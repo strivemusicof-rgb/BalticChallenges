@@ -8,6 +8,7 @@ import {
 import { levelForXp, type LevelInfo, type LevelRow } from '../domain/levels.js';
 
 import { loadGoalProgress } from './goals.js';
+import { tr, type I18n } from '../i18n.js';
 
 export type XpSource =
   | 'challenge'
@@ -124,8 +125,8 @@ async function completeGoals(db: DbClient, userId: string, unlocked: UnlockedRew
 export async function evaluateUnlocks(db: DbClient, userId: string): Promise<UnlockedReward[]> {
   const unlocked: UnlockedReward[] = [];
 
-  const finishedCollections = await db.query<{ id: string; slug: string; title: string; icon: string; xp_reward: number }>(
-    `SELECT c.id, c.slug, c.title, c.icon, c.xp_reward
+  const finishedCollections = await db.query<{ id: string; slug: string; title: string; icon: string; xp_reward: number; i18n: I18n }>(
+    `SELECT c.id, c.slug, c.title, c.icon, c.xp_reward, c.i18n
      FROM collections c
      WHERE c.status = 'published'
        AND NOT EXISTS (SELECT 1 FROM user_collections uc WHERE uc.user_id = $1 AND uc.collection_id = c.id)
@@ -148,7 +149,7 @@ export async function evaluateUnlocks(db: DbClient, userId: string): Promise<Unl
     unlocked.push({
       kind: 'collection',
       id: collection.slug,
-      title: collection.title,
+      title: tr(collection.i18n, 'title', collection.title),
       icon: collection.icon,
       xp: collection.xp_reward,
     });
@@ -157,8 +158,8 @@ export async function evaluateUnlocks(db: DbClient, userId: string): Promise<Unl
   await completeGoals(db, userId, unlocked);
 
   const progress = await loadProgress(db, userId);
-  const candidates = await db.query<{ id: string; title: string; icon: string; rule: unknown; xp_reward: number }>(
-    `SELECT id, title, icon, rule, xp_reward FROM achievements
+  const candidates = await db.query<{ id: string; title: string; icon: string; rule: unknown; xp_reward: number; i18n: I18n }>(
+    `SELECT id, title, icon, rule, xp_reward, i18n FROM achievements
      WHERE status = 'published'
        AND id NOT IN (SELECT achievement_id FROM user_achievements WHERE user_id = $1)
      ORDER BY sort`,
@@ -185,7 +186,7 @@ export async function evaluateUnlocks(db: DbClient, userId: string): Promise<Unl
       unlocked.push({
         kind: 'achievement',
         id: achievement.id,
-        title: achievement.title,
+        title: tr(achievement.i18n, 'title', achievement.title),
         icon: achievement.icon,
         xp: achievement.xp_reward,
       });

@@ -5,32 +5,35 @@ import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Brand, Spacing } from '@/constants/theme';
+import { formatNumber, levelTitle } from '@/lib/format';
+import { useT } from '@/lib/i18n';
 import type { LevelInfo } from '@/lib/types';
 
-function greeting(date = new Date()) {
+function greetingKey(date = new Date()) {
   const hour = date.getHours();
-  if (hour < 5) return 'Good night';
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 5) return 'greeting.night';
+  if (hour < 12) return 'greeting.morning';
+  if (hour < 18) return 'greeting.afternoon';
+  return 'greeting.evening';
 }
 
 export function XpHeader({ name, avatarUrl, level }: { name: string; avatarUrl?: string | null; level: LevelInfo }) {
+  const t = useT();
   const xpLabel = level.nextLevelXp
-    ? `${level.xp.toLocaleString()} / ${level.nextLevelXp.toLocaleString()} XP`
-    : `${level.xp.toLocaleString()} XP`;
+    ? t('common.xpProgress', { xp: formatNumber(level.xp), next: formatNumber(level.nextLevelXp) })
+    : t('common.xpTotal', { xp: formatNumber(level.xp) });
   const firstName = name.split(/\s+/)[0] ?? name;
   return (
     <View style={styles.container}>
-      <Pressable onPress={() => router.navigate('/profile')} accessibilityRole="button" accessibilityLabel="Your profile">
+      <Pressable onPress={() => router.navigate('/profile')} accessibilityRole="button" accessibilityLabel={t('tabs.profile')}>
         <Avatar name={name} url={avatarUrl ?? null} size={52} />
       </Pressable>
       <View style={styles.flex}>
         <ThemedText style={styles.greeting} numberOfLines={1}>
-          {greeting()}, {firstName} 👋
+          {t(greetingKey(), { name: firstName })}
         </ThemedText>
         <ThemedText style={styles.level}>
-          LVL {level.level} {level.title}
+          {t('common.levelTitle', { title: levelTitle(level.title), level: level.level })}
         </ThemedText>
         <View style={styles.barRow}>
           <View style={styles.flex}>

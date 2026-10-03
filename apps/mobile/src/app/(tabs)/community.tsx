@@ -9,21 +9,23 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Segmented } from '@/components/ui/segmented';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useFeed } from '@/hooks/social-queries';
+import { useT } from '@/lib/i18n';
 
 type Scope = 'following' | 'friends' | 'global';
 const SCOPES = [
-  { id: 'following', label: 'Following' },
-  { id: 'friends', label: 'Friends' },
-  { id: 'global', label: 'Global' },
+  { id: 'following', label: 'community.following' },
+  { id: 'friends', label: 'community.friends' },
+  { id: 'global', label: 'community.global' },
 ] as const;
 
 const EMPTY = {
-  following: { emoji: '👥', title: 'Nothing from people you follow yet', body: 'Find explorers to follow, or check Global.' },
-  friends: { emoji: '🤝', title: 'No posts from friends yet', body: 'Friends are people who follow you back.' },
-  global: { emoji: '🧭', title: 'No adventures shared yet', body: 'Complete a challenge and be the first to share it!' },
-};
+  following: { icon: 'account-multiple-outline', title: 'community.emptyFollowing', body: 'community.emptyFollowingBody' },
+  friends: { icon: 'handshake-outline', title: 'community.emptyFriends', body: 'community.emptyFriendsBody' },
+  global: { icon: 'compass-outline', title: 'community.emptyGlobal', body: 'community.emptyGlobalBody' },
+} as const;
 
 export default function CommunityScreen() {
+  const t = useT();
   const [scope, setScope] = useState<Scope>('following');
   const feed = useFeed(scope);
 
@@ -31,18 +33,21 @@ export default function CommunityScreen() {
     <SafeAreaView edges={['top']} style={styles.safe}>
       <View style={styles.header}>
         <PageTitle
-          title="Community"
+          title={t('community.title')}
           right={
             <View style={styles.actions}>
-              <IconButton icon="trophy-outline" label="Leaderboard" onPress={() => router.push('/leaderboard')} background="#F0F4F1" />
-              <IconButton icon="person-add-outline" label="Find people" onPress={() => router.push('/people')} background="#F0F4F1" />
-              <IconButton icon="add" label="Create post" onPress={() => router.push('/new-post')} background={Brand.sea} color="#FFFFFF" />
+              <IconButton icon="trophy-outline" label={t('community.leaderboard')} onPress={() => router.push('/leaderboard')} background="#F0F4F1" />
+              <IconButton icon="person-add-outline" label={t('community.findPeople')} onPress={() => router.push('/people')} background="#F0F4F1" />
+              <IconButton icon="add" label={t('community.createPost')} onPress={() => router.push('/new-post')} background={Brand.sea} color="#FFFFFF" />
             </View>
           }
         />
-        <Segmented variant="underline" options={SCOPES} value={scope} onChange={setScope} />
+        <Segmented variant="underline" options={SCOPES.map((item) => ({ ...item, label: t(item.label) }))} value={scope} onChange={setScope} />
       </View>
-      <PostList query={feed} empty={EMPTY[scope]} />
+      <PostList
+        query={feed}
+        empty={{ icon: EMPTY[scope].icon, title: t(EMPTY[scope].title), body: t(EMPTY[scope].body) }}
+      />
     </SafeAreaView>
   );
 }

@@ -8,8 +8,10 @@ import { Icon } from '@/components/ui/icon';
 import { MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useCategories, useChallenges } from '@/hooks/queries';
 import { useLocation } from '@/hooks/use-location';
+import { useT } from '@/lib/i18n';
 
 export default function BrowseScreen() {
+  const t = useT();
   const location = useLocation();
   const [category, setCategory] = useState<string | undefined>();
   const [search, setSearch] = useState('');
@@ -26,7 +28,7 @@ export default function BrowseScreen() {
         <TextInput
           value={search}
           onChangeText={setSearch}
-          placeholder="Search castles, beaches, towns…"
+          placeholder={t('browse.search')}
           placeholderTextColor="#8A9790"
           returnKeyType="search"
           clearButtonMode="while-editing"
@@ -34,11 +36,11 @@ export default function BrowseScreen() {
         />
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={styles.bleed}>
-        <Chip label="All" selected={!category} onPress={() => setCategory(undefined)} />
+        <Chip label={t('browse.all')} selected={!category} onPress={() => setCategory(undefined)} />
         {topCategories.map((item) => (
           <Chip
             key={item.id}
-            label={`${item.icon} ${item.name}`}
+            label={item.name}
             selected={category === item.id}
             onPress={() => setCategory(category === item.id ? undefined : item.id)}
           />
@@ -60,7 +62,7 @@ export default function BrowseScreen() {
         ) : challenges.isError ? (
           <ErrorState error={challenges.error} onRetry={() => challenges.refetch()} />
         ) : (
-          <EmptyState emoji="🔎" title="No challenges found" body="Try another category or search term." />
+          <EmptyState icon="magnify" title={t('browse.none')} body={t('browse.noneBody')} />
         )
       }
       contentContainerStyle={styles.content}

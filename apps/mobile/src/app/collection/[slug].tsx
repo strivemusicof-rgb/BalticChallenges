@@ -12,8 +12,11 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Brand, Radius, Shadow, Spacing } from '@/constants/theme';
 import { useCollection } from '@/hooks/queries';
+import { categoryGlyph, collectionGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 
 export default function CollectionScreen() {
+  const t = useT();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const collection = useCollection(slug);
 
@@ -24,10 +27,10 @@ export default function CollectionScreen() {
   const done = data.completedAt !== null;
 
   return (
-    <HeroScroll image={data.imageUrl} fallback={data.icon} refreshing={collection.isRefetching} onRefresh={() => void collection.refetch()}>
+    <HeroScroll image={data.imageUrl} fallback={collectionGlyph(data.slug)} refreshing={collection.isRefetching} onRefresh={() => void collection.refetch()}>
       <Reveal>
         <ThemedText style={styles.title}>
-          {data.icon} {data.title}
+          {data.title}
         </ThemedText>
         <ThemedText themeColor="textSecondary" style={styles.description}>
           {data.description}
@@ -43,7 +46,7 @@ export default function CollectionScreen() {
             <View style={styles.row}>
               <Icon name="checkmark-circle" size={16} color={Brand.success} />
               <ThemedText type="smallBold" style={{ color: Brand.success }}>
-                Completed
+                {t('common.completed')}
               </ThemedText>
             </View>
           ) : (
@@ -53,7 +56,7 @@ export default function CollectionScreen() {
         <ProgressBar progress={data.total ? data.completed / data.total : 0} height={10} color={done ? Brand.success : Brand.sea} />
         {!done && (
           <ThemedText type="small" themeColor="textSecondary">
-            Complete every place to earn +{data.xpReward} XP and the collection badge.
+            {t('collections.progressHint', { xp: data.xpReward })}
           </ThemedText>
         )}
       </Reveal>
@@ -66,8 +69,8 @@ export default function CollectionScreen() {
               <PressableScale
                 onPress={() => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } })}
                 style={styles.item}
-                accessibilityLabel={`${challenge.place?.name ?? challenge.title}${completed ? ', completed' : ''}`}>
-                <Photo uri={challenge.imageUrl} fallback={challenge.icon} style={styles.itemPhoto}>
+                accessibilityLabel={`${challenge.place?.name ?? challenge.title}${completed ? `, ${t('common.completed')}` : ''}`}>
+                <Photo uri={challenge.imageUrl} fallback={categoryGlyph(challenge.categoryId)} style={styles.itemPhoto}>
                   {!completed && <View style={styles.dim} />}
                   <View style={[styles.state, { backgroundColor: completed ? Brand.success : 'rgba(20,32,26,0.7)' }]}>
                     <Icon name={completed ? 'checkmark' : 'lock-closed'} size={13} color="#FFFFFF" />

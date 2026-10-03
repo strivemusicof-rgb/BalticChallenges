@@ -4,9 +4,12 @@ import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
+import { Glyph } from '@/components/ui/glyph';
 import { Icon } from '@/components/ui/icon';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import type { GlyphName } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 
 interface ScreenProps {
   children: ReactNode;
@@ -88,20 +91,25 @@ export function LoadingState() {
 }
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
-  const message = error instanceof Error ? error.message : 'Something went wrong';
+  const t = useT();
+  const message = error instanceof Error ? error.message : t('common.somethingWrong');
   return (
     <View style={styles.state}>
-      <ThemedText style={styles.stateEmoji}>🧭</ThemedText>
+      <View style={styles.stateIcon}>
+        <Glyph name="compass-off-outline" size={30} color={Brand.sea} />
+      </View>
       <ThemedText style={styles.stateText}>{message}</ThemedText>
-      {onRetry && <Button label="Try again" variant="secondary" onPress={onRetry} />}
+      {onRetry && <Button label={t('common.retry')} variant="secondary" onPress={onRetry} />}
     </View>
   );
 }
 
-export function EmptyState({ emoji, title, body }: { emoji: string; title: string; body?: string }) {
+export function EmptyState({ icon, title, body }: { icon: GlyphName; title: string; body?: string }) {
   return (
     <View style={styles.state}>
-      <ThemedText style={styles.stateEmoji}>{emoji}</ThemedText>
+      <View style={styles.stateIcon}>
+        <Glyph name={icon} size={30} color={Brand.sea} />
+      </View>
       <ThemedText type="smallBold" style={styles.stateText}>
         {title}
       </ThemedText>
@@ -162,9 +170,13 @@ const styles = StyleSheet.create({
     padding: Spacing.five,
     gap: Spacing.three,
   },
-  stateEmoji: {
-    fontSize: 40,
-    lineHeight: 48,
+  stateIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Brand.mint,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   stateText: {
     textAlign: 'center',

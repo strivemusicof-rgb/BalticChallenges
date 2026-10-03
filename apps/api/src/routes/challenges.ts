@@ -4,6 +4,7 @@ import { userId } from '../auth/plugin.js';
 import { withTransaction } from '../db.js';
 import { evaluateCheckIn } from '../domain/verification.js';
 import { badRequest, conflict, forbidden, notFound } from '../errors.js';
+import { tr } from '../i18n.js';
 import { Coordinates, CountrySchema, parse, UuidSchema, type RoutePlugin } from '../http.js';
 import { findChallengeDetail, findChallenges } from '../services/challenges.js';
 import { finalizeCompletion, todaysChallengeId } from '../services/completion.js';
@@ -36,13 +37,13 @@ const CompleteBody = z.object({
 export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
   app.get('/v1/categories', async () => {
     const { rows } = await db.query(
-      `SELECT c.id, c.parent_id AS "parentId", c.name, c.icon,
+      `SELECT c.id, c.parent_id AS "parentId", c.name, c.icon, c.i18n,
               (SELECT count(*) FROM challenges ch
                  JOIN categories cc ON cc.id = ch.category_id
                 WHERE ch.status = 'published' AND (cc.id = c.id OR cc.parent_id = c.id)) AS "challengeCount"
        FROM categories c ORDER BY c.sort`,
     );
-    return { categories: rows };
+    return { categories: rows.map(({ i18n, ...row }) => ({ ...row, name: tr(i18n, 'name', row.name) })) };
   });
 
   app.get('/v1/challenges', { preHandler: auth.optionalAuth }, async (request) => {

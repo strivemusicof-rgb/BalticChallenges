@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { memo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 
 import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
@@ -13,22 +13,25 @@ import { Brand, Radius, Spacing } from '@/constants/theme';
 import { useBlock, useDeletePost, useReport, useToggleLike, useToggleSave } from '@/hooks/social-queries';
 import { showAlert } from '@/lib/dialog';
 import { timeAgo } from '@/lib/format';
+import { achievementGlyph, type GlyphName } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import { askReportReason, confirmBlock, reportReceived } from '@/lib/moderation-actions';
 import type { Post } from '@/lib/types';
 
 function LikeButton({ post }: { post: Post }) {
+  const t = useT();
   const like = useToggleLike();
   const scale = useSharedValue(1);
   const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
   return (
     <Pressable
       onPress={() => {
-        if (!post.likedByMe) scale.set(withSequence(withSpring(1.35, { damping: 6 }), withSpring(1)));
+        if (!post.likedByMe) scale.set(withSequence(withTiming(1.2, { duration: 110 }), withTiming(1, { duration: 140 })));
         like.mutate(post);
       }}
       hitSlop={8}
       accessibilityRole="button"
-      accessibilityLabel={post.likedByMe ? 'Unlike' : 'Like'}
+      accessibilityLabel={post.likedByMe ? t('post.unlike') : t('post.like')}
       style={styles.action}>
       <Animated.View style={animated}>
         <Icon name={post.likedByMe ? 'heart' : 'heart-outline'} size={22} color={post.likedByMe ? '#E5484D' : '#33433A'} />
@@ -39,6 +42,7 @@ function LikeButton({ post }: { post: Post }) {
 }
 
 function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }) {
+  const t = useT();
   const save = useToggleSave();
   const [photoWidth, setPhotoWidth] = useState(0);
   const report = useReport();
@@ -50,39 +54,39 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
 
   function showMenu() {
     if (post.isMine) {
-      showAlert('Your post', undefined, [
+      showAlert(t('post.yours'), undefined, [
         {
-          text: 'Delete post',
+          text: t('post.delete'),
           style: 'destructive',
           onPress: () => remove.mutate(post.id, { onSuccess: () => detail && router.back() }),
         },
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ]);
       return;
     }
     showAlert(post.author.displayName, undefined, [
       {
-        text: 'Report post',
+        text: t('post.report'),
         onPress: async () => {
           const reason = await askReportReason('post');
           if (reason) report.mutate({ targetType: 'post', targetId: post.id, reason }, { onSuccess: reportReceived });
         },
       },
       {
-        text: `Block ${post.author.displayName}`,
+        text: t('post.block', { name: post.author.displayName }),
         style: 'destructive',
         onPress: async () => {
           if (await confirmBlock(post.author.displayName)) block.mutate({ id: post.author.id, block: true });
         },
       },
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
     ]);
   }
 
-  const attachment = post.challenge
-    ? { icon: '🏆', title: post.challenge.title, onPress: () => router.push({ pathname: '/challenge/[id]', params: { id: post.challenge!.id } }) }
+  const attachment: { glyph: GlyphName; title: string; onPress: () => void } | null = post.challenge
+    ? { glyph: 'flag-checkered', title: post.challenge.title, onPress: () => router.push({ pathname: '/challenge/[id]', params: { id: post.challenge!.id } }) }
     : post.achievement
-      ? { icon: post.achievement.icon, title: post.achievement.title, onPress: () => router.push('/achievements') }
+      ? { glyph: achievementGlyph(post.achievement.id), title: post.achievement.title, onPress: () => router.push('/achievements') }
       : null;
 
   return (
@@ -98,7 +102,7 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
             </ThemedText>
           </View>
         </Pressable>
-        <Pressable onPress={showMenu} hitSlop={12} accessibilityLabel="Post options" accessibilityRole="button">
+        <Pressable onPress={showMenu} hitSlop={12} accessibilityLabel={t('post.options')} accessibilityRole="button">
           <Icon name="ellipsis-horizontal" size={20} color="#6B7A72" />
         </Pressable>
       </View>
@@ -126,7 +130,7 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
                     contentFit="cover"
                     transition={200}
                     cachePolicy="memory-disk"
-                    accessibilityLabel={`Photo by ${post.author.displayName}`}
+                    accessibilityLabel={t('post.photoBy', { name: post.author.displayName })}
                   />
                 </Pressable>
               ))}
@@ -137,13 +141,13 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
 
       {attachment && (
         <PressableScale onPress={attachment.onPress} scaleTo={0.98} style={styles.attachment}>
-          <HexBadge icon={attachment.icon} size={38} />
+          <HexBadge glyph={attachment.glyph} size={38} />
           <View style={styles.flex}>
             <ThemedText type="smallBold" numberOfLines={1}>
               {attachment.title}
             </ThemedText>
             <View style={styles.completed}>
-              <ThemedText style={styles.completedText}>{post.challenge ? 'Completed' : 'Badge unlocked'}</ThemedText>
+              <ThemedText style={styles.completedText}>{post.challenge ? t('post.completed') : t('post.badgeUnlocked')}</ThemedText>
               <Icon name="checkmark-circle-outline" size={14} color={Brand.success} />
             </View>
           </View>
@@ -152,7 +156,7 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
 
       <View style={styles.actions}>
         <LikeButton post={post} />
-        <Pressable onPress={openPost} hitSlop={8} accessibilityRole="button" accessibilityLabel="Comments" style={styles.action}>
+        <Pressable onPress={openPost} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('post.comments')} style={styles.action}>
           <Icon name="chatbubble-outline" size={20} color="#33433A" />
           <ThemedText style={styles.count}>{post.commentCount}</ThemedText>
         </Pressable>
@@ -161,7 +165,7 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
           onPress={() => save.mutate(post)}
           hitSlop={8}
           accessibilityRole="button"
-          accessibilityLabel={post.savedByMe ? 'Remove from saved' : 'Save'}>
+          accessibilityLabel={post.savedByMe ? t('post.unsave') : t('post.save')}>
           <Icon name={post.savedByMe ? 'bookmark' : 'bookmark-outline'} size={20} color={post.savedByMe ? Brand.sea : '#33433A'} />
         </Pressable>
       </View>

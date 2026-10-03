@@ -7,6 +7,7 @@ import { CountrySchema, PageQuery, parse, UuidSchema, type RoutePlugin } from '.
 import { canSeeSql, loadPosts } from '../services/posts.js';
 import { getLevelInfo } from '../services/progression.js';
 import { loadStats } from '../services/users.js';
+import { tr, type I18n } from '../i18n.js';
 
 const IdParams = z.object({ id: UuidSchema });
 
@@ -78,7 +79,7 @@ export const socialRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
       ? await Promise.all([
           loadStats(db, id),
           db.query(
-            `SELECT a.id, a.title, a.icon, ua.unlocked_at AS "unlockedAt"
+            `SELECT a.id, a.title, a.i18n, a.icon, ua.unlocked_at AS "unlockedAt"
              FROM user_achievements ua JOIN achievements a ON a.id = ua.achievement_id
              WHERE ua.user_id = $1 ORDER BY ua.unlocked_at DESC LIMIT 24`,
             [id],
@@ -108,7 +109,7 @@ export const socialRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
         following: stats.following,
         countryProgress: stats.countryProgress,
       },
-      badges: badges?.rows ?? [],
+      badges: (badges?.rows ?? []).map(({ i18n, ...badge }) => ({ ...badge, title: tr(i18n as I18n, 'title', badge.title as string) })),
     };
   });
 

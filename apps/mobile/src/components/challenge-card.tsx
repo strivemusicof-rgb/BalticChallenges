@@ -7,13 +7,15 @@ import { ThemedText } from '@/components/themed-text';
 import { Icon } from '@/components/ui/icon';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { Brand, Radius, Shadow, Spacing } from '@/constants/theme';
-import { COUNTRY_LABELS, formatDistance } from '@/lib/format';
+import { formatDistance } from '@/lib/format';
+import { categoryGlyph } from '@/lib/glyphs';
+import { i18n, useT } from '@/lib/i18n';
 import type { ChallengeSummary } from '@/lib/types';
 
 const STATUS = {
-  completed: { label: 'Completed', color: Brand.success, icon: 'checkmark-circle' },
-  in_progress: { label: 'In progress', color: Brand.sky, icon: 'navigate' },
-  flagged: { label: 'In review', color: Brand.amber, icon: 'time' },
+  completed: { label: 'common.completed', color: Brand.success, icon: 'checkmark-circle' },
+  in_progress: { label: 'common.inProgress', color: Brand.sky, icon: 'navigate' },
+  flagged: { label: 'common.inReview', color: Brand.amber, icon: 'time' },
 } as const;
 
 function StatusBadge({ status }: { status: ChallengeSummary['userStatus'] }) {
@@ -22,7 +24,7 @@ function StatusBadge({ status }: { status: ChallengeSummary['userStatus'] }) {
   return (
     <View style={[styles.badge, { backgroundColor: color }]}>
       <Icon name={icon} size={12} color="#FFFFFF" />
-      <ThemedText style={styles.badgeText}>{label}</ThemedText>
+      <ThemedText style={styles.badgeText}>{i18n.t(label)}</ThemedText>
     </View>
   );
 }
@@ -31,14 +33,15 @@ export function XpLabel({ xp, color = Brand.amber, size = 13 }: { xp: number; co
   return (
     <View style={styles.xp}>
       <Icon name="star" size={size} color={Brand.amber} />
-      <ThemedText style={[styles.xpText, { color, fontSize: size }]}>+{xp} XP</ThemedText>
+      <ThemedText style={[styles.xpText, { color, fontSize: size }]}>{i18n.t('common.xp', { xp })}</ThemedText>
     </View>
   );
 }
 
 function ChallengeCardBase({ challenge, compact = false }: { challenge: ChallengeSummary; compact?: boolean }) {
+  const t = useT();
   const distance = formatDistance(challenge.distanceM);
-  const where = [challenge.place?.city, challenge.country && COUNTRY_LABELS[challenge.country].name].filter(Boolean).join(', ');
+  const where = [challenge.place?.city, challenge.country && t(`countries.${challenge.country}`)].filter(Boolean).join(', ');
   const open = () => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } });
 
   if (compact) {
@@ -47,7 +50,7 @@ function ChallengeCardBase({ challenge, compact = false }: { challenge: Challeng
         onPress={open}
         accessibilityLabel={`${challenge.title}, ${challenge.xpReward} XP`}
         style={[styles.card, styles.compact]}>
-        <Photo uri={challenge.imageUrl} fallback={challenge.icon} style={styles.photoTop}>
+        <Photo uri={challenge.imageUrl} fallback={categoryGlyph(challenge.categoryId)} style={styles.photoTop}>
           <View style={styles.badgeSlot}>
             <StatusBadge status={challenge.userStatus} />
           </View>
@@ -74,7 +77,7 @@ function ChallengeCardBase({ challenge, compact = false }: { challenge: Challeng
       onPress={open}
       accessibilityLabel={`${challenge.title}, ${challenge.xpReward} XP${distance ? `, ${distance} away` : ''}`}
       style={[styles.card, styles.row]}>
-      <Photo uri={challenge.imageUrl} fallback={challenge.icon} style={styles.photoSide} />
+      <Photo uri={challenge.imageUrl} fallback={categoryGlyph(challenge.categoryId)} style={styles.photoSide} />
       <View style={styles.rowBody}>
         <ThemedText type="smallBold" numberOfLines={2} style={styles.title}>
           {challenge.title}

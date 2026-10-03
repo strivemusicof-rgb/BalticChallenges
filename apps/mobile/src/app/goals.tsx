@@ -14,21 +14,23 @@ import { Brand, Radius, Spacing } from '@/constants/theme';
 import { useGoals, useHomeFeed } from '@/hooks/queries';
 import { useLocation } from '@/hooks/use-location';
 import { formatDistance } from '@/lib/format';
+import { useT } from '@/lib/i18n';
 
 type Period = 'daily' | 'weekly' | 'monthly';
 const PERIODS = [
-  { id: 'daily', label: 'Daily' },
-  { id: 'weekly', label: 'Weekly' },
-  { id: 'monthly', label: 'Monthly' },
+  { id: 'daily', label: 'goals.daily' },
+  { id: 'weekly', label: 'goals.weekly' },
+  { id: 'monthly', label: 'goals.monthly' },
 ] as const;
 
 function DailyTab() {
+  const t = useT();
   const location = useLocation();
   const feed = useHomeFeed(location.coords);
   if (feed.isPending) return <LoadingState />;
   if (feed.isError) return <ErrorState error={feed.error} onRetry={() => feed.refetch()} />;
   const today = feed.data.todaysChallenge;
-  if (!today) return <EmptyState emoji="☀️" title="No daily challenge today" body="Check back tomorrow." />;
+  if (!today) return <EmptyState icon="white-balance-sunny" title={t('goals.noDaily')} body={t('goals.noDailyBody')} />;
   const done = today.userStatus === 'completed';
 
   return (
@@ -36,7 +38,7 @@ function DailyTab() {
       <Card
         onPress={() => router.push({ pathname: '/challenge/[id]', params: { id: today.id } })}
         style={[styles.today, done && styles.todayDone]}>
-        <ThemedText style={styles.kicker}>Today’s Challenge</ThemedText>
+        <ThemedText style={styles.kicker}>{t('goals.today')}</ThemedText>
         <View style={styles.todayRow}>
           <View style={styles.todayIcon}>
             <Icon name="location" size={24} color="#FFFFFF" />
@@ -52,7 +54,7 @@ function DailyTab() {
         <View style={styles.todayFooter}>
           {today.distanceM !== null ? (
             <ThemedText type="small" themeColor="textSecondary">
-              {formatDistance(today.distanceM)} away
+              {t('common.away', { distance: formatDistance(today.distanceM) })}
             </ThemedText>
           ) : (
             <View />
@@ -60,30 +62,31 @@ function DailyTab() {
           {done ? (
             <View style={styles.completedPill}>
               <Icon name="checkmark" size={12} color="#FFFFFF" />
-              <ThemedText style={styles.completedText}>Completed</ThemedText>
+              <ThemedText style={styles.completedText}>{t('common.completed')}</ThemedText>
             </View>
           ) : (
             <ThemedText type="smallBold" style={{ color: Brand.sea }}>
-              +{feed.data.dailyBonusXp} XP bonus today
+              {t('goals.bonusToday', { xp: feed.data.dailyBonusXp })}
             </ThemedText>
           )}
         </View>
       </Card>
       <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
-        A new challenge of the day is picked every morning (Riga time). Completing it earns a bonus once per day.
+        {t('goals.dailyNote')}
       </ThemedText>
     </Reveal>
   );
 }
 
 export default function GoalsScreen() {
+  const t = useT();
   const [period, setPeriod] = useState<Period>('daily');
   const goals = useGoals();
   const list = (goals.data ?? []).filter((goal) => goal.period === period);
 
   return (
     <Screen edges={[]} refreshing={goals.isRefetching} onRefresh={() => void goals.refetch()}>
-      <Segmented options={PERIODS} value={period} onChange={setPeriod} />
+      <Segmented options={PERIODS.map((item) => ({ ...item, label: t(item.label) }))} value={period} onChange={setPeriod} />
       {period === 'daily' ? (
         <DailyTab />
       ) : goals.isPending ? (
@@ -91,7 +94,7 @@ export default function GoalsScreen() {
       ) : goals.isError ? (
         <ErrorState error={goals.error} onRetry={() => goals.refetch()} />
       ) : list.length === 0 ? (
-        <EmptyState emoji="🗓️" title="No goals right now" body="New goals start every week and month." />
+        <EmptyState icon="calendar-blank-outline" title={t('goals.noGoals')} body={t('goals.noGoalsBody')} />
       ) : (
         list.map((goal, index) => (
           <Reveal key={goal.id} index={index}>

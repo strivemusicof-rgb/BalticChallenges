@@ -1,13 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { DialogHost } from '@/components/dialog-host';
 import { Brand } from '@/constants/theme';
 import { ApiError } from '@/lib/api';
+import { restoreLanguage } from '@/lib/i18n';
 import { handleNotificationTaps, registerForPushNotifications } from '@/lib/notifications';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 
@@ -41,13 +44,19 @@ function createQueryClient() {
 
 function RootNavigator() {
   const { state } = useAuth();
-  // Icons are drawn with a font; load it before the first frame so they never flash as boxes.
-  const [fontsLoaded, fontError] = useFonts(Ionicons.font);
+  const { t } = useTranslation();
+  // Icons are drawn with fonts; load them before the first frame so they never flash as boxes.
+  const [fontsLoaded, fontError] = useFonts({ ...Ionicons.font, ...MaterialCommunityIcons.font });
   const fontsReady = fontsLoaded || fontError !== null;
+  const [languageReady, setLanguageReady] = useState(false);
 
   useEffect(() => {
-    if (state.status !== 'loading' && fontsReady) SplashScreen.hideAsync();
-  }, [state.status, fontsReady]);
+    void restoreLanguage().finally(() => setLanguageReady(true));
+  }, []);
+
+  useEffect(() => {
+    if (state.status !== 'loading' && fontsReady && languageReady) SplashScreen.hideAsync();
+  }, [state.status, fontsReady, languageReady]);
 
   const signedIn = state.status === 'signedIn';
   const onboarded = signedIn && state.user.onboarded;
@@ -59,7 +68,7 @@ function RootNavigator() {
     return handleNotificationTaps();
   }, [ready]);
 
-  if (state.status === 'loading' || !fontsReady) return null;
+  if (state.status === 'loading' || !fontsReady || !languageReady) return null;
 
   return (
     <Stack screenOptions={STACK_OPTIONS}>
@@ -77,20 +86,21 @@ function RootNavigator() {
         <Stack.Screen name="challenge/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="collection/[slug]" options={{ headerShown: false }} />
         <Stack.Screen name="place/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="achievements" options={{ title: 'Achievements' }} />
-        <Stack.Screen name="goals" options={{ title: 'Challenges' }} />
-        <Stack.Screen name="browse" options={{ title: 'All challenges' }} />
-        <Stack.Screen name="pro" options={{ title: 'Pro Subscription' }} />
-        <Stack.Screen name="post/[id]" options={{ title: 'Post' }} />
+        <Stack.Screen name="achievements" options={{ title: t('titles.achievements') }} />
+        <Stack.Screen name="goals" options={{ title: t('titles.goals') }} />
+        <Stack.Screen name="browse" options={{ title: t('titles.browse') }} />
+        <Stack.Screen name="pro" options={{ title: t('titles.pro') }} />
+        <Stack.Screen name="post/[id]" options={{ title: t('titles.post') }} />
         <Stack.Screen name="user/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="new-post" options={{ title: 'Create Post' }} />
-        <Stack.Screen name="settings" options={{ title: 'Settings' }} />
-        <Stack.Screen name="history" options={{ title: 'History' }} />
-        <Stack.Screen name="saved" options={{ title: 'Saved' }} />
-        <Stack.Screen name="blocked" options={{ title: 'Blocked people' }} />
-        <Stack.Screen name="leaderboard" options={{ title: 'Leaderboard' }} />
-        <Stack.Screen name="people" options={{ title: 'Find people' }} />
+        <Stack.Screen name="new-post" options={{ title: t('titles.newPost') }} />
+        <Stack.Screen name="settings" options={{ title: t('titles.settings') }} />
+        <Stack.Screen name="history" options={{ title: t('titles.history') }} />
+        <Stack.Screen name="saved" options={{ title: t('titles.saved') }} />
+        <Stack.Screen name="blocked" options={{ title: t('titles.blocked') }} />
+        <Stack.Screen name="leaderboard" options={{ title: t('titles.leaderboard') }} />
+        <Stack.Screen name="people" options={{ title: t('titles.people') }} />
         <Stack.Screen name="follows" options={{ title: '' }} />
+        <Stack.Screen name="admin/index" options={{ title: t('titles.admin') }} />
       </Stack.Protected>
     </Stack>
   );
@@ -98,11 +108,19 @@ function RootNavigator() {
 
 export default function RootLayout() {
   const [queryClient] = useState(createQueryClient);
+  const { i18n } = useTranslation();
+  const language = i18n.language;
+
+  // Server-provided text (challenge titles, descriptions) is translated, so refetch it in the new language.
+  useEffect(() => {
+    void queryClient.invalidateQueries();
+  }, [language, queryClient]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={NAV_THEME}>
         <AuthProvider>
-          <RootNavigator />
+          <RootNavigator key={language} />
           <DialogHost />
         </AuthProvider>
       </ThemeProvider>

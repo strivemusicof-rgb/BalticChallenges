@@ -15,6 +15,7 @@ import { StatRow } from '@/components/stat-row';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Glyph } from '@/components/ui/glyph';
 import { HexBadge } from '@/components/ui/hex-badge';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -26,13 +27,14 @@ import { useAbandonChallenge, useChallenge, useCompleteChallenge, useStartChalle
 import { useReport } from '@/hooks/social-queries';
 import { useLiveDistance } from '@/hooks/use-live-distance';
 import { showAlert } from '@/lib/dialog';
-import { COUNTRY_LABELS, DIFFICULTY_LABELS, formatDistance } from '@/lib/format';
+import { formatDistance, formatNumber, levelTitle, monthName } from '@/lib/format';
+import { categoryGlyph, collectionGlyph, rewardGlyph } from '@/lib/glyphs';
+import { i18n, useT } from '@/lib/i18n';
 import { pickImage } from '@/lib/images';
 import { askReportReason, reportReceived } from '@/lib/moderation-actions';
 import { registerForPushNotifications } from '@/lib/notifications';
-import type { ChallengeDetail, CompletionResult, UnlockedReward } from '@/lib/types';
+import type { ChallengeDetail, CompletionResult } from '@/lib/types';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function openDirections(challenge: ChallengeDetail) {
   if (!challenge.place) return;
@@ -69,23 +71,25 @@ function InfoItem({ icon, label, value }: { icon: IconName; label: string; value
 }
 
 function SafetyInfo({ safety }: { safety: NonNullable<ChallengeDetail['safety']> }) {
-  const yesNo = (value: boolean | null) => (value === null ? '—' : value ? 'Yes' : 'No');
-  const season = safety.seasonMonths.length === 12 ? 'All year' : safety.seasonMonths.map((month) => MONTHS[month - 1]).join(', ');
+  const t = useT();
+  const yesNo = (value: boolean | null) => (value === null ? '—' : value ? t('common.yes') : t('common.no'));
+  const season =
+    safety.seasonMonths.length === 12 ? t('challenge.allYear') : safety.seasonMonths.map((month) => monthName(month)).join(', ');
   return (
     <Card style={styles.safety}>
-      {safety.temporarilyClosed && <Tag label="Temporarily closed" icon="warning" tone="red" />}
+      {safety.temporarilyClosed && <Tag label={t('challenge.closed')} icon="warning" tone="red" />}
       <View style={styles.infoGrid}>
-        <InfoItem icon="trail-sign-outline" label="Terrain" value={safety.terrain ?? '—'} />
-        <InfoItem icon="calendar-outline" label="Season" value={season} />
-        <InfoItem icon="people-outline" label="Family friendly" value={yesNo(safety.familyFriendly)} />
-        <InfoItem icon="paw-outline" label="Dog friendly" value={yesNo(safety.dogFriendly)} />
-        <InfoItem icon="car-outline" label="Parking" value={yesNo(safety.parking)} />
-        <InfoItem icon="accessibility-outline" label="Accessibility" value={safety.accessibility ?? '—'} />
+        <InfoItem icon="trail-sign-outline" label={t('challenge.terrain')} value={safety.terrain ?? '—'} />
+        <InfoItem icon="calendar-outline" label={t('challenge.season')} value={season} />
+        <InfoItem icon="people-outline" label={t('challenge.family')} value={yesNo(safety.familyFriendly)} />
+        <InfoItem icon="paw-outline" label={t('challenge.dog')} value={yesNo(safety.dogFriendly)} />
+        <InfoItem icon="car-outline" label={t('challenge.parking')} value={yesNo(safety.parking)} />
+        <InfoItem icon="accessibility-outline" label={t('challenge.accessibility')} value={safety.accessibility ?? '—'} />
       </View>
       <View style={styles.notice}>
         <Icon name="leaf-outline" size={16} color={Brand.sea} />
         <ThemedText type="small" style={styles.noticeText}>
-          Always follow local rules and site guidance. Respect nature and leave places as you found them.
+          {t('challenge.notice')}
         </ThemedText>
       </View>
     </Card>
@@ -106,23 +110,23 @@ function DetailView({
   feedback: string | null;
 }) {
   const report = useReport();
-  const difficulty = DIFFICULTY_LABELS[data.difficulty];
-  const where = [data.place?.city, data.country && COUNTRY_LABELS[data.country].name].filter(Boolean).join(', ');
+  const t = useT();
+  const where = [data.place?.city, data.country && t(`countries.${data.country}`)].filter(Boolean).join(', ');
 
   const footer =
     data.userStatus === null ? (
-      <Button label="Start Challenge" icon="flag-outline" loading={starting} onPress={onStart} />
+      <Button label={t('challenge.start')} icon="flag-outline" loading={starting} onPress={onStart} />
     ) : data.userStatus === 'in_progress' ? (
-      <Button label="Resume challenge" icon="navigate" onPress={onResume} />
+      <Button label={t('challenge.resume')} icon="navigate" onPress={onResume} />
     ) : null;
 
   return (
     <HeroScroll
       image={data.imageUrl}
-      fallback={data.icon}
+      fallback={categoryGlyph(data.categoryId)}
       credit={data.imageCredit}
       footer={footer}
-      actions={<IconButton icon="map-outline" label="Directions" onPress={() => openDirections(data)} />}>
+      actions={<IconButton icon="map-outline" label={t('challenge.directions')} onPress={() => openDirections(data)} />}>
       <Reveal>
         <ThemedText style={styles.title}>{data.title}</ThemedText>
         {where.length > 0 && (
@@ -136,19 +140,22 @@ function DetailView({
       </Reveal>
 
       <Reveal index={1} style={styles.tags}>
-        <Tag label={`${data.icon} ${data.categoryName}`} tone="green" />
-        <Tag label={difficulty.name} tone="blue" />
+        <Tag label={data.categoryName} tone="green" />
+        <Tag label={t(`difficulty.${data.difficulty}.name`)} tone="blue" />
         <View style={styles.flex} />
-        <Tag label={`+${data.xpReward} XP`} icon="star" tone="amber" />
+        <Tag label={t('common.xp', { xp: data.xpReward })} icon="star" tone="amber" />
       </Reveal>
 
       <Reveal index={2}>
         <StatRow
           items={[
-            { value: data.explorers, label: 'explorers' },
-            { value: formatDistance(data.distanceM) ?? '—', label: 'away' },
-            { value: data.safety?.estimatedDurationMin ? `${data.safety.estimatedDurationMin}m` : '—', label: 'duration' },
-            { value: formatDistance(data.place?.radiusM) ?? '—', label: 'radius' },
+            { value: data.explorers, label: t('challenge.explorers') },
+            { value: formatDistance(data.distanceM) ?? '—', label: t('challenge.away') },
+            {
+              value: data.safety?.estimatedDurationMin ? t('challenge.minutes', { count: data.safety.estimatedDurationMin }) : '—',
+              label: t('challenge.duration'),
+            },
+            { value: formatDistance(data.place?.radiusM) ?? '—', label: t('challenge.radius') },
           ]}
         />
       </Reveal>
@@ -161,7 +168,7 @@ function DetailView({
         <Card style={styles.statusDone}>
           <View style={styles.statusRow}>
             <Icon name="checkmark-circle" size={22} color={Brand.success} />
-            <ThemedText type="smallBold">You completed this challenge</ThemedText>
+            <ThemedText type="smallBold">{t('challenge.youCompleted')}</ThemedText>
           </View>
         </Card>
       )}
@@ -169,10 +176,10 @@ function DetailView({
         <Card style={styles.statusReview}>
           <View style={styles.statusRow}>
             <Icon name="time-outline" size={22} color={Brand.amber} />
-            <ThemedText type="smallBold">Your completion is being reviewed</ThemedText>
+            <ThemedText type="smallBold">{t('challenge.underReview')}</ThemedText>
           </View>
           <ThemedText type="small" themeColor="textSecondary">
-            We double-check unusual check-ins to keep leaderboards fair. XP is added once approved.
+            {t('challenge.underReviewBody')}
           </ThemedText>
         </Card>
       )}
@@ -184,11 +191,11 @@ function DetailView({
 
       {data.place && (
         <PressableScale onPress={() => router.push({ pathname: '/place/[id]', params: { id: data.place!.id } })} style={styles.placeLink}>
-          <Photo uri={data.imageUrl} fallback={data.icon} style={styles.placeThumb} />
+          <Photo uri={data.imageUrl} fallback={categoryGlyph(data.categoryId)} style={styles.placeThumb} />
           <View style={styles.flex}>
             <ThemedText type="smallBold">{data.place.name}</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              Other challenges and photos from explorers
+              {t('challenge.otherHere')}
             </ThemedText>
           </View>
           <Icon name="chevron-forward" size={18} color="#6B7A72" />
@@ -197,16 +204,15 @@ function DetailView({
 
       {data.collections.length > 0 && (
         <View style={styles.section}>
-          <SectionHeader title="Part of" />
+          <SectionHeader title={t('challenge.partOf')} />
           <View style={styles.tags}>
             {data.collections.map((collection) => (
               <PressableScale
                 key={collection.slug}
                 onPress={() => router.push({ pathname: '/collection/[slug]', params: { slug: collection.slug } })}
                 style={styles.collectionChip}>
-                <ThemedText type="smallBold">
-                  {collection.icon} {collection.title}
-                </ThemedText>
+                <Glyph name={collectionGlyph(collection.slug)} size={16} color={Brand.sea} />
+                <ThemedText type="smallBold">{collection.title}</ThemedText>
               </PressableScale>
             ))}
           </View>
@@ -215,7 +221,7 @@ function DetailView({
 
       {data.safety && (
         <View style={styles.section}>
-          <SectionHeader title="Before you go" />
+          <SectionHeader title={t('challenge.beforeYouGo')} />
           <SafetyInfo safety={data.safety} />
         </View>
       )}
@@ -229,7 +235,7 @@ function DetailView({
         }}>
         <Icon name="flag-outline" size={14} color="#8A9790" />
         <ThemedText type="small" style={styles.reportText}>
-          Report wrong or unsafe info
+          {t('challenge.report')}
         </ThemedText>
       </Pressable>
     </HeroScroll>
@@ -247,6 +253,7 @@ function GpsMode({
   onVerify: () => void;
   onDetails: () => void;
 }) {
+  const t = useT();
   const insets = useSafeAreaInsets();
   const abandon = useAbandonChallenge(data.id);
   const live = useLiveDistance(data.place, true);
@@ -268,17 +275,17 @@ function GpsMode({
 
       <View style={[styles.gpsTop, { paddingTop: insets.top + Spacing.two }]} pointerEvents="box-none">
         <View style={styles.gpsTopRow}>
-          <IconButton icon="chevron-back" label="Back" onPress={() => router.back()} background="rgba(20,32,26,0.85)" color="#FFFFFF" />
+          <IconButton icon="chevron-back" label={t('common.back')} onPress={() => router.back()} background="rgba(20,32,26,0.85)" color="#FFFFFF" />
           <View style={styles.gpsHeader}>
             <View style={styles.gpsHeaderIcon}>
-              <ThemedText style={styles.gpsHeaderEmoji}>{data.icon}</ThemedText>
+              <Glyph name={categoryGlyph(data.categoryId)} size={22} color="#FFFFFF" />
             </View>
             <View style={styles.flex}>
               <ThemedText style={styles.gpsTitle} numberOfLines={1}>
                 {data.place?.name ?? data.title}
               </ThemedText>
               <ThemedText style={styles.gpsDistance}>
-                {live.distance === null ? 'Locating you…' : inRange ? 'You are here' : formatDistance(live.distance)}
+                {live.distance === null ? t('challenge.locating') : inRange ? t('challenge.youAreHere') : formatDistance(live.distance)}
               </ThemedText>
             </View>
           </View>
@@ -291,18 +298,18 @@ function GpsMode({
         </View>
       </View>
 
-      <Animated.View entering={FadeInUp.springify().damping(18)} style={[styles.gpsSheet, { paddingBottom: insets.bottom + Spacing.three }]}>
+      <Animated.View entering={FadeInUp} style={[styles.gpsSheet, { paddingBottom: insets.bottom + Spacing.three }]}>
         {inRange && (
-          <Animated.View entering={ZoomIn.springify().damping(10)} style={styles.found}>
+          <Animated.View entering={FadeIn.duration(250)} style={styles.found}>
             <Icon name="location" size={16} color="#FFFFFF" />
-            <ThemedText style={styles.foundText}>CHECKPOINT FOUND!</ThemedText>
+            <ThemedText style={styles.foundText}>{t('challenge.found')}</ThemedText>
           </Animated.View>
         )}
         <View style={styles.checkpoint}>
-          <Photo uri={data.imageUrl} fallback={data.icon} style={styles.checkpointPhoto} />
+          <Photo uri={data.imageUrl} fallback={categoryGlyph(data.categoryId)} style={styles.checkpointPhoto} />
           <View style={styles.flex}>
             <ThemedText type="small" themeColor="textSecondary">
-              Next checkpoint
+              {t('challenge.nextCheckpoint')}
             </ThemedText>
             <ThemedText style={styles.checkpointTitle} numberOfLines={2}>
               {data.place?.name ?? data.title}
@@ -315,7 +322,7 @@ function GpsMode({
             <View>
               <ThemedText style={styles.gpsStatValue}>{formatDistance(distance) ?? '—'}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                distance
+                {t('challenge.distance')}
               </ThemedText>
             </View>
           </View>
@@ -324,34 +331,34 @@ function GpsMode({
             <View>
               <ThemedText style={styles.gpsStatValue}>{estimate(distance)}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                estimated
+                {t('challenge.estimated')}
               </ThemedText>
             </View>
           </View>
         </View>
         <ThemedText type="small" themeColor="textSecondary">
-          Get within {formatDistance(radius)} to complete
-          {live.accuracy !== null ? ` · GPS ±${Math.round(live.accuracy)} m` : ''}
+          {t('challenge.withinRadius', { radius: formatDistance(radius) })}
+          {live.accuracy !== null ? ` · ${t('challenge.accuracy', { m: Math.round(live.accuracy) })}` : ''}
         </ThemedText>
-        <Button label={inRange ? 'Continue' : "I'm here — verify"} icon={inRange ? 'checkmark' : 'locate'} onPress={onVerify} />
-        <Button label="Open Map" icon="map-outline" variant="outline" onPress={() => openDirections(data)} />
+        <Button label={inRange ? t('challenge.continue') : t('challenge.imHere')} icon={inRange ? 'checkmark' : 'locate'} onPress={onVerify} />
+        <Button label={t('challenge.openMap')} icon="map-outline" variant="outline" onPress={() => openDirections(data)} />
         <View style={styles.gpsLinks}>
           <Pressable onPress={onDetails} hitSlop={8} accessibilityRole="button">
             <ThemedText type="smallBold" style={{ color: Brand.sea }}>
-              Challenge details
+              {t('challenge.details')}
             </ThemedText>
           </Pressable>
           <Pressable
             hitSlop={8}
             accessibilityRole="button"
             onPress={() =>
-              showAlert('Give up this challenge?', 'You can start it again any time.', [
-                { text: 'Keep going', style: 'cancel' },
-                { text: 'Give up', style: 'destructive', onPress: () => abandon.mutate(undefined, { onSuccess: onDetails }) },
+              showAlert(t('challenge.giveUpTitle'), t('challenge.giveUpBody'), [
+                { text: t('challenge.keepGoing'), style: 'cancel' },
+                { text: t('challenge.giveUp'), style: 'destructive', onPress: () => abandon.mutate(undefined, { onSuccess: onDetails }) },
               ])
             }>
             <ThemedText type="smallBold" style={{ color: '#8A9790' }}>
-              Give up
+              {t('challenge.giveUp')}
             </ThemedText>
           </Pressable>
         </View>
@@ -375,6 +382,7 @@ function PhotoStep({
   onBack: () => void;
   feedback: string | null;
 }) {
+  const t = useT();
   const [photo, setPhoto] = useState<string | null>(null);
   const take = async (source: 'camera' | 'library') => {
     const uri = await pickImage(source).catch(() => null);
@@ -384,20 +392,20 @@ function PhotoStep({
   return (
     <SafeAreaView style={styles.photoScreen} edges={['top', 'bottom']}>
       <View style={styles.photoHeader}>
-        <IconButton icon="chevron-back" label="Back" onPress={onBack} background="#F0F4F1" />
+        <IconButton icon="chevron-back" label={t('common.back')} onPress={onBack} background="#F0F4F1" />
       </View>
       <View style={styles.photoBody}>
         <Reveal>
-          <ThemedText style={styles.photoTitle}>Take a photo</ThemedText>
+          <ThemedText style={styles.photoTitle}>{t('challenge.photoTitle')}</ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.center}>
-            Capture the location and complete the challenge.
+            {t('challenge.photoSubtitle')}
           </ThemedText>
         </Reveal>
         <Animated.View entering={FadeIn.duration(300)} style={styles.photoFrame}>
           {photo ? (
             <Image source={photo} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
           ) : (
-            <Photo uri={data.imageUrl} fallback={data.icon} style={StyleSheet.absoluteFill}>
+            <Photo uri={data.imageUrl} fallback={categoryGlyph(data.categoryId)} style={StyleSheet.absoluteFill}>
               <View style={styles.photoHint}>
                 <Icon name="camera-outline" size={16} color="#FFFFFF" />
                 <ThemedText style={styles.photoHintText}>{data.place?.name}</ThemedText>
@@ -413,16 +421,16 @@ function PhotoStep({
         <View style={styles.photoActions}>
           {photo ? (
             <>
-              <Button label="Complete challenge" icon="checkmark-circle" loading={submitting} onPress={() => onSubmit(photo)} />
-              <Button label="Retake" icon="refresh" variant="outline" disabled={submitting} onPress={() => take('camera')} />
+              <Button label={t('challenge.complete')} icon="checkmark-circle" loading={submitting} onPress={() => onSubmit(photo)} />
+              <Button label={t('challenge.retake')} icon="refresh" variant="outline" disabled={submitting} onPress={() => take('camera')} />
             </>
           ) : (
             <>
-              <Button label="Take Photo" icon="camera" onPress={() => take('camera')} />
-              <Button label="Upload from Gallery" icon="image-outline" variant="outline" onPress={() => take('library')} />
+              <Button label={t('challenge.takePhoto')} icon="camera" onPress={() => take('camera')} />
+              <Button label={t('challenge.upload')} icon="image-outline" variant="outline" onPress={() => take('library')} />
               <Pressable onPress={() => onSubmit(null)} disabled={submitting} accessibilityRole="button" style={styles.skip}>
                 <ThemedText type="smallBold" style={{ color: Brand.sea }}>
-                  {submitting ? 'Verifying…' : 'Skip photo and complete'}
+                  {submitting ? t('challenge.verifying') : t('challenge.skip')}
                 </ThemedText>
               </Pressable>
             </>
@@ -435,12 +443,6 @@ function PhotoStep({
 
 // ── Celebration ────────────────────────────────────────────────────────────
 
-const REWARD_LABEL: Record<UnlockedReward['kind'], string> = {
-  achievement: 'Badge unlocked',
-  collection: 'Collection complete',
-  goal: 'Goal complete',
-  daily: 'Daily bonus',
-};
 
 function Celebration({
   result,
@@ -451,6 +453,7 @@ function Celebration({
   challenge: ChallengeDetail;
   photoUri: string | null;
 }) {
+  const t = useT();
   const done = () => {
     registerForPushNotifications({ prompt: true }).catch(() => undefined);
     router.navigate('/');
@@ -458,44 +461,45 @@ function Celebration({
   return (
     <SafeAreaView style={styles.celebrateScreen} edges={['top', 'bottom']}>
       <View style={styles.celebrate}>
-        <Animated.View entering={ZoomIn.springify().damping(9)}>
-          <HexBadge icon={result.leveledUp ? '⬆️' : challenge.icon} size={110} />
+        <Animated.View entering={ZoomIn.duration(320)}>
+          <HexBadge glyph={result.leveledUp ? 'arrow-up-bold' : categoryGlyph(challenge.categoryId)} size={110} />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(150)} style={styles.centerBlock}>
-          <ThemedText style={styles.celebrateTitle}>{result.leveledUp ? `Level ${result.level.level}!` : 'Challenge complete!'}</ThemedText>
+          <ThemedText style={styles.celebrateTitle}>{result.leveledUp ? t('challenge.levelUp', { level: result.level.level }) : t('challenge.completeTitle')}</ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.center}>
-            {result.leveledUp ? `You are now a ${result.level.title}.` : challenge.title}
+            {result.leveledUp ? t('challenge.nowA', { title: levelTitle(result.level.title) }) : challenge.title}
           </ThemedText>
         </Animated.View>
-        <Animated.View entering={ZoomIn.delay(300).springify()} style={styles.xpBurst}>
+        <Animated.View entering={FadeIn.delay(250).duration(300)} style={styles.xpBurst}>
           <Icon name="star" size={22} color={Brand.amber} />
-          <ThemedText style={styles.xpBurstText}>+{result.xpEarned} XP</ThemedText>
+          <ThemedText style={styles.xpBurstText}>{t('common.xp', { xp: result.xpEarned })}</ThemedText>
         </Animated.View>
         {result.streak > 1 && (
           <Animated.View entering={FadeInDown.delay(400)}>
-            <Tag label={`🔥 ${result.streak}-day streak`} tone="amber" />
+            <Tag label={t('challenge.streak', { count: result.streak })} icon="flame" tone="amber" />
           </Animated.View>
         )}
         <Animated.View entering={FadeInDown.delay(450)} style={styles.levelBox}>
           <View style={styles.levelRow}>
             <ThemedText type="smallBold">
-              LVL {result.level.level} {result.level.title}
+              {t('common.levelTitle', { title: levelTitle(result.level.title), level: result.level.level })}
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {result.level.xp.toLocaleString()}
-              {result.level.nextLevelXp ? ` / ${result.level.nextLevelXp.toLocaleString()}` : ''} XP
+              {result.level.nextLevelXp
+                ? t('common.xpProgress', { xp: formatNumber(result.level.xp), next: formatNumber(result.level.nextLevelXp) })
+                : t('common.xpTotal', { xp: formatNumber(result.level.xp) })}
             </ThemedText>
           </View>
           <ProgressBar progress={result.level.progress} color={Brand.amber} height={10} />
         </Animated.View>
         {result.unlocked.map((reward, index) => (
           <Animated.View key={`${reward.kind}-${reward.id}`} entering={FadeInDown.delay(600 + index * 120)} style={styles.reward}>
-            <HexBadge icon={reward.icon} size={40} />
+            <HexBadge glyph={rewardGlyph(reward.kind, reward.id)} size={40} />
             <View style={styles.flex}>
               <ThemedText type="small" themeColor="textSecondary">
-                {REWARD_LABEL[reward.kind]}
+                {t(`challenge.rewards.${reward.kind}`)}
               </ThemedText>
-              <ThemedText type="smallBold">{reward.title}</ThemedText>
+              <ThemedText type="smallBold">{reward.kind === 'daily' ? t('goals.today') : reward.title}</ThemedText>
             </View>
             {reward.xp > 0 && <XpLabel xp={reward.xp} />}
           </Animated.View>
@@ -503,7 +507,7 @@ function Celebration({
       </View>
       <View style={styles.celebrateActions}>
         <Button
-          label="Share this adventure"
+          label={t('challenge.share')}
           icon="share-social-outline"
           onPress={() =>
             router.push({
@@ -512,7 +516,7 @@ function Celebration({
             })
           }
         />
-        <Button variant="outline" label="Find next challenge" onPress={done} />
+        <Button variant="outline" label={t('challenge.findNext')} onPress={done} />
       </View>
     </SafeAreaView>
   );
@@ -547,7 +551,7 @@ export default function ChallengeScreen() {
       await start.mutateAsync();
       setMode('gps');
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'Could not start the challenge');
+      setFeedback(error instanceof Error ? error.message : i18n.t('challenge.startFailed'));
     }
   }
 
@@ -558,7 +562,7 @@ export default function ChallengeScreen() {
       const result = await complete.mutateAsync({ photoUri: photo });
       if (result.status !== 'completed') setFeedback(result.message);
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : 'Could not verify your location');
+      setFeedback(error instanceof Error ? error.message : i18n.t('challenge.verifyFailed'));
     }
   }
 
@@ -639,6 +643,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.medium,
   },
   collectionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     borderRadius: Radius.pill,

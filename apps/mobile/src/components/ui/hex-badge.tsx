@@ -1,5 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Polygon, Stop } from 'react-native-svg';
+
+import { Glyph } from '@/components/ui/glyph';
+import type { GlyphName } from '@/lib/glyphs';
 
 function hexPoints(w: number, h: number, inset: number) {
   return [
@@ -14,8 +17,8 @@ function hexPoints(w: number, h: number, inset: number) {
     .join(' ');
 }
 
-/** Gold hexagon badge with the badge emoji in the middle; greyed out while locked. */
-export function HexBadge({ icon, size = 56, locked = false }: { icon: string; size?: number; locked?: boolean }) {
+/** Gold hexagon badge with the badge icon in the middle; greyed out while locked. */
+export function HexBadge({ glyph, size = 56, locked = false }: { glyph: GlyphName; size?: number; locked?: boolean }) {
   const w = size;
   const h = size * 1.1;
   const id = locked ? 'hexLocked' : 'hexGold';
@@ -32,7 +35,7 @@ export function HexBadge({ icon, size = 56, locked = false }: { icon: string; si
         <Polygon points={hexPoints(w, h, size * 0.12)} fill={locked ? '#F1F4F2' : '#24473A'} />
       </Svg>
       <View style={[StyleSheet.absoluteFill, styles.center]}>
-        <Text style={{ fontSize: size * 0.34, opacity: locked ? 0.5 : 1 }}>{locked ? '🔒' : icon}</Text>
+        <Glyph name={locked ? 'lock-outline' : glyph} size={size * 0.4} color={locked ? '#9AA7A0' : '#F6C35B'} />
       </View>
     </View>
   );

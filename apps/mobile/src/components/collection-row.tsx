@@ -5,13 +5,17 @@ import { StyleSheet, View } from 'react-native';
 import { XpLabel } from '@/components/challenge-card';
 import { Photo } from '@/components/photo';
 import { ThemedText } from '@/components/themed-text';
+import { Flag } from '@/components/ui/glyph';
 import { Icon } from '@/components/ui/icon';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Brand, Radius, Shadow, Spacing } from '@/constants/theme';
+import { collectionGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import type { Collection } from '@/lib/types';
 
 function CollectionRowBase({ collection }: { collection: Collection }) {
+  const t = useT();
   const done = collection.completedAt !== null;
   const progress = collection.total ? collection.completed / collection.total : 0;
   return (
@@ -19,7 +23,13 @@ function CollectionRowBase({ collection }: { collection: Collection }) {
       onPress={() => router.push({ pathname: '/collection/[slug]', params: { slug: collection.slug } })}
       accessibilityLabel={`${collection.title}, ${collection.completed} of ${collection.total}`}
       style={styles.card}>
-      <Photo uri={collection.imageUrl} fallback={collection.icon} style={styles.photo} />
+      <Photo uri={collection.imageUrl} fallback={collectionGlyph(collection.slug)} style={styles.photo}>
+        {collection.country && (
+          <View style={styles.flag}>
+            <Flag country={collection.country} width={20} />
+          </View>
+        )}
+      </Photo>
       <View style={styles.body}>
         <View style={styles.titleRow}>
           <ThemedText style={styles.title} numberOfLines={1}>
@@ -27,7 +37,7 @@ function CollectionRowBase({ collection }: { collection: Collection }) {
           </ThemedText>
           {collection.isPro && (
             <View style={styles.pro}>
-              <ThemedText style={styles.proText}>PRO</ThemedText>
+              <ThemedText style={styles.proText}>{t('collections.pro')}</ThemedText>
             </View>
           )}
         </View>
@@ -39,7 +49,7 @@ function CollectionRowBase({ collection }: { collection: Collection }) {
             <View style={styles.doneRow}>
               <Icon name="checkmark-circle" size={14} color={Brand.success} />
               <ThemedText type="smallBold" style={{ color: Brand.success }}>
-                Done
+                {t('common.done')}
               </ThemedText>
             </View>
           ) : (
@@ -88,6 +98,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+  },
+  flag: {
+    position: 'absolute',
+    left: 4,
+    bottom: 4,
   },
   pro: {
     backgroundColor: Brand.amber,

@@ -1,10 +1,12 @@
 import { memo, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
+import { Glyph } from '@/components/ui/glyph';
 import { Brand } from '@/constants/theme';
 import type { Coordinates } from '@/hooks/use-location';
 import { categoryColor } from '@/lib/format';
+import { categoryGlyph } from '@/lib/glyphs';
 import type { ChallengeSummary } from '@/lib/types';
 
 export const BALTIC_REGION = { latitude: 57.0, longitude: 24.6, latitudeDelta: 6.5, longitudeDelta: 7.5 };
@@ -36,7 +38,7 @@ const Pin = memo(function Pin({ challenge, selected }: { challenge: ChallengeSum
         { backgroundColor: done ? Brand.success : categoryColor(challenge.categoryId) },
         selected && styles.markerSelected,
       ]}>
-      <Text style={styles.markerIcon}>{done ? '✓' : challenge.icon}</Text>
+      <Glyph name={done ? 'check-bold' : categoryGlyph(challenge.categoryId)} size={17} color="#FFFFFF" />
     </View>
   );
 });
@@ -129,10 +131,5 @@ const styles = StyleSheet.create({
   markerSelected: {
     transform: [{ scale: 1.25 }],
     borderColor: Brand.amber,
-  },
-  markerIcon: {
-    fontSize: 15,
-    color: '#FFFFFF',
-    fontWeight: '800',
   },
 });

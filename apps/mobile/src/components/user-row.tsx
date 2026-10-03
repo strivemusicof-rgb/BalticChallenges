@@ -6,9 +6,11 @@ import { Avatar } from '@/components/avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/card';
 import { Spacing } from '@/constants/theme';
+import { useT } from '@/lib/i18n';
 import type { UserSummary } from '@/lib/types';
 
 export function UserRow({ user, leading, trailing }: { user: UserSummary; leading?: ReactNode; trailing?: ReactNode }) {
+  const t = useT();
   return (
     <Card style={styles.row} onPress={() => router.push({ pathname: '/user/[id]', params: { id: user.id } })}>
       {leading}
@@ -16,7 +18,7 @@ export function UserRow({ user, leading, trailing }: { user: UserSummary; leadin
       <View style={styles.flex}>
         <ThemedText type="smallBold">{user.displayName}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          LVL {user.level}
+          {t('common.level', { level: user.level })}
         </ThemedText>
       </View>
       {trailing}

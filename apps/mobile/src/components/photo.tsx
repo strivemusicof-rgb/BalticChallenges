@@ -3,27 +3,28 @@ import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
+import { Glyph } from '@/components/ui/glyph';
 import { Brand } from '@/constants/theme';
+import type { GlyphName } from '@/lib/glyphs';
 
 interface PhotoProps {
   uri: string | null | undefined;
-  /** Emoji shown on a tinted background when there is no photo. */
-  fallback?: string;
+  /** Icon shown on a tinted background when there is no photo. */
+  fallback?: GlyphName;
   /** Darken the bottom so white text on top stays readable. */
   shade?: boolean;
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
 }
 
-export function Photo({ uri, fallback = '🧭', shade = false, style, children }: PhotoProps) {
+export function Photo({ uri, fallback = 'map-marker-outline', shade = false, style, children }: PhotoProps) {
   return (
     <View style={[styles.box, { backgroundColor: Brand.mint }, style]}>
       {uri ? (
         <Image source={uri} style={StyleSheet.absoluteFill} contentFit="cover" transition={250} cachePolicy="memory-disk" recyclingKey={uri} />
       ) : (
         <View style={[StyleSheet.absoluteFill, styles.fallback, { backgroundColor: Brand.mint }]}>
-          <ThemedText style={styles.emoji}>{fallback}</ThemedText>
+          <Glyph name={fallback} size={34} color={Brand.sea} />
         </View>
       )}
       {shade && (
@@ -46,9 +47,5 @@ const styles = StyleSheet.create({
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  emoji: {
-    fontSize: 40,
-    lineHeight: 52,
   },
 });

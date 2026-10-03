@@ -11,25 +11,27 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { Segmented } from '@/components/ui/segmented';
 import { Brand, Radius, Spacing } from '@/constants/theme';
 import { useLeaderboard } from '@/hooks/social-queries';
-import { COUNTRY_LABELS } from '@/lib/format';
+import { COUNTRIES, formatNumber } from '@/lib/format';
+import { useT } from '@/lib/i18n';
 import type { Country, Leaderboard, LeaderboardEntry } from '@/lib/types';
 
 type Tab = 'global' | 'baltics' | 'friends';
 const TABS = [
-  { id: 'global', label: 'Global' },
-  { id: 'baltics', label: 'Baltics' },
-  { id: 'friends', label: 'Friends' },
+  { id: 'global', label: 'leaderboard.global' },
+  { id: 'baltics', label: 'leaderboard.baltics' },
+  { id: 'friends', label: 'leaderboard.friends' },
 ] as const;
 
 const PERIODS: { id: Leaderboard['period']; label: string }[] = [
-  { id: 'week', label: 'This week' },
-  { id: 'month', label: 'This month' },
-  { id: 'all', label: 'All time' },
+  { id: 'week', label: 'leaderboard.week' },
+  { id: 'month', label: 'leaderboard.month' },
+  { id: 'all', label: 'leaderboard.all' },
 ];
 
 const MEDAL = ['#E4A23B', '#A7B1AC', '#C47A3E'];
 
 function Row({ entry, isMe, metric }: { entry: LeaderboardEntry; isMe: boolean; metric: Leaderboard['metric'] }) {
+  const t = useT();
   const medal = MEDAL[entry.rank - 1];
   return (
     <PressableScale
@@ -41,20 +43,20 @@ function Row({ entry, isMe, metric }: { entry: LeaderboardEntry; isMe: boolean; 
       </View>
       <Avatar name={entry.displayName} url={entry.avatarUrl} size={40} />
       <View style={styles.flex}>
-        <ThemedText type="smallBold">{isMe ? `${entry.displayName} (you)` : entry.displayName}</ThemedText>
+        <ThemedText type="smallBold">{isMe ? `${entry.displayName} (${t('common.you')})` : entry.displayName}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          LVL {entry.level}
+          {t('common.level', { level: entry.level })}
         </ThemedText>
       </View>
       <ThemedText style={styles.score}>
-        {entry.score.toLocaleString()}
-        {metric === 'xp' ? ' XP' : ''}
+        {metric === 'xp' ? t('common.xpTotal', { xp: formatNumber(entry.score) }) : formatNumber(entry.score)}
       </ThemedText>
     </PressableScale>
   );
 }
 
 export default function LeaderboardScreen() {
+  const t = useT();
   const [tab, setTab] = useState<Tab>('global');
   const [country, setCountry] = useState<Country>('LV');
   const [period, setPeriod] = useState<Leaderboard['period']>('week');
@@ -63,23 +65,17 @@ export default function LeaderboardScreen() {
 
   return (
     <Screen edges={[]} refreshing={board.isRefetching} onRefresh={() => void board.refetch()}>
-      <Segmented options={TABS} value={tab} onChange={setTab} />
+      <Segmented options={TABS.map((item) => ({ ...item, label: t(item.label) }))} value={tab} onChange={setTab} />
       {tab === 'baltics' && (
         <View style={styles.chips}>
-          {(Object.keys(COUNTRY_LABELS) as Country[]).map((code) => (
-            <Chip
-              key={code}
-              compact
-              label={`${COUNTRY_LABELS[code].flag} ${COUNTRY_LABELS[code].name}`}
-              selected={country === code}
-              onPress={() => setCountry(code)}
-            />
+          {COUNTRIES.map((code) => (
+            <Chip key={code} compact label={t(`countries.${code}`)} selected={country === code} onPress={() => setCountry(code)} />
           ))}
         </View>
       )}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
         {PERIODS.map((item) => (
-          <Chip key={item.id} compact label={item.label} selected={period === item.id} onPress={() => setPeriod(item.id)} />
+          <Chip key={item.id} compact label={t(item.label)} selected={period === item.id} onPress={() => setPeriod(item.id)} />
         ))}
       </ScrollView>
 
@@ -89,9 +85,9 @@ export default function LeaderboardScreen() {
         <ErrorState error={board.error} onRetry={() => board.refetch()} />
       ) : (
         <>
-          <ThemedText style={styles.subtitle}>{board.data.metric === 'xp' ? 'Most XP' : 'Most Challenges'}</ThemedText>
+          <ThemedText style={styles.subtitle}>{board.data.metric === 'xp' ? t('leaderboard.mostXp') : t('leaderboard.mostChallenges')}</ThemedText>
           {board.data.entries.length === 0 ? (
-            <EmptyState emoji="🏆" title="No one on the board yet" body="Complete a challenge to claim the top spot." />
+            <EmptyState icon="podium" title={t('leaderboard.empty')} body={t('leaderboard.emptyBody')} />
           ) : (
             <View style={styles.list}>
               {board.data.entries.map((entry, index) => (

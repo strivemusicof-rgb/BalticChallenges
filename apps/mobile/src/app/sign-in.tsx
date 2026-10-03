@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,6 +13,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { Brand, Radius, Spacing } from '@/constants/theme';
 import { ApiError } from '@/lib/api';
 import { BRAND_IMAGES } from '@/lib/brand-images';
+import { currentLanguage, i18n, LANGUAGES, setLanguage, useT } from '@/lib/i18n';
 import { useAuth } from '@/providers/auth-provider';
 
 type Mode = 'register' | 'login';
@@ -30,6 +31,7 @@ function Field({
 }
 
 export default function SignInScreen() {
+  const t = useT();
   const { signIn, register } = useAuth();
   const [mode, setMode] = useState<Mode>('register');
   const [showForm, setShowForm] = useState(false);
@@ -49,7 +51,7 @@ export default function SignInScreen() {
       else await signIn(email.trim(), password);
     } catch (caught) {
       const details = caught instanceof ApiError && Array.isArray(caught.details) ? caught.details : null;
-      setError(details?.[0]?.message ?? (caught instanceof Error ? caught.message : 'Something went wrong'));
+      setError(details?.[0]?.message ?? (caught instanceof Error ? caught.message : i18n.t('common.somethingWrong')));
     } finally {
       setSubmitting(false);
     }
@@ -71,17 +73,29 @@ export default function SignInScreen() {
           style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={styles.splashContent}>
-          <Animated.View entering={FadeInDown.duration(700).springify().damping(16)} style={styles.brand}>
+          <View style={styles.languages}>
+            {LANGUAGES.map((item) => (
+              <Pressable
+                key={item.code}
+                onPress={() => void setLanguage(item.code)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: currentLanguage() === item.code }}
+                style={[styles.languagePill, currentLanguage() === item.code && styles.languagePillActive]}>
+                <ThemedText style={styles.languageText}>{item.code.toUpperCase()}</ThemedText>
+              </Pressable>
+            ))}
+          </View>
+          <Animated.View entering={FadeIn.duration(600)} style={styles.brand}>
             <LogoMark size={92} />
-            <ThemedText style={styles.brandTop}>BALTIC</ThemedText>
-            <ThemedText style={styles.brandBottom}>CHALLENGES</ThemedText>
-            <ThemedText style={styles.tagline}>Explore. Discover. Complete.</ThemedText>
-            <ThemedText style={styles.countries}>Latvia · Lithuania · Estonia</ThemedText>
+            <ThemedText style={styles.brandTop}>{t('auth.brandTop')}</ThemedText>
+            <ThemedText style={styles.brandBottom}>{t('auth.brandBottom')}</ThemedText>
+            <ThemedText style={styles.tagline}>{t('auth.tagline')}</ThemedText>
+            <ThemedText style={styles.countries}>{t('auth.countriesLine')}</ThemedText>
           </Animated.View>
           <Animated.View entering={FadeIn.delay(350).duration(500)} style={styles.splashBottom}>
-            <Button label="Get Started" variant="light" onPress={() => open('register')} style={styles.pill} />
-            <Button variant="ghost" label="I already have an account" textColor="#FFFFFF" onPress={() => open('login')} />
-            <ThemedText style={styles.credit}>Photo: {BRAND_IMAGES.welcome.credit} · Wikimedia Commons</ThemedText>
+            <Button label={t('auth.getStarted')} variant="light" onPress={() => open('register')} style={styles.pill} />
+            <Button variant="ghost" label={t('auth.haveAccount')} textColor="#FFFFFF" onPress={() => open('login')} />
+            <ThemedText style={styles.credit}>{t('common.photoCredit', { credit: `${BRAND_IMAGES.welcome.credit} · Wikimedia Commons` })}</ThemedText>
           </Animated.View>
         </SafeAreaView>
       </View>
@@ -92,14 +106,14 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
-          <IconButton icon="chevron-back" label="Back" onPress={() => setShowForm(false)} background="#F0F4F1" />
+          <IconButton icon="chevron-back" label={t('common.back')} onPress={() => setShowForm(false)} background="#F0F4F1" />
           <Animated.View key={mode} entering={FadeInDown.duration(350)} style={styles.formHeader}>
             <View style={styles.formLogo}>
               <LogoMark size={44} />
             </View>
-            <ThemedText style={styles.formTitle}>{mode === 'register' ? 'Create your account' : 'Welcome back'}</ThemedText>
+            <ThemedText style={styles.formTitle}>{mode === 'register' ? t('auth.createAccount') : t('auth.welcomeBack')}</ThemedText>
             <ThemedText themeColor="textSecondary">
-              {mode === 'register' ? 'Start collecting places, badges and XP across the Baltics.' : 'Sign in to continue exploring.'}
+              {mode === 'register' ? t('auth.registerSubtitle') : t('auth.loginSubtitle')}
             </ThemedText>
           </Animated.View>
 
@@ -107,7 +121,7 @@ export default function SignInScreen() {
             {mode === 'register' && (
               <Field
                 icon="person-outline"
-                placeholder="Your name"
+                placeholder={t('auth.name')}
                 autoComplete="name"
                 textContentType="name"
                 maxLength={40}
@@ -117,7 +131,7 @@ export default function SignInScreen() {
             )}
             <Field
               icon="mail-outline"
-              placeholder="Email"
+              placeholder={t('auth.email')}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
@@ -127,7 +141,7 @@ export default function SignInScreen() {
             />
             <Field
               icon="lock-closed-outline"
-              placeholder={mode === 'register' ? 'Password (8+ characters)' : 'Password'}
+              placeholder={mode === 'register' ? t('auth.passwordNew') : t('auth.password')}
               secureTextEntry
               autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
               textContentType={mode === 'register' ? 'newPassword' : 'password'}
@@ -144,14 +158,14 @@ export default function SignInScreen() {
               </View>
             )}
             <Button
-              label={mode === 'register' ? 'Start exploring' : 'Sign in'}
+              label={mode === 'register' ? t('auth.startExploring') : t('auth.signIn')}
               loading={submitting}
               disabled={!canSubmit}
               onPress={submit}
             />
             <Button
               variant="ghost"
-              label={mode === 'register' ? 'I already have an account' : 'Create a new account'}
+              label={mode === 'register' ? t('auth.haveAccount') : t('auth.createNew')}
               onPress={() => open(mode === 'register' ? 'login' : 'register')}
             />
           </View>
@@ -174,6 +188,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.three,
+  },
+  languages: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 6,
+    paddingTop: Spacing.two,
+  },
+  languagePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  languagePillActive: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+  languageText: {
+    fontSize: 12,
+    fontWeight: 800,
+    color: '#0E2233',
   },
   brand: {
     alignItems: 'center',

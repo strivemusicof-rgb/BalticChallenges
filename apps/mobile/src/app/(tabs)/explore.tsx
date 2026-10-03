@@ -17,25 +17,28 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { Brand, MaxContentWidth, Radius, Shadow, Spacing } from '@/constants/theme';
 import { useChallenges, type ChallengeFilters } from '@/hooks/queries';
 import { useLocation } from '@/hooks/use-location';
-import { COUNTRY_LABELS, formatDistance } from '@/lib/format';
+import { formatDistance } from '@/lib/format';
+import { categoryGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import type { ChallengeSummary } from '@/lib/types';
 
 type Filter = 'nearby' | 'challenges' | 'places' | 'completed';
 
 const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'nearby', label: 'Nearby' },
-  { id: 'challenges', label: 'Challenges' },
-  { id: 'places', label: 'Places' },
-  { id: 'completed', label: 'Completed' },
+  { id: 'nearby', label: 'explore.nearby' },
+  { id: 'challenges', label: 'explore.challenges' },
+  { id: 'places', label: 'explore.places' },
+  { id: 'completed', label: 'explore.completed' },
 ];
 
 function Preview({ challenge }: { challenge: ChallengeSummary }) {
+  const t = useT();
   const open = () => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } });
-  const where = [challenge.place?.city, challenge.country && COUNTRY_LABELS[challenge.country].name].filter(Boolean).join(', ');
+  const where = [challenge.place?.city, challenge.country && t(`countries.${challenge.country}`)].filter(Boolean).join(', ');
   return (
-    <Animated.View entering={FadeInDown.springify().damping(18)} exiting={FadeOutDown.duration(160)} style={styles.preview}>
+    <Animated.View entering={FadeInDown} exiting={FadeOutDown.duration(160)} style={styles.preview}>
       <PressableScale onPress={open} scaleTo={0.98} style={styles.previewRow}>
-        <Photo uri={challenge.imageUrl} fallback={challenge.icon} style={styles.previewPhoto} />
+        <Photo uri={challenge.imageUrl} fallback={categoryGlyph(challenge.categoryId)} style={styles.previewPhoto} />
         <View style={styles.flex}>
           <ThemedText style={styles.previewTitle} numberOfLines={2}>
             {challenge.place?.name ?? challenge.title}
@@ -47,7 +50,7 @@ function Preview({ challenge }: { challenge: ChallengeSummary }) {
         </View>
       </PressableScale>
       <Button
-        label={challenge.userStatus === 'completed' ? 'View' : 'Start'}
+        label={challenge.userStatus === 'completed' ? t('explore.view') : t('explore.start')}
         icon={challenge.userStatus === 'completed' ? 'eye-outline' : 'navigate'}
         size="small"
         onPress={open}
@@ -59,6 +62,7 @@ function Preview({ challenge }: { challenge: ChallengeSummary }) {
 export default function ExploreScreen() {
   const location = useLocation();
   const [filter, setFilter] = useState<Filter>('challenges');
+  const t = useT();
   const [selected, setSelected] = useState<ChallengeSummary | null>(null);
   const [listView, setListView] = useState(false);
   const [search, setSearch] = useState('');
@@ -102,7 +106,7 @@ export default function ExploreScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Search locations, challenges..."
+            placeholder={t('explore.search')}
             placeholderTextColor="#8A9790"
             returnKeyType="search"
             clearButtonMode="while-editing"
@@ -115,14 +119,14 @@ export default function ExploreScreen() {
             setSelected(null);
             setListView(!listView);
           }}
-          accessibilityLabel={listView ? 'Show map' : 'Show list'}
+          accessibilityLabel={listView ? t('explore.showMap') : t('explore.showList')}
           style={styles.filterButton}>
           <Icon name={listView ? 'map-outline' : 'list'} size={20} color="#15211B" />
         </PressableScale>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
         {FILTERS.map((item) => (
-          <Chip key={item.id} compact label={item.label} selected={filter === item.id} onPress={() => choose(item.id)} />
+          <Chip key={item.id} compact label={t(item.label)} selected={filter === item.id} onPress={() => choose(item.id)} />
         ))}
       </ScrollView>
     </View>
@@ -141,7 +145,7 @@ export default function ExploreScreen() {
           windowSize={7}
           keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
-            challenges.isSuccess ? <EmptyState emoji="🧭" title="Nothing here yet" body="Try another filter or search." /> : null
+            challenges.isSuccess ? <EmptyState icon="compass-outline" title={t('explore.nothingHere')} body={t('explore.tryAnother')} /> : null
           }
         />
       </SafeAreaView>
@@ -164,13 +168,13 @@ export default function ExploreScreen() {
 
       <View style={styles.bottom} pointerEvents="box-none">
         <View style={styles.locateRow} pointerEvents="box-none">
-          <IconButton icon="navigate-outline" label="Show my location" onPress={locate} size={44} color={Brand.sea} />
+          <IconButton icon="navigate-outline" label={t('explore.myLocation')} onPress={locate} size={44} color={Brand.sea} />
         </View>
         {selected && <Preview key={selected.id} challenge={selected} />}
         {!selected && challenges.isSuccess && visible.length === 0 && (
           <View style={styles.preview}>
             <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-              {filter === 'completed' ? 'Nothing completed yet. Your first challenge is waiting!' : 'No challenges match this filter.'}
+              {filter === 'completed' ? t('explore.noCompleted') : t('explore.noMatch')}
             </ThemedText>
           </View>
         )}

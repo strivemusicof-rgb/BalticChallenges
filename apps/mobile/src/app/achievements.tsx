@@ -4,19 +4,22 @@ import { FlatList, StyleSheet, View } from 'react-native';
 
 import { EmptyState, ErrorState, LoadingState } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
+import { Glyph } from '@/components/ui/glyph';
 import { HexBadge } from '@/components/ui/hex-badge';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Segmented } from '@/components/ui/segmented';
 import { Brand, MaxContentWidth, Radius, Shadow, Spacing } from '@/constants/theme';
 import { useAchievements } from '@/hooks/queries';
+import { achievementGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import type { Achievement } from '@/lib/types';
 
 type Filter = 'all' | 'unlocked' | 'locked';
 const FILTERS = [
-  { id: 'all', label: 'All' },
-  { id: 'unlocked', label: 'Unlocked' },
-  { id: 'locked', label: 'Locked' },
+  { id: 'all', label: 'achievements.all' },
+  { id: 'unlocked', label: 'achievements.unlocked' },
+  { id: 'locked', label: 'achievements.locked' },
 ] as const;
 
 function AchievementRow({ achievement }: { achievement: Achievement }) {
@@ -30,7 +33,7 @@ function AchievementRow({ achievement }: { achievement: Achievement }) {
       }
       accessibilityLabel={`${achievement.title}: ${achievement.description}${unlocked ? ', unlocked. Tap to share.' : ''}`}
       style={styles.row}>
-      <HexBadge icon={achievement.icon} size={52} locked={!unlocked} />
+      <HexBadge glyph={achievementGlyph(achievement.id)} size={52} locked={!unlocked} />
       <View style={styles.flex}>
         <ThemedText style={styles.title}>{achievement.title}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
@@ -42,14 +45,17 @@ function AchievementRow({ achievement }: { achievement: Achievement }) {
           </View>
         )}
       </View>
-      <ThemedText style={[styles.count, unlocked && { color: Brand.success }]}>
-        {unlocked ? '✓' : target > 1 ? `${Math.min(current, target)}/${target}` : ''}
-      </ThemedText>
+      {unlocked ? (
+        <Glyph name="check-circle" size={22} color={Brand.success} />
+      ) : (
+        <ThemedText style={styles.count}>{target > 1 ? `${Math.min(current, target)}/${target}` : ''}</ThemedText>
+      )}
     </PressableScale>
   );
 }
 
 export default function AchievementsScreen() {
+  const t = useT();
   const [filter, setFilter] = useState<Filter>('all');
   const achievements = useAchievements();
   const all = achievements.data ?? [];
@@ -65,10 +71,10 @@ export default function AchievementsScreen() {
       contentContainerStyle={styles.content}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Segmented options={FILTERS} value={filter} onChange={setFilter} />
+          <Segmented options={FILTERS.map((item) => ({ ...item, label: t(item.label) }))} value={filter} onChange={setFilter} />
           {achievements.isSuccess && (
             <ThemedText type="small" themeColor="textSecondary">
-              {unlockedCount} of {all.length} unlocked · tap an unlocked badge to share it
+              {t('achievements.summary', { unlocked: unlockedCount, total: all.length })}
             </ThemedText>
           )}
         </View>
@@ -79,7 +85,7 @@ export default function AchievementsScreen() {
         ) : achievements.isError ? (
           <ErrorState error={achievements.error} onRetry={() => achievements.refetch()} />
         ) : (
-          <EmptyState emoji="🏅" title={filter === 'unlocked' ? 'No badges yet' : 'All unlocked!'} />
+          <EmptyState icon="medal-outline" title={filter === 'unlocked' ? t('achievements.noneTitle') : t('achievements.allUnlocked')} />
         )
       }
     />

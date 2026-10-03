@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { DbClient } from '../db.js';
+import { tr, type I18n } from '../i18n.js';
 
 export const GoalMetricSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('challenges_completed') }),
@@ -102,7 +103,8 @@ export async function loadGoalProgress(db: DbClient, userId: string): Promise<Go
       metric: unknown;
       target: number;
       xp_reward: number;
-    }>(`SELECT id, slug, title, description, icon, period, metric, target, xp_reward
+      i18n: I18n;
+    }>(`SELECT id, slug, title, description, icon, period, metric, target, xp_reward, i18n
         FROM goals WHERE status = 'published' ORDER BY sort`),
     db.query<CompletionInWindow>(
       `SELECT a.completed_at, ch.place_id, coalesce(ch.region_id, p.region_id) AS region_id,
@@ -144,8 +146,8 @@ export async function loadGoalProgress(db: DbClient, userId: string): Promise<Go
       {
         id: goal.id,
         slug: goal.slug,
-        title: goal.title,
-        description: goal.description,
+        title: tr(goal.i18n, 'title', goal.title),
+        description: tr(goal.i18n, 'description', goal.description),
         icon: goal.icon,
         period: goal.period,
         periodKey: window.key,

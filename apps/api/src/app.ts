@@ -18,6 +18,7 @@ import { meRoutes } from './routes/me.js';
 import { metaRoutes } from './routes/meta.js';
 import { postRoutes } from './routes/posts.js';
 import { socialRoutes } from './routes/social.js';
+import { registerLanguage } from './i18n.js';
 import { createPhotoStore } from './services/photos.js';
 import { createPushService } from './services/push.js';
 
@@ -32,6 +33,7 @@ export async function buildApp(config: Config, db: Db) {
   });
 
   app.decorateRequest('auth', null);
+  registerLanguage(app);
 
   await app.register(rateLimit, { global: true, max: 300, timeWindow: '1 minute' });
   await app.register(multipart);

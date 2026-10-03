@@ -1,8 +1,11 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useEffect, useRef, useState } from 'react';
 
 import { Brand } from '@/constants/theme';
 import type { Coordinates } from '@/hooks/use-location';
 import { categoryColor } from '@/lib/format';
+import { categoryGlyph, type GlyphName } from '@/lib/glyphs';
+import { i18n } from '@/lib/i18n';
 import type { ChallengeSummary } from '@/lib/types';
 
 export const BALTIC_REGION = { latitude: 57.0, longitude: 24.6, latitudeDelta: 6.5, longitudeDelta: 7.5 };
@@ -54,6 +57,12 @@ function loadLeaflet(): Promise<Leaflet> {
   return leafletPromise;
 }
 
+/** HTML entity for an icon in the Material Community Icons font (already loaded by the app). */
+function glyphHtml(name: GlyphName, size: number) {
+  const code = (MaterialCommunityIcons.glyphMap as Record<string, number>)[name] ?? 0;
+  return `<span style="font-family:material-community;font-size:${size}px;line-height:1">&#x${code.toString(16)};</span>`;
+}
+
 function pinHtml(challenge: ChallengeSummary, selected: boolean) {
   const done = challenge.userStatus === 'completed';
   const color = done ? Brand.success : categoryColor(challenge.categoryId);
@@ -62,7 +71,7 @@ function pinHtml(challenge: ChallengeSummary, selected: boolean) {
     selected ? Brand.amber : '#fff'
   };box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:${
     selected ? 19 : 15
-  }px;color:#fff;font-weight:800;transition:all .15s ease">${done ? '✓' : challenge.icon}</div>`;
+  }px;color:#fff;transition:all .15s ease">${glyphHtml(done ? 'check-bold' : categoryGlyph(challenge.categoryId), selected ? 22 : 17)}</div>`;
 }
 
 export function ChallengeMap({ challenges, userCoords, selectedId, onSelect, focus, routeTo, dark = false }: ChallengeMapProps) {
@@ -184,7 +193,7 @@ export function ChallengeMap({ challenges, userCoords, selectedId, onSelect, foc
   if (failed) {
     return (
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7A72' }}>
-        Map could not be loaded. Check your connection.
+        {i18n.t('explore.mapFailed')}
       </div>
     );
   }

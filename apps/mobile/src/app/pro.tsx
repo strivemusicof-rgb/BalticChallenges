@@ -9,29 +9,24 @@ import { Icon } from '@/components/ui/icon';
 import { Segmented } from '@/components/ui/segmented';
 import { Brand, Radius, Spacing } from '@/constants/theme';
 import { showAlert } from '@/lib/dialog';
+import { useT } from '@/lib/i18n';
 import { openLegal } from '@/lib/legal';
 
 type Plan = 'monthly' | 'yearly';
 const PLANS = [
-  { id: 'monthly', label: 'Monthly' },
-  { id: 'yearly', label: 'Yearly · Save 33%' },
+  { id: 'monthly', label: 'pro.monthly' },
+  { id: 'yearly', label: 'pro.yearly' },
 ] as const;
 
 const PRICE: Record<Plan, { amount: string; period: string; note: string }> = {
-  monthly: { amount: '€4.99', period: '/ month', note: 'Billed monthly. Cancel anytime.' },
-  yearly: { amount: '€39.99', period: '/ year', note: 'That is €3.33 a month, billed once a year.' },
+  monthly: { amount: '€4.99', period: 'pro.perMonth', note: 'pro.noteMonthly' },
+  yearly: { amount: '€39.99', period: 'pro.perYear', note: 'pro.noteYearly' },
 };
 
-const FEATURES = [
-  'Offline maps and challenge packs',
-  'Advanced statistics',
-  'Unlimited custom routes',
-  'Exclusive challenges and premium collections',
-  'Pro badge on your profile',
-  'No ads',
-];
+const FEATURES = ['offline', 'stats', 'routes', 'exclusive', 'badge', 'ads'] as const;
 
 export default function ProScreen() {
+  const t = useT();
   const [plan, setPlan] = useState<Plan>('monthly');
   const price = PRICE[plan];
 
@@ -41,28 +36,25 @@ export default function ProScreen() {
         <View style={styles.heroIcon}>
           <Icon name="diamond" size={30} color="#FFFFFF" />
         </View>
-        <ThemedText style={styles.subtitle}>Unlock the full experience</ThemedText>
+        <ThemedText style={styles.subtitle}>{t('pro.subtitle')}</ThemedText>
       </Reveal>
 
       <Reveal index={1}>
-        <Segmented options={PLANS} value={plan} onChange={setPlan} />
+        <Segmented options={PLANS.map((item) => ({ ...item, label: t(item.label) }))} value={plan} onChange={setPlan} />
       </Reveal>
 
       <Reveal index={2} style={styles.priceBox}>
         <View style={styles.priceRow}>
           <ThemedText style={styles.price}>{price.amount}</ThemedText>
-          <ThemedText style={styles.period}>{price.period}</ThemedText>
+          <ThemedText style={styles.period}>{t(price.period)}</ThemedText>
         </View>
         <ThemedText type="small" themeColor="textSecondary">
-          {price.note}
+          {t(price.note)}
         </ThemedText>
         <Button
-          label="Go Pro"
+          label={t('pro.goPro')}
           onPress={() =>
-            showAlert(
-              'Coming with the App Store release',
-              'Subscriptions will be available when the app launches on the App Store and Google Play. Everything is free while we test.',
-            )
+            showAlert(t('pro.comingTitle'), t('pro.comingBody'))
           }
         />
       </Reveal>
@@ -73,20 +65,19 @@ export default function ProScreen() {
             <View style={styles.check}>
               <Icon name="checkmark" size={14} color="#FFFFFF" />
             </View>
-            <ThemedText style={styles.featureText}>{feature}</ThemedText>
+            <ThemedText style={styles.featureText}>{t(`pro.features.${feature}`)}</ThemedText>
           </View>
         ))}
       </Reveal>
 
       <ThemedText type="small" themeColor="textSecondary" style={styles.legal}>
-        The free version always includes challenges, XP, badges and the community. Payment is charged to your App Store or Google
-        Play account and renews automatically unless cancelled at least 24 hours before the period ends.{' '}
+        {t('pro.legal')}{' '}
         <ThemedText type="small" style={styles.link} onPress={() => openLegal('terms')}>
-          Terms
+          {t('pro.terms')}
         </ThemedText>{' '}
         ·{' '}
         <ThemedText type="small" style={styles.link} onPress={() => openLegal('privacy')}>
-          Privacy
+          {t('pro.privacy')}
         </ThemedText>
       </ThemedText>
     </Screen>

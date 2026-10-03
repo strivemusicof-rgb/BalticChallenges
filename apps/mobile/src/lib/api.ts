@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 
+import { currentLanguage } from '@/lib/i18n';
 import { loadRefreshToken, saveRefreshToken } from '@/lib/session-store';
 import type { Tokens } from '@/lib/types';
 
@@ -88,7 +89,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const url = `${API_URL}${path}${search.size ? `?${search}` : ''}`;
 
   const send = () => {
-    const headers: Record<string, string> = { Accept: 'application/json' };
+    // The API returns challenge and place text in this language when a translation exists.
+    const headers: Record<string, string> = { Accept: 'application/json', 'Accept-Language': currentLanguage() };
     if (body !== undefined && !form) headers['Content-Type'] = 'application/json';
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
     return fetch(url, { method, headers, body: form ?? (body === undefined ? undefined : JSON.stringify(body)) });

@@ -32,7 +32,7 @@ export function DialogHost() {
       </Animated.View>
       <Animated.View
         key={dialog.id}
-        entering={SlideInDown.springify().damping(20).stiffness(220)}
+        entering={SlideInDown.duration(240)}
         exiting={SlideOutDown.duration(180)}
         style={[styles.sheet, { paddingBottom: insets.bottom + Spacing.three }]}
         accessibilityViewIsModal>

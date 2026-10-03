@@ -6,6 +6,7 @@ import { badRequest, forbidden, notFound } from '../errors.js';
 import { assertCleanText, PageQuery, parse, UuidSchema, type RoutePlugin } from '../http.js';
 import { PHOTO_MAX_BYTES } from '../services/photos.js';
 import { canSeeSql, loadPosts } from '../services/posts.js';
+import { tr, type I18n } from '../i18n.js';
 
 const IdParams = z.object({ id: UuidSchema });
 
@@ -288,7 +289,7 @@ export const postRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
     const viewer = request.auth?.userId ?? null;
     const isUuid = UuidSchema.safeParse(id).success;
     const { rows } = await db.query(
-      `SELECT p.id, p.slug, p.name, p.description, p.city, p.country::text AS country,
+      `SELECT p.id, p.slug, p.name, p.description, p.i18n, p.city, p.country::text AS country,
               ST_Y(p.geog::geometry) AS lat, ST_X(p.geog::geometry) AS lng, p.images, p.image_credit AS "imageCredit", p.official_url AS "officialUrl",
               r.name AS region,
               (SELECT count(DISTINCT a.user_id) FROM challenge_attempts a JOIN challenges ch ON ch.id = a.challenge_id
@@ -304,11 +305,13 @@ export const postRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
        WHERE ${isUuid ? 'p.id = $1::uuid' : 'p.slug = $1'} AND p.status = 'published'`,
       [id],
     );
-    const place = rows[0] as { id: string } | undefined;
-    if (!place) throw notFound('Place');
+    const row = rows[0] as { id: string; name: string; description: string; i18n: I18n } | undefined;
+    if (!row) throw notFound('Place');
+    const { i18n, ...base } = row;
+    const place = { ...base, name: tr(i18n, 'name', base.name), description: tr(i18n, 'description', base.description) };
     const [challenges, posts] = await Promise.all([
       db.query(
-        `SELECT ch.id, ch.slug, ch.title, ch.xp_reward AS "xpReward", ch.difficulty, cat.icon,
+        `SELECT ch.id, ch.slug, ch.title, ch.i18n, ch.xp_reward AS "xpReward", ch.difficulty, cat.icon, ch.category_id AS "categoryId",
                 EXISTS (SELECT 1 FROM challenge_attempts a WHERE a.challenge_id = ch.id AND a.user_id = $2::uuid
                         AND a.status = 'completed') AS completed
          FROM challenges ch JOIN categories cat ON cat.id = ch.category_id
@@ -317,6 +320,13 @@ export const postRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
       ),
       loadPosts(db, photos, { viewerId: viewer, placeId: place.id, limit: 20 }),
     ]);
-    return { place, challenges: challenges.rows, posts };
+    return {
+      place,
+      challenges: challenges.rows.map(({ i18n: challengeI18n, ...challenge }) => ({
+        ...challenge,
+        title: tr(challengeI18n as I18n, 'title', challenge.title as string),
+      })),
+      posts,
+    };
   });
 };

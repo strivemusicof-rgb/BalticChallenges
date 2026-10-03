@@ -1,57 +1,72 @@
+import { currentLanguage, i18n } from '@/lib/i18n';
 import type { Country, Difficulty } from '@/lib/types';
 
 export function formatDistance(meters: number | null | undefined): string | null {
   if (meters === null || meters === undefined) return null;
-  if (meters < 1000) return `${Math.round(meters)} m`;
-  return meters < 10_000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters / 1000)} km`;
+  const km = currentLanguage() === 'ru' ? 'км' : 'km';
+  const m = currentLanguage() === 'ru' ? 'м' : 'm';
+  if (meters < 1000) return `${Math.round(meters)} ${m}`;
+  const value = meters < 10_000 ? (meters / 1000).toFixed(1) : String(Math.round(meters / 1000));
+  return `${currentLanguage() === 'en' ? value : value.replace('.', ',')} ${km}`;
+}
+
+export function formatNumber(value: number): string {
+  return value.toLocaleString(currentLanguage() === 'en' ? 'en-GB' : currentLanguage());
 }
 
 export function timeAgo(iso: string, now = Date.now()): string {
   const seconds = Math.max(0, Math.round((now - new Date(iso).getTime()) / 1000));
-  if (seconds < 60) return 'just now';
+  if (seconds < 60) return i18n.t('time.justNow');
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 60) return i18n.t('time.minAgo', { count: minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} h ago`;
+  if (hours < 24) return i18n.t('time.hAgo', { count: hours });
   const days = Math.round(hours / 24);
-  if (days < 7) return `${days} d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  if (days < 7) return i18n.t('time.dAgo', { count: days });
+  return new Date(iso).toLocaleDateString(currentLanguage(), { day: 'numeric', month: 'short' });
 }
 
 /** "3 days left" style countdown for weekly/monthly goals. */
 export function timeLeft(iso: string, now = Date.now()): string {
   const hours = Math.max(0, Math.round((new Date(iso).getTime() - now) / 3_600_000));
-  if (hours < 24) return `${hours} h left`;
-  const days = Math.round(hours / 24);
-  return `${days} ${days === 1 ? 'day' : 'days'} left`;
+  if (hours < 24) return i18n.t('time.hLeft', { count: hours });
+  return i18n.t('time.dLeft', { count: Math.round(hours / 24) });
 }
 
-export const INTEREST_OPTIONS = [
-  { id: 'nature', label: '🌲 Nature' },
-  { id: 'history', label: '🏰 History' },
-  { id: 'food', label: '🍽️ Food' },
-  { id: 'hiking', label: '🥾 Hiking' },
-  { id: 'architecture', label: '🏛️ Architecture' },
-  { id: 'beaches', label: '🏖️ Beaches' },
-  { id: 'family', label: '👨‍👩‍👧 Family' },
-  { id: 'adventure', label: '🧗 Adventure' },
-  { id: 'photography', label: '📸 Photography' },
-  { id: 'wildlife', label: '🦌 Wildlife' },
-  { id: 'cycling', label: '🚴 Cycling' },
-  { id: 'road-trips', label: '🚗 Road trips' },
+/** Short month name (1-12) in the current language. */
+export function monthName(month: number): string {
+  return new Date(2024, month - 1, 1).toLocaleString(currentLanguage(), { month: 'short' });
+}
+
+/** Level titles come from the server in English; show the translated one. */
+export function levelTitle(title: string): string {
+  return i18n.t(`levels.${title}`, { defaultValue: title });
+}
+
+export const INTEREST_IDS = [
+  'nature',
+  'history',
+  'food',
+  'hiking',
+  'architecture',
+  'beaches',
+  'family',
+  'adventure',
+  'photography',
+  'wildlife',
+  'cycling',
+  'road-trips',
 ] as const;
 
-export const COUNTRY_LABELS: Record<Country, { flag: string; name: string }> = {
-  LV: { flag: '🇱🇻', name: 'Latvia' },
-  LT: { flag: '🇱🇹', name: 'Lithuania' },
-  EE: { flag: '🇪🇪', name: 'Estonia' },
-};
+export const COUNTRIES: Country[] = ['LV', 'LT', 'EE'];
 
-export const DIFFICULTY_LABELS: Record<Difficulty, { dot: string; name: string; blurb: string }> = {
-  casual: { dot: '🟢', name: 'Casual', blurb: 'Easy visits, short walks, family friendly' },
-  explorer: { dot: '🔵', name: 'Explorer', blurb: 'Day trips and moderate trails' },
-  adventurer: { dot: '🟣', name: 'Adventurer', blurb: 'Longer routes and remote places' },
-  extreme: { dot: '🔴', name: 'Extreme', blurb: 'Demanding hikes, rides and multi-day routes' },
+export const DIFFICULTIES: Difficulty[] = ['casual', 'explorer', 'adventurer', 'extreme'];
+
+export const DIFFICULTY_COLORS: Record<Difficulty, string> = {
+  casual: '#2E9E62',
+  explorer: '#2F7BD8',
+  adventurer: '#7B5BD6',
+  extreme: '#D6493F',
 };
 
 const MARKER_COLORS = ['#1E5E46', '#2F7BD8', '#E8892C', '#D6493F', '#2A9D8F', '#7B5BD6', '#C9A227'];

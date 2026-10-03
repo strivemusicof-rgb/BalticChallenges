@@ -5,12 +5,13 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet } from 'react-n
 import { PostCard } from '@/components/post-card';
 import { EmptyState, ErrorState, LoadingState } from '@/components/screen';
 import { BottomTabInset, Brand, MaxContentWidth, Spacing } from '@/constants/theme';
+import type { GlyphName } from '@/lib/glyphs';
 import type { Post } from '@/lib/types';
 
 interface PostListProps {
   query: UseInfiniteQueryResult<Post[]>;
   header?: ReactElement;
-  empty: { emoji: string; title: string; body?: string };
+  empty: { icon: GlyphName; title: string; body?: string };
   tabScreen?: boolean;
 }
 

@@ -18,6 +18,7 @@ import { useCreatePost } from '@/hooks/social-queries';
 import { showAlert } from '@/lib/dialog';
 import { chooseImage } from '@/lib/images';
 import type { Post, Visibility } from '@/lib/types';
+import { useT } from '@/lib/i18n';
 import { useCurrentUser } from '@/providers/auth-provider';
 
 const MAX_PHOTOS = 6;
@@ -25,19 +26,20 @@ const MAX_PHOTOS = 6;
 type Kind = Exclude<Post['kind'], 'route'>;
 
 const KINDS: { id: Post['kind']; icon: IconName; title: string; subtitle: string; soon?: boolean }[] = [
-  { id: 'adventure', icon: 'image-outline', title: 'Adventure Post', subtitle: 'Share your latest adventure' },
-  { id: 'achievement', icon: 'ribbon-outline', title: 'Achievement Post', subtitle: 'Show off your achievement' },
-  { id: 'discovery', icon: 'compass-outline', title: 'Discovery Post', subtitle: 'Share a hidden gem' },
-  { id: 'route', icon: 'map-outline', title: 'Route Post', subtitle: 'Share your route and stats', soon: true },
+  { id: 'adventure', icon: 'image-outline', title: 'newPost.adventure', subtitle: 'newPost.adventureSub' },
+  { id: 'achievement', icon: 'ribbon-outline', title: 'newPost.achievement', subtitle: 'newPost.achievementSub' },
+  { id: 'discovery', icon: 'compass-outline', title: 'newPost.discovery', subtitle: 'newPost.discoverySub' },
+  { id: 'route', icon: 'map-outline', title: 'newPost.route', subtitle: 'newPost.routeSub', soon: true },
 ];
 
 const VISIBILITY = [
-  { id: 'public', label: 'Everyone' },
-  { id: 'friends', label: 'Friends' },
-  { id: 'private', label: 'Only me' },
+  { id: 'public', label: 'newPost.everyone' },
+  { id: 'friends', label: 'newPost.friends' },
+  { id: 'private', label: 'newPost.onlyMe' },
 ] as const;
 
 function KindPicker({ value, onChange, onContinue }: { value: Kind; onChange: (kind: Kind) => void; onContinue: () => void }) {
+  const t = useT();
   return (
     <Screen edges={['bottom']}>
       {KINDS.map((kind, index) => {
@@ -54,13 +56,13 @@ function KindPicker({ value, onChange, onContinue }: { value: Kind; onChange: (k
                 <Icon name={kind.icon} size={22} color={Brand.sea} />
               </View>
               <View style={styles.flex}>
-                <ThemedText style={styles.kindTitle}>{kind.title}</ThemedText>
+                <ThemedText style={styles.kindTitle}>{t(kind.title)}</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {kind.subtitle}
+                  {t(kind.subtitle)}
                 </ThemedText>
               </View>
               {kind.soon ? (
-                <Tag label="Soon" />
+                <Tag label={t('common.soon')} />
               ) : selected ? (
                 <Icon name="checkmark-circle" size={24} color={Brand.sea} />
               ) : (
@@ -71,12 +73,13 @@ function KindPicker({ value, onChange, onContinue }: { value: Kind; onChange: (k
         );
       })}
       <View style={styles.spacer} />
-      <Button label="Continue" onPress={onContinue} />
+      <Button label={t('newPost.continue')} onPress={onContinue} />
     </Screen>
   );
 }
 
 export default function NewPostScreen() {
+  const t = useT();
   const user = useCurrentUser();
   const params = useLocalSearchParams<{
     challengeId?: string;
@@ -103,10 +106,10 @@ export default function NewPostScreen() {
 
   const completed = (history.data ?? [])
     .filter((entry) => entry.status === 'completed')
-    .map((entry) => ({ id: entry.challengeId, label: `${entry.icon} ${entry.title}` }));
+    .map((entry) => ({ id: entry.challengeId, label: entry.title }));
   // A challenge passed in from the completion screen may not be in the history cache yet.
   if (params.challengeId && params.challengeTitle && !completed.some((entry) => entry.id === params.challengeId)) {
-    completed.unshift({ id: params.challengeId, label: `🏆 ${params.challengeTitle}` });
+    completed.unshift({ id: params.challengeId, label: params.challengeTitle });
   }
   const unlocked = (achievements.data ?? []).filter((achievement) => achievement.unlockedAt !== null);
 
@@ -131,14 +134,14 @@ export default function NewPostScreen() {
           router.back();
           router.push({ pathname: '/post/[id]', params: { id: post.id } });
         },
-        onError: (error) => showAlert('Could not post', error.message),
+        onError: (error) => showAlert(t('newPost.failed'), error.message),
       },
     );
   }
 
   const canPost =
     kind === 'achievement' ? Boolean(achievementId) : body.trim().length > 0 || photos.length > 0;
-  const title = KINDS.find((item) => item.id === kind)?.title ?? 'Create Post';
+  const title = t(KINDS.find((item) => item.id === kind)?.title ?? 'titles.newPost');
 
   return (
     <Screen edges={['bottom']}>
@@ -146,7 +149,7 @@ export default function NewPostScreen() {
 
       {kind === 'adventure' && completed.length > 0 && (
         <View style={styles.section}>
-          <SectionHeader title="Completed challenge" subtitle="Optional — links your post to it" />
+          <SectionHeader title={t('newPost.completedChallenge')} subtitle={t('newPost.optional')} />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
             {completed.map((entry) => (
               <Chip
@@ -163,10 +166,10 @@ export default function NewPostScreen() {
 
       {kind === 'achievement' && (
         <View style={styles.section}>
-          <SectionHeader title="Which badge?" />
+          <SectionHeader title={t('newPost.whichBadge')} />
           {unlocked.length === 0 ? (
             <ThemedText type="small" themeColor="textSecondary">
-              You have not unlocked a badge yet. Complete a challenge to earn your first one.
+              {t('newPost.noBadge')}
             </ThemedText>
           ) : (
             <View style={styles.wrap}>
@@ -174,7 +177,7 @@ export default function NewPostScreen() {
                 <Chip
                   key={achievement.id}
                   compact
-                  label={`${achievement.icon} ${achievement.title}`}
+                  label={achievement.title}
                   selected={achievementId === achievement.id}
                   onPress={() => setAchievementId(achievement.id)}
                 />
@@ -187,7 +190,7 @@ export default function NewPostScreen() {
       <TextInput
         value={body}
         onChangeText={setBody}
-        placeholder={kind === 'discovery' ? 'What did you find? Where is it?' : 'How was it? Tips for other explorers?'}
+        placeholder={kind === 'discovery' ? t('newPost.placeholderDiscovery') : t('newPost.placeholder')}
         placeholderTextColor="#8A9790"
         multiline
         maxLength={2000}
@@ -196,7 +199,7 @@ export default function NewPostScreen() {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photos}>
         {photos.map((uri) => (
-          <Pressable key={uri} accessibilityLabel="Remove photo" onPress={() => setPhotos((current) => current.filter((item) => item !== uri))}>
+          <Pressable key={uri} accessibilityLabel={t('newPost.removePhoto')} onPress={() => setPhotos((current) => current.filter((item) => item !== uri))}>
             <Image source={uri} style={styles.photo} contentFit="cover" />
             <View style={styles.remove}>
               <Icon name="close" size={14} color="#FFFFFF" />
@@ -204,33 +207,33 @@ export default function NewPostScreen() {
           </Pressable>
         ))}
         {photos.length < MAX_PHOTOS && (
-          <PressableScale onPress={addPhoto} accessibilityLabel="Add photo" style={[styles.photo, styles.addPhoto]}>
+          <PressableScale onPress={addPhoto} accessibilityLabel={t('newPost.addPhoto')} style={[styles.photo, styles.addPhoto]}>
             <Icon name="camera-outline" size={26} color={Brand.sea} />
             <ThemedText type="small" style={{ color: Brand.sea }}>
-              Add photo
+              {t('newPost.addPhoto')}
             </ThemedText>
           </PressableScale>
         )}
       </ScrollView>
 
       <View style={styles.section}>
-        <ThemedText type="smallBold">Who can see this?</ThemedText>
-        <Segmented options={VISIBILITY} value={visibility} onChange={setVisibility} />
+        <ThemedText type="smallBold">{t('newPost.whoCanSee')}</ThemedText>
+        <Segmented options={VISIBILITY.map((item) => ({ ...item, label: t(item.label) }))} value={visibility} onChange={setVisibility} />
       </View>
       <View style={styles.switchRow}>
         <View style={styles.flex}>
-          <ThemedText type="smallBold">Show place name</ThemedText>
+          <ThemedText type="smallBold">{t('newPost.showPlace')}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            Only “Place, City, Country”. Exact coordinates and photo location data are never shared.
+            {t('newPost.showPlaceHint')}
           </ThemedText>
         </View>
-        <Switch value={showLocation} onValueChange={setShowLocation} trackColor={{ true: Brand.sea }} accessibilityLabel="Show place name" />
+        <Switch value={showLocation} onValueChange={setShowLocation} trackColor={{ true: Brand.sea }} accessibilityLabel={t('newPost.showPlace')} />
       </View>
 
       <ThemedText type="small" themeColor="textSecondary">
-        Be kind, don’t show people without their consent, and don’t share your home location.
+        {t('newPost.kindness')}
       </ThemedText>
-      <Button label="Post" icon="paper-plane-outline" disabled={!canPost} loading={create.isPending} onPress={submit} />
+      <Button label={t('newPost.post')} icon="paper-plane-outline" disabled={!canPost} loading={create.isPending} onPress={submit} />
     </Screen>
   );
 }

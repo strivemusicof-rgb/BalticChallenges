@@ -155,7 +155,7 @@ export interface PlaceDetail {
     photoCount: number;
     challengeCount: number;
   };
-  challenges: { id: string; slug: string; title: string; xpReward: number; difficulty: Difficulty; icon: string; completed: boolean }[];
+  challenges: { id: string; slug: string; title: string; xpReward: number; difficulty: Difficulty; icon: string; categoryId: string; completed: boolean }[];
   posts: Post[];
 }
 

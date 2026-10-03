@@ -12,6 +12,7 @@ import { PHOTO_MAX_BYTES, processImage } from '../services/photos.js';
 import { loadPosts } from '../services/posts.js';
 import { loadProgress } from '../services/progression.js';
 import { CURRENT_TERMS_VERSION, loadMe, loadStats } from '../services/users.js';
+import { tr, type I18n } from '../i18n.js';
 
 const INTERESTS = [
   'nature', 'history', 'food', 'hiking', 'architecture', 'beaches',
@@ -123,8 +124,8 @@ export const meRoutes: RoutePlugin = (app, { db, auth, photos }) => {
   app.get('/v1/me/achievements', { preHandler: auth.requireAuth }, async (request) => {
     const uid = userId(request);
     const [achievements, unlocked, progress] = await Promise.all([
-      db.query<{ id: string; title: string; description: string; icon: string; rule: unknown; xp_reward: number; is_hidden: boolean }>(
-        `SELECT id, title, description, icon, rule, xp_reward, is_hidden FROM achievements WHERE status = 'published' ORDER BY sort`,
+      db.query<{ id: string; title: string; description: string; icon: string; rule: unknown; xp_reward: number; is_hidden: boolean; i18n: I18n }>(
+        `SELECT id, title, description, icon, rule, xp_reward, is_hidden, i18n FROM achievements WHERE status = 'published' ORDER BY sort`,
       ),
       db.query<{ achievement_id: string; unlocked_at: Date }>(
         'SELECT achievement_id, unlocked_at FROM user_achievements WHERE user_id = $1',
@@ -141,8 +142,8 @@ export const meRoutes: RoutePlugin = (app, { db, auth, photos }) => {
           const ruleState = rule.success ? ruleProgress(rule.data, progress) : { current: 0, target: 1 };
           return {
             id: row.id,
-            title: row.title,
-            description: row.description,
+            title: tr(row.i18n, 'title', row.title),
+            description: tr(row.i18n, 'description', row.description),
             icon: row.icon,
             xpReward: row.xp_reward,
             unlockedAt: unlockedAt.get(row.id)?.toISOString() ?? null,

@@ -2,6 +2,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { Linking, Platform } from 'react-native';
 import { showAlert } from '@/lib/dialog';
+import { i18n } from '@/lib/i18n';
 
 const MAX_EDGE = 2048;
 
@@ -19,11 +20,11 @@ export async function pickImage(source: ImageSource, options: { square?: boolean
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) {
     showAlert(
-      source === 'camera' ? 'Camera access needed' : 'Photo access needed',
-      'You can allow access in Settings.',
+      source === 'camera' ? i18n.t('images.cameraNeeded') : i18n.t('images.photosNeeded'),
+      i18n.t('images.allowInSettings'),
       [
-        { text: 'Not now', style: 'cancel' },
-        { text: 'Open Settings', onPress: () => void Linking.openSettings() },
+        { text: i18n.t('images.notNow'), style: 'cancel' },
+        { text: i18n.t('images.openSettings'), onPress: () => void Linking.openSettings() },
       ],
     );
     return null;
@@ -55,10 +56,10 @@ export function chooseImage(options: { square?: boolean; maxEdge?: number } = {}
   // Browsers show their own camera/library chooser for file inputs.
   if (Platform.OS === 'web') return pickImage('library', options).catch(() => null);
   return new Promise((resolve) => {
-    showAlert('Add photo', undefined, [
-      { text: 'Take photo', onPress: () => void pickImage('camera', options).then(resolve, () => resolve(null)) },
-      { text: 'Choose from library', onPress: () => void pickImage('library', options).then(resolve, () => resolve(null)) },
-      { text: 'Cancel', style: 'cancel', onPress: () => resolve(null) },
+    showAlert(i18n.t('images.addPhoto'), undefined, [
+      { text: i18n.t('images.takePhoto'), onPress: () => void pickImage('camera', options).then(resolve, () => resolve(null)) },
+      { text: i18n.t('images.chooseLibrary'), onPress: () => void pickImage('library', options).then(resolve, () => resolve(null)) },
+      { text: i18n.t('common.cancel'), style: 'cancel', onPress: () => resolve(null) },
     ]);
   });
 }

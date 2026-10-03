@@ -8,10 +8,11 @@ import { Photo } from '@/components/photo';
 import { ThemedText } from '@/components/themed-text';
 import { IconButton } from '@/components/ui/icon-button';
 import { Brand, MaxContentWidth, Spacing } from '@/constants/theme';
+import type { GlyphName } from '@/lib/glyphs';
 
 interface HeroScrollProps {
   image: string | null | undefined;
-  fallback?: string;
+  fallback?: GlyphName;
   credit?: string | null;
   height?: number;
   /** Extra buttons in the top-right corner over the photo. */
@@ -51,7 +52,7 @@ export function HeroScroll({ image, fallback, credit, height = 300, actions, ove
           <Photo uri={image} fallback={fallback} style={StyleSheet.absoluteFill} />
           {credit ? (
             <ThemedText style={styles.credit} numberOfLines={1}>
-              📷 {credit}
+              © {credit}
             </ThemedText>
           ) : null}
         </Animated.View>

@@ -11,11 +11,12 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { Segmented } from '@/components/ui/segmented';
 import { Brand, Radius, Spacing } from '@/constants/theme';
 import { useCollections } from '@/hooks/queries';
+import { useT } from '@/lib/i18n';
 
 type Tab = 'mine' | 'all';
 const TABS = [
-  { id: 'mine', label: 'My Collections' },
-  { id: 'all', label: 'All Collections' },
+  { id: 'mine', label: 'collections.mine' },
+  { id: 'all', label: 'collections.all' },
 ] as const;
 
 function Shortcut({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
@@ -30,6 +31,7 @@ function Shortcut({ icon, label, onPress }: { icon: IconName; label: string; onP
 }
 
 export default function CollectionsScreen() {
+  const t = useT();
   const [picked, setPicked] = useState<Tab | null>(null);
   const collections = useCollections();
 
@@ -41,13 +43,13 @@ export default function CollectionsScreen() {
 
   return (
     <Screen refreshing={collections.isRefetching} onRefresh={() => void collections.refetch()}>
-      <PageTitle title="Collections" />
+      <PageTitle title={t('collections.title')} />
       <View style={styles.shortcuts}>
-        <Shortcut icon="calendar-outline" label="Daily & weekly" onPress={() => router.push('/goals')} />
-        <Shortcut icon="search-outline" label="All challenges" onPress={() => router.push('/browse')} />
-        <Shortcut icon="ribbon-outline" label="Badges" onPress={() => router.push('/achievements')} />
+        <Shortcut icon="calendar-outline" label={t('collections.dailyWeekly')} onPress={() => router.push('/goals')} />
+        <Shortcut icon="search-outline" label={t('collections.allChallenges')} onPress={() => router.push('/browse')} />
+        <Shortcut icon="ribbon-outline" label={t('collections.badges')} onPress={() => router.push('/achievements')} />
       </View>
-      <Segmented options={TABS} value={tab} onChange={setPicked} />
+      <Segmented options={TABS.map((item) => ({ ...item, label: t(item.label) }))} value={tab} onChange={setPicked} />
 
       {collections.isPending ? (
         <LoadingState />
@@ -55,9 +57,9 @@ export default function CollectionsScreen() {
         <ErrorState error={collections.error} onRetry={() => collections.refetch()} />
       ) : list.length === 0 ? (
         <EmptyState
-          emoji="🗺️"
-          title="No collections started yet"
-          body="Complete any challenge and the collections it belongs to show up here."
+          icon="map-outline"
+          title={t('collections.emptyTitle')}
+          body={t('collections.emptyBody')}
         />
       ) : (
         list.map((collection, index) => (

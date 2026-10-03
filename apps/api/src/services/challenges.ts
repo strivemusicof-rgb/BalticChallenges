@@ -1,4 +1,5 @@
 import type { DbClient } from '../db.js';
+import { tr, type I18n } from '../i18n.js';
 
 export interface ChallengeSummary {
   id: string;
@@ -69,6 +70,9 @@ interface Row {
   image_credit: string | null;
   distance_m: number | null;
   user_status: ChallengeSummary['userStatus'];
+  ch_i18n: I18n;
+  cat_i18n: I18n;
+  place_i18n: I18n;
 }
 
 export async function findChallenges(db: DbClient, query: ChallengeQuery): Promise<ChallengeSummary[]> {
@@ -97,7 +101,7 @@ export async function findChallenges(db: DbClient, query: ChallengeQuery): Promi
   if (query.excludeIds?.length) where.push(`ch.id <> ALL(${param(query.excludeIds)}::uuid[])`);
   if (query.search) {
     const term = param(`%${query.search.replace(/[%_\\]/g, (match) => `\\${match}`)}%`);
-    where.push(`(ch.title ILIKE ${term} OR p.name ILIKE ${term} OR p.city ILIKE ${term})`);
+    where.push(`(ch.title ILIKE ${term} OR p.name ILIKE ${term} OR p.city ILIKE ${term} OR ch.i18n::text ILIKE ${term} OR p.i18n::text ILIKE ${term})`);
   }
   if (query.status === 'completed') where.push(`a.status = 'completed'`);
   if (query.status === 'in_progress') where.push(`a.status = 'in_progress'`);
@@ -119,7 +123,7 @@ export async function findChallenges(db: DbClient, query: ChallengeQuery): Promi
             ch.country::text AS country, ch.difficulty, ch.xp_reward, ch.verification, ch.is_pro, ch.ends_at,
             p.id AS place_id, p.name AS place_name, p.city,
             ST_Y(p.geog::geometry) AS lat, ST_X(p.geog::geometry) AS lng, p.radius_m,
-            p.images[1] AS image_url, p.image_credit,
+            p.images[1] AS image_url, p.image_credit, ch.i18n AS ch_i18n, cat.i18n AS cat_i18n, p.i18n AS place_i18n,
             ${distance} AS distance_m,
             a.status AS user_status
      FROM challenges ch
@@ -139,11 +143,11 @@ function toSummary(row: Row): ChallengeSummary {
   return {
     id: row.id,
     slug: row.slug,
-    title: row.title,
-    description: row.description,
+    title: tr(row.ch_i18n, 'title', row.title),
+    description: tr(row.ch_i18n, 'description', row.description),
     type: row.type,
     categoryId: row.category_id,
-    categoryName: row.category_name,
+    categoryName: tr(row.cat_i18n, 'name', row.category_name),
     icon: row.icon,
     country: row.country,
     difficulty: row.difficulty,
@@ -155,7 +159,7 @@ function toSummary(row: Row): ChallengeSummary {
       row.place_id && row.lat !== null && row.lng !== null
         ? {
             id: row.place_id,
-            name: row.place_name ?? '',
+            name: tr(row.place_i18n, 'name', row.place_name ?? ''),
             city: row.city,
             lat: row.lat,
             lng: row.lng,
@@ -207,8 +211,8 @@ export async function findChallengeDetail(db: DbClient, idOrSlug: string, userId
       `SELECT count(*) AS explorers FROM challenge_attempts WHERE challenge_id = $1 AND status = 'completed'`,
       [id],
     ),
-    db.query<{ slug: string; title: string; icon: string }>(
-      `SELECT c.slug, c.title, c.icon FROM collection_items ci JOIN collections c ON c.id = ci.collection_id
+    db.query<{ slug: string; title: string; icon: string; i18n: I18n }>(
+      `SELECT c.slug, c.title, c.icon, c.i18n FROM collection_items ci JOIN collections c ON c.id = ci.collection_id
        WHERE ci.challenge_id = $1 AND c.status = 'published' ORDER BY c.sort`,
       [id],
     ),
@@ -218,7 +222,7 @@ export async function findChallengeDetail(db: DbClient, idOrSlug: string, userId
   return {
     ...summary,
     explorers: stats.rows[0]?.explorers ?? 0,
-    collections: collections.rows,
+    collections: collections.rows.map(({ i18n, ...row }) => ({ ...row, title: tr(i18n, 'title', row.title) })),
     safety: placeRow
       ? {
           difficulty: placeRow.difficulty,

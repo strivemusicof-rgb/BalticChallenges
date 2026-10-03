@@ -1,5 +1,6 @@
 import type { DbClient } from '../db.js';
 import type { PhotoStore } from './photos.js';
+import { tr, type I18n } from '../i18n.js';
 
 export interface PostQuery {
   viewerId: string | null;
@@ -70,6 +71,9 @@ interface PostRow {
   place_name: string | null;
   challenge_id: string | null;
   challenge_title: string | null;
+  challenge_i18n: I18n;
+  place_i18n: I18n;
+  achievement_i18n: I18n;
   achievement_id: string | null;
   achievement_title: string | null;
   achievement_icon: string | null;
@@ -108,8 +112,8 @@ export async function loadPosts(db: DbClient, photos: PhotoStore, query: PostQue
   const { rows } = await db.query<PostRow>(
     `SELECT p.id, p.kind, p.body, p.created_at, p.user_id, u.display_name, u.avatar_url, u.level,
             p.location_label, p.show_location, p.visibility,
-            p.place_id, pl.name AS place_name, p.challenge_id, ch.title AS challenge_title,
-            p.achievement_id, ac.title AS achievement_title, ac.icon AS achievement_icon,
+            p.place_id, pl.name AS place_name, pl.i18n AS place_i18n, p.challenge_id, ch.title AS challenge_title, ch.i18n AS challenge_i18n,
+            p.achievement_id, ac.title AS achievement_title, ac.i18n AS achievement_i18n, ac.icon AS achievement_icon,
             p.like_count, p.comment_count,
             EXISTS (SELECT 1 FROM post_likes l WHERE l.post_id = p.id AND l.user_id = $1) AS liked,
             EXISTS (SELECT 1 FROM post_saves s WHERE s.post_id = p.id AND s.user_id = $1) AS saved,
@@ -141,10 +145,10 @@ export async function loadPosts(db: DbClient, photos: PhotoStore, query: PostQue
       height: photo.height,
     })),
     locationLabel: row.show_location ? row.location_label : null,
-    place: row.show_location && row.place_id ? { id: row.place_id, name: row.place_name! } : null,
-    challenge: row.challenge_id ? { id: row.challenge_id, title: row.challenge_title! } : null,
+    place: row.show_location && row.place_id ? { id: row.place_id, name: tr(row.place_i18n, 'name', row.place_name!) } : null,
+    challenge: row.challenge_id ? { id: row.challenge_id, title: tr(row.challenge_i18n, 'title', row.challenge_title!) } : null,
     achievement: row.achievement_id
-      ? { id: row.achievement_id, title: row.achievement_title!, icon: row.achievement_icon! }
+      ? { id: row.achievement_id, title: tr(row.achievement_i18n, 'title', row.achievement_title!), icon: row.achievement_icon! }
       : null,
     likeCount: row.like_count,
     commentCount: row.comment_count,

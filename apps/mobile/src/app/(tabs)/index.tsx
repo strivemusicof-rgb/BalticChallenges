@@ -10,6 +10,7 @@ import { EmptyState, ErrorState, LoadingState, Screen, SectionHeader } from '@/c
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Glyph } from '@/components/ui/glyph';
 import { Icon } from '@/components/ui/icon';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { XpHeader } from '@/components/xp-header';
@@ -18,17 +19,20 @@ import { useHomeFeed } from '@/hooks/queries';
 import { useFeed } from '@/hooks/social-queries';
 import { useLocation } from '@/hooks/use-location';
 import { formatDistance } from '@/lib/format';
+import { categoryGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import type { ChallengeSummary } from '@/lib/types';
 
 function TodayCard({ challenge, bonus }: { challenge: ChallengeSummary; bonus: number }) {
+  const t = useT();
   const open = () => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } });
   return (
     <View style={styles.todayCard}>
-      <PressableScale onPress={open} scaleTo={0.985} accessibilityLabel={`Today's challenge: ${challenge.title}`}>
-      <Photo uri={challenge.imageUrl} fallback={challenge.icon} shade style={styles.todayPhoto}>
+      <PressableScale onPress={open} scaleTo={0.985} accessibilityLabel={t('home.todaysChallengeA11y', { title: challenge.title })}>
+      <Photo uri={challenge.imageUrl} fallback={categoryGlyph(challenge.categoryId)} shade style={styles.todayPhoto}>
         <View style={styles.todayTag}>
           <Icon name="star" size={12} color="#FFFFFF" />
-          <ThemedText style={styles.todayTagText}>TODAY’S CHALLENGE</ThemedText>
+          <ThemedText style={styles.todayTagText}>{t('home.todaysChallenge')}</ThemedText>
         </View>
         <View style={styles.todayBottom}>
           <ThemedText style={styles.todayTitle} numberOfLines={2}>
@@ -42,7 +46,7 @@ function TodayCard({ challenge, bonus }: { challenge: ChallengeSummary; bonus: n
             {challenge.distanceM !== null && (
               <View style={styles.inline}>
                 <Icon name="location-outline" size={13} color="#FFFFFF" />
-                <ThemedText style={styles.todayMetaText}>{formatDistance(challenge.distanceM)} away</ThemedText>
+                <ThemedText style={styles.todayMetaText}>{t('common.away', { distance: formatDistance(challenge.distanceM) })}</ThemedText>
               </View>
             )}
           </View>
@@ -50,13 +54,14 @@ function TodayCard({ challenge, bonus }: { challenge: ChallengeSummary; bonus: n
       </Photo>
       </PressableScale>
       <View style={styles.todayFooter}>
-        <Button label="Start Challenge" onPress={open} style={styles.startButton} />
+        <Button label={t('home.startChallenge')} onPress={open} style={styles.startButton} />
       </View>
     </View>
   );
 }
 
 export default function HomeScreen() {
+  const t = useT();
   const location = useLocation();
   const feed = useHomeFeed(location.coords);
   const friends = useFeed('following');
@@ -82,10 +87,13 @@ export default function HomeScreen() {
       {me.streak.current > 0 && (
         <Reveal index={1}>
           <View style={styles.streak}>
-            <ThemedText style={styles.streakText}>🔥 {me.streak.current}-day streak</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Complete a challenge today to keep it
-            </ThemedText>
+            <Glyph name="fire" size={20} color="#D9822B" />
+            <View style={styles.flex}>
+              <ThemedText style={styles.streakText}>{t('home.streak', { count: me.streak.current })}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {t('home.streakHint')}
+              </ThemedText>
+            </View>
           </View>
         </Reveal>
       )}
@@ -98,7 +106,7 @@ export default function HomeScreen() {
 
       {inProgress.length > 0 && (
         <Reveal index={3} style={styles.section}>
-          <SectionHeader title="Continue" subtitle="Challenges you started" />
+          <SectionHeader title={t('home.continue')} subtitle={t('home.continueSub')} />
           {inProgress.map((challenge) => (
             <ChallengeCard key={challenge.id} challenge={challenge} />
           ))}
@@ -107,27 +115,27 @@ export default function HomeScreen() {
 
       <Reveal index={4} style={styles.section}>
         <SectionHeader
-          title="Near You"
+          title={t('home.nearYou')}
           subtitle={
             location.permission === 'granted'
-              ? `${nearby.count} ${nearby.count === 1 ? 'challenge' : 'challenges'} within ${nearby.radiusKm} km`
-              : 'Turn on location to see what is close'
+              ? t('home.nearCount', { count: nearby.count, km: nearby.radiusKm })
+              : t('home.nearOff')
           }
           onPress={() => router.navigate('/explore')}
         />
         {location.permission !== 'granted' ? (
           <Card>
             <ThemedText type="small" themeColor="textSecondary">
-              We use your location to show nearby challenges and verify visits. It is never shown to others.
+              {t('home.locationWhy')}
             </ThemedText>
-            <Button label="Use my location" icon="locate" variant="secondary" onPress={location.request} />
+            <Button label={t('home.useLocation')} icon="locate" variant="secondary" onPress={location.request} />
           </Card>
         ) : nearby.count === 0 ? (
           <Card>
             <ThemedText type="small" themeColor="textSecondary">
-              Nothing within {nearby.radiusKm} km yet. The map shows the closest ones.
+              {t('home.nothingNear', { km: nearby.radiusKm })}
             </ThemedText>
-            <Button label="Open map" icon="map-outline" variant="secondary" onPress={() => router.navigate('/explore')} />
+            <Button label={t('home.openMap')} icon="map-outline" variant="secondary" onPress={() => router.navigate('/explore')} />
           </Card>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel} style={styles.bleed}>
@@ -140,15 +148,15 @@ export default function HomeScreen() {
 
       {weekly && (
         <Reveal index={5} style={styles.section}>
-          <SectionHeader title="This week" onPress={() => router.push('/goals')} />
+          <SectionHeader title={t('home.thisWeek')} onPress={() => router.push('/goals')} />
           <GoalCard goal={weekly} onPress={() => router.push('/goals')} />
         </Reveal>
       )}
 
       <Reveal index={6} style={styles.section}>
-        <SectionHeader title="Recommended for you" onPress={() => router.push('/browse')} />
+        <SectionHeader title={t('home.recommended')} onPress={() => router.push('/browse')} />
         {recommended.length === 0 ? (
-          <EmptyState emoji="🏆" title="You've done everything here!" body="New challenges are added regularly." />
+          <EmptyState icon="trophy-outline" title={t('home.allDone')} body={t('home.allDoneBody')} />
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel} style={styles.bleed}>
             {recommended.map((challenge) => (
@@ -159,15 +167,15 @@ export default function HomeScreen() {
       </Reveal>
 
       <Reveal index={7} style={styles.section}>
-        <SectionHeader title="Friends are exploring" onPress={() => router.push('/leaderboard')} />
+        <SectionHeader title={t('home.friendsExploring')} onPress={() => router.push('/leaderboard')} />
         {friends.data && friends.data.length > 0 ? (
           friends.data.slice(0, 2).map((post) => <PostCard key={post.id} post={post} />)
         ) : (
           <Card>
             <ThemedText type="small" themeColor="textSecondary">
-              Follow other explorers to see what they complete.
+              {t('home.followHint')}
             </ThemedText>
-            <Button label="Find people" icon="person-add-outline" variant="secondary" onPress={() => router.push('/people')} />
+            <Button label={t('home.findPeople')} icon="person-add-outline" variant="secondary" onPress={() => router.push('/people')} />
           </Card>
         )}
       </Reveal>
@@ -178,6 +186,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   section: {
     gap: Spacing.three,
+  },
+  flex: {
+    flex: 1,
   },
   bleed: {
     marginHorizontal: -(Spacing.three + 4),

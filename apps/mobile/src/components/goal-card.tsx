@@ -8,18 +8,21 @@ import { Icon } from '@/components/ui/icon';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Brand, Spacing } from '@/constants/theme';
 import { timeLeft } from '@/lib/format';
+import { goalGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import type { Goal } from '@/lib/types';
 
 export function GoalCard({ goal, onPress }: { goal: Goal; onPress?: () => void }) {
+  const t = useT();
   const done = goal.completedAt !== null;
   return (
     <Card onPress={onPress} style={[styles.card, done && styles.done]}>
       <View style={styles.row}>
         <View style={styles.flex}>
-          <ThemedText style={styles.kicker}>{goal.period === 'weekly' ? 'Weekly Challenge' : 'Monthly Challenge'}</ThemedText>
+          <ThemedText style={styles.kicker}>{goal.period === 'weekly' ? t('goals.weeklyChallenge') : t('goals.monthlyChallenge')}</ThemedText>
           <ThemedText style={styles.title}>{goal.description || goal.title}</ThemedText>
         </View>
-        <HexBadge icon={goal.icon} size={44} locked={!done && goal.current === 0} />
+        <HexBadge glyph={goalGlyph(goal.slug)} size={44} locked={!done && goal.current === 0} />
       </View>
       <View style={styles.row}>
         <View style={styles.flex}>
@@ -34,7 +37,7 @@ export function GoalCard({ goal, onPress }: { goal: Goal; onPress?: () => void }
         <View style={styles.status}>
           <Icon name={done ? 'checkmark-circle' : 'time-outline'} size={14} color={done ? Brand.success : '#6B7A72'} />
           <ThemedText type="small" style={{ color: done ? Brand.success : '#6B7A72' }}>
-            {done ? 'Completed' : timeLeft(goal.endsAt)}
+            {done ? t('common.completed') : timeLeft(goal.endsAt)}
           </ThemedText>
         </View>
       </View>

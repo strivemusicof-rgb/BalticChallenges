@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { FadeInRight, FadeOutLeft, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,7 +11,10 @@ import { IconButton } from '@/components/ui/icon-button';
 import { PressableScale } from '@/components/ui/pressable-scale';
 import { Brand, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { api } from '@/lib/api';
-import { COUNTRY_LABELS, DIFFICULTY_LABELS, INTEREST_OPTIONS } from '@/lib/format';
+import { Flag } from '@/components/ui/glyph';
+import { Segmented } from '@/components/ui/segmented';
+import { COUNTRIES, DIFFICULTIES, DIFFICULTY_COLORS, INTEREST_IDS } from '@/lib/format';
+import { currentLanguage, LANGUAGES, setLanguage, useT } from '@/lib/i18n';
 import { openLegal, TERMS_VERSION } from '@/lib/legal';
 import type { Country, Difficulty, User } from '@/lib/types';
 import { useAuth } from '@/providers/auth-provider';
@@ -33,19 +36,13 @@ const INTEREST_ICONS: Record<string, { icon: IconName; color: string }> = {
   'road-trips': { icon: 'car-sport', color: '#1E5E46' },
 };
 
-const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  casual: '#2E9E62',
-  explorer: '#2F7BD8',
-  adventurer: '#7B5BD6',
-  extreme: '#D6493F',
-};
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 }
 
 function Dot({ active, done }: { active: boolean; done: boolean }) {
-  const animated = useAnimatedStyle(() => ({ width: withSpring(active ? 22 : 8, { damping: 16 }) }));
+  const animated = useAnimatedStyle(() => ({ width: withTiming(active ? 22 : 8, { duration: 220 }) }));
   return <Animated.View style={[styles.dot, { backgroundColor: active || done ? Brand.sea : '#D5DED9' }, animated]} />;
 }
 
@@ -53,14 +50,14 @@ function Tile({
   label,
   icon,
   color,
-  emoji,
+  country,
   selected,
   onPress,
 }: {
   label: string;
   icon?: IconName;
   color?: string;
-  emoji?: string;
+  country?: Country;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -71,7 +68,7 @@ function Tile({
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
       style={[styles.tile, selected && styles.tileSelected]}>
-      {icon ? <Icon name={icon} size={26} color={color ?? Brand.sea} /> : <ThemedText style={styles.tileEmoji}>{emoji}</ThemedText>}
+      {icon ? <Icon name={icon} size={26} color={color ?? Brand.sea} /> : country ? <Flag country={country} width={34} /> : null}
       <ThemedText style={styles.tileLabel} numberOfLines={1}>
         {label}
       </ThemedText>
@@ -85,6 +82,7 @@ function Tile({
 }
 
 export default function OnboardingScreen() {
+  const t = useT();
   const { setUser, state } = useAuth();
   const [step, setStep] = useState(0);
   const [interests, setInterests] = useState<string[]>([]);
@@ -105,7 +103,7 @@ export default function OnboardingScreen() {
       });
       setUser(user);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not save your preferences');
+      setError(caught instanceof Error ? caught.message : t('onboarding.saveFailed'));
       setSaving(false);
     }
   }
@@ -118,7 +116,7 @@ export default function OnboardingScreen() {
       <View style={styles.container}>
         <View style={styles.top}>
           <View style={styles.back}>
-            {step > 0 && <IconButton icon="chevron-back" label="Back" onPress={() => setStep(step - 1)} background="#F0F4F1" />}
+            {step > 0 && <IconButton icon="chevron-back" label={t('common.back')} onPress={() => setStep(step - 1)} background="#F0F4F1" />}
           </View>
           <View style={styles.dots}>
             {Array.from({ length: STEPS }, (_, index) => (
@@ -128,47 +126,52 @@ export default function OnboardingScreen() {
           <View style={styles.back} />
         </View>
 
-        <Animated.View key={step} entering={FadeInRight.duration(260)} exiting={FadeOutLeft.duration(160)} style={styles.body}>
+        <Animated.View key={step} entering={FadeIn.duration(220)} exiting={FadeOut.duration(120)} style={styles.body}>
           <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
             {step === 0 && (
               <View style={styles.centered}>
                 <View style={styles.heroIcon}>
                   <Icon name="compass" size={44} color="#FFFFFF" />
                 </View>
-                <ThemedText style={styles.title}>Welcome, {name}!</ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  Explore Latvia, Lithuania & Estonia. Find a challenge, go there, complete it and level up.
-                </ThemedText>
+                <ThemedText style={styles.title}>{t('onboarding.welcome', { name })}</ThemedText>
+                <ThemedText style={[styles.subtitle, styles.center]}>{t('onboarding.intro')}</ThemedText>
+                <View style={styles.languageBlock}>
+                  <ThemedText style={styles.fieldLabel}>{t('onboarding.language')}</ThemedText>
+                  <Segmented
+                    options={LANGUAGES.map((item) => ({ id: item.code, label: item.label }))}
+                    value={currentLanguage()}
+                    onChange={(next) => void setLanguage(next)}
+                  />
+                </View>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-                  By continuing you agree to the{' '}
+                  {t('onboarding.agreePrefix')}{' '}
                   <ThemedText type="small" style={styles.link} onPress={() => openLegal('terms')}>
-                    Terms of Use
+                    {t('onboarding.terms')}
                   </ThemedText>{' '}
-                  and{' '}
+                  {t('onboarding.and')}{' '}
                   <ThemedText type="small" style={styles.link} onPress={() => openLegal('privacy')}>
-                    Privacy Policy
+                    {t('onboarding.privacy')}
                   </ThemedText>
-                  . Stay safe: respect closures, private land and nature rules.
+                  . {t('onboarding.safety')}
                 </ThemedText>
               </View>
             )}
 
             {step === 1 && (
               <>
-                <ThemedText style={styles.title}>What are you interested in?</ThemedText>
-                <ThemedText style={styles.subtitle}>Choose a few topics to get personalized challenges and recommendations.</ThemedText>
+                <ThemedText style={styles.title}>{t('onboarding.interestsTitle')}</ThemedText>
+                <ThemedText style={styles.subtitle}>{t('onboarding.interestsSubtitle')}</ThemedText>
                 <View style={styles.grid}>
-                  {INTEREST_OPTIONS.map((interest) => {
-                    const meta = INTEREST_ICONS[interest.id];
+                  {INTEREST_IDS.map((interest) => {
+                    const meta = INTEREST_ICONS[interest];
                     return (
                       <Tile
-                        key={interest.id}
-                        label={interest.label.replace(/^\S+\s/, '')}
+                        key={interest}
+                        label={t(`interests.${interest}`)}
                         icon={meta?.icon}
                         color={meta?.color}
-                        emoji={interest.label.split(' ')[0]}
-                        selected={interests.includes(interest.id)}
-                        onPress={() => setInterests(toggle(interests, interest.id))}
+                        selected={interests.includes(interest)}
+                        onPress={() => setInterests(toggle(interests, interest))}
                       />
                     );
                   })}
@@ -178,10 +181,10 @@ export default function OnboardingScreen() {
 
             {step === 2 && (
               <>
-                <ThemedText style={styles.title}>How adventurous are you?</ThemedText>
-                <ThemedText style={styles.subtitle}>We match challenge difficulty to you. You can change this later.</ThemedText>
+                <ThemedText style={styles.title}>{t('onboarding.difficultyTitle')}</ThemedText>
+                <ThemedText style={styles.subtitle}>{t('onboarding.difficultySubtitle')}</ThemedText>
                 <View style={styles.options}>
-                  {(Object.keys(DIFFICULTY_LABELS) as Difficulty[]).map((level) => {
+                  {DIFFICULTIES.map((level) => {
                     const selected = difficulty === level;
                     return (
                       <PressableScale
@@ -192,9 +195,9 @@ export default function OnboardingScreen() {
                         style={[styles.option, selected && styles.optionSelected]}>
                         <View style={[styles.levelDot, { backgroundColor: DIFFICULTY_COLORS[level] }]} />
                         <View style={styles.flex}>
-                          <ThemedText style={styles.optionTitle}>{DIFFICULTY_LABELS[level].name}</ThemedText>
+                          <ThemedText style={styles.optionTitle}>{t(`difficulty.${level}.name`)}</ThemedText>
                           <ThemedText type="small" themeColor="textSecondary">
-                            {DIFFICULTY_LABELS[level].blurb}
+                            {t(`difficulty.${level}.blurb`)}
                           </ThemedText>
                         </View>
                         <Icon name={selected ? 'radio-button-on' : 'radio-button-off'} size={22} color={selected ? Brand.sea : '#B4C0BA'} />
@@ -207,14 +210,14 @@ export default function OnboardingScreen() {
 
             {step === 3 && (
               <>
-                <ThemedText style={styles.title}>Where do you want to explore?</ThemedText>
-                <ThemedText style={styles.subtitle}>Choose one or more countries.</ThemedText>
+                <ThemedText style={styles.title}>{t('onboarding.countriesTitle')}</ThemedText>
+                <ThemedText style={styles.subtitle}>{t('onboarding.countriesSubtitle')}</ThemedText>
                 <View style={styles.grid}>
-                  {(Object.keys(COUNTRY_LABELS) as Country[]).map((country) => (
+                  {COUNTRIES.map((country) => (
                     <Tile
                       key={country}
-                      label={COUNTRY_LABELS[country].name}
-                      emoji={COUNTRY_LABELS[country].flag}
+                      label={t(`countries.${country}`)}
+                      country={country}
                       selected={countries.includes(country)}
                       onPress={() => setCountries(toggle(countries, country))}
                     />
@@ -228,11 +231,8 @@ export default function OnboardingScreen() {
                 <View style={styles.heroIcon}>
                   <Icon name="location" size={44} color="#FFFFFF" />
                 </View>
-                <ThemedText style={styles.title}>Use your location?</ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  We use your location to show nearby challenges and to verify location-based challenges. Your exact location is
-                  never shown to other people.
-                </ThemedText>
+                <ThemedText style={styles.title}>{t('onboarding.locationTitle')}</ThemedText>
+                <ThemedText style={[styles.subtitle, styles.center]}>{t('onboarding.locationBody')}</ThemedText>
               </View>
             )}
           </ScrollView>
@@ -243,14 +243,14 @@ export default function OnboardingScreen() {
         <View style={styles.actions}>
           {step < 4 ? (
             <Button
-              label={step === 0 ? 'Agree & continue' : 'Next'}
+              label={step === 0 ? t('onboarding.agreeContinue') : t('onboarding.next')}
               disabled={step === 3 && countries.length === 0}
               onPress={next}
             />
           ) : (
             <>
-              <Button label="Allow location" icon="navigate" loading={saving} onPress={() => finish(true)} />
-              <Button variant="ghost" label="Not now" disabled={saving} onPress={() => finish(false)} />
+              <Button label={t('onboarding.allowLocation')} icon="navigate" loading={saving} onPress={() => finish(true)} />
+              <Button variant="ghost" label={t('onboarding.notNow')} disabled={saving} onPress={() => finish(false)} />
             </>
           )}
         </View>
@@ -329,6 +329,17 @@ const styles = StyleSheet.create({
   center: {
     textAlign: 'center',
   },
+  languageBlock: {
+    alignSelf: 'stretch',
+    gap: Spacing.two,
+    marginVertical: Spacing.two,
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#5E6D65',
+    textAlign: 'center',
+  },
   link: {
     color: Brand.sea,
     fontWeight: 700,
@@ -355,10 +366,6 @@ const styles = StyleSheet.create({
   tileSelected: {
     borderColor: Brand.sea,
     backgroundColor: '#E4F1EA',
-  },
-  tileEmoji: {
-    fontSize: 30,
-    lineHeight: 36,
   },
   tileLabel: {
     fontSize: 13,

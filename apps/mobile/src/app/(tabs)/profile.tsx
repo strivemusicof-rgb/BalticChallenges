@@ -9,6 +9,7 @@ import { ErrorState, LoadingState, SectionHeader } from '@/components/screen';
 import { StatRow } from '@/components/stat-row';
 import { ThemedText } from '@/components/themed-text';
 import { Card } from '@/components/ui/card';
+import { Glyph , Flag } from '@/components/ui/glyph';
 import { HexBadge } from '@/components/ui/hex-badge';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -17,7 +18,10 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { Brand, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
 import { useAchievements, useProfile } from '@/hooks/queries';
 import { BRAND_IMAGES } from '@/lib/brand-images';
-import { COUNTRY_LABELS } from '@/lib/format';
+
+import { formatNumber, levelTitle } from '@/lib/format';
+import { achievementGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 
 function LinkRow({ icon, label, detail, onPress }: { icon: IconName; label: string; detail?: string; onPress: () => void }) {
   return (
@@ -37,6 +41,7 @@ function LinkRow({ icon, label, detail, onPress }: { icon: IconName; label: stri
 }
 
 export default function ProfileScreen() {
+  const t = useT();
   const insets = useSafeAreaInsets();
   const profile = useProfile();
   const achievements = useAchievements();
@@ -52,18 +57,18 @@ export default function ProfileScreen() {
       <View style={styles.cover}>
         <Photo uri={BRAND_IMAGES.profileCover.uri} shade style={StyleSheet.absoluteFill} />
         <View style={[styles.coverActions, { top: insets.top + Spacing.two }]}>
-          <IconButton icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
+          <IconButton icon="settings-outline" label={t('profile.settings')} onPress={() => router.push('/settings')} />
         </View>
       </View>
 
       <View style={styles.body}>
         <Reveal style={styles.header}>
-          <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Edit profile" style={styles.avatarRing}>
+          <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel={t('profile.editProfile')} style={styles.avatarRing}>
             <Avatar name={user.displayName} url={user.avatarUrl} size={96} />
           </Pressable>
           <ThemedText style={styles.name}>{user.displayName}</ThemedText>
           <ThemedText style={styles.level}>
-            {user.level.title} LVL {user.level.level}
+            {t('common.levelTitle', { title: levelTitle(user.level.title), level: user.level.level })}
           </ThemedText>
           {user.bio.length > 0 && (
             <ThemedText type="small" themeColor="textSecondary" style={styles.bio}>
@@ -75,22 +80,28 @@ export default function ProfileScreen() {
               <ProgressBar progress={user.level.progress} height={8} />
             </View>
             <ThemedText type="small" themeColor="textSecondary">
-              {user.level.xp.toLocaleString()}
-              {user.level.nextLevelXp ? ` / ${user.level.nextLevelXp.toLocaleString()}` : ''} XP
+              {user.level.nextLevelXp
+                ? t('common.xpProgress', { xp: formatNumber(user.level.xp), next: formatNumber(user.level.nextLevelXp) })
+                : t('common.xpTotal', { xp: formatNumber(user.level.xp) })}
             </ThemedText>
           </View>
           <View style={styles.follows}>
             <Pressable onPress={() => router.push({ pathname: '/follows', params: { id: user.id, direction: 'followers' } })}>
               <ThemedText type="small" themeColor="textSecondary">
-                <ThemedText type="smallBold">{stats.followers}</ThemedText> followers
+                <ThemedText type="smallBold">{stats.followers}</ThemedText> {t('profile.followers')}
               </ThemedText>
             </Pressable>
             <Pressable onPress={() => router.push({ pathname: '/follows', params: { id: user.id, direction: 'following' } })}>
               <ThemedText type="small" themeColor="textSecondary">
-                <ThemedText type="smallBold">{stats.following}</ThemedText> following
+                <ThemedText type="smallBold">{stats.following}</ThemedText> {t('profile.following')}
               </ThemedText>
             </Pressable>
-            {user.streak.current > 0 && <ThemedText type="smallBold">🔥 {user.streak.current} days</ThemedText>}
+            {user.streak.current > 0 && (
+              <View style={styles.streak}>
+                <Glyph name="fire" size={16} color="#D9822B" />
+                <ThemedText type="smallBold">{t('profile.streakDays', { count: user.streak.current })}</ThemedText>
+              </View>
+            )}
           </View>
         </Reveal>
 
@@ -98,9 +109,9 @@ export default function ProfileScreen() {
           <View style={styles.countries}>
             {stats.countryProgress.map((country) => (
               <View key={country.country} style={styles.country}>
-                <ThemedText style={styles.flag}>{COUNTRY_LABELS[country.country].flag}</ThemedText>
+                <Flag country={country.country} width={24} />
                 <View>
-                  <ThemedText type="smallBold">{COUNTRY_LABELS[country.country].name}</ThemedText>
+                  <ThemedText type="smallBold">{t(`countries.${country.country}`)}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
                     {country.percent}%
                   </ThemedText>
@@ -114,16 +125,16 @@ export default function ProfileScreen() {
           <Card style={styles.statsCard}>
             <StatRow
               items={[
-                { value: stats.challengesCompleted, label: 'challenges' },
-                { value: stats.placesVisited, label: 'places' },
-                { value: stats.countriesVisited, label: 'countries' },
+                { value: stats.challengesCompleted, label: t('profile.challenges') },
+                { value: stats.placesVisited, label: t('profile.places') },
+                { value: stats.countriesVisited, label: t('profile.countries') },
               ]}
             />
             <View style={styles.statsDivider} />
             <StatRow
               items={[
-                { value: `${stats.kmExplored} km`, label: 'explored' },
-                { value: stats.photos, label: 'photos' },
+                { value: t('profile.km', { km: formatNumber(stats.kmExplored) }), label: t('profile.explored') },
+                { value: stats.photos, label: t('profile.photos') },
               ]}
             />
           </Card>
@@ -131,11 +142,11 @@ export default function ProfileScreen() {
 
         <Reveal index={3} style={styles.section}>
           <SectionHeader
-            title="Badges"
+            title={t('collections.badges')}
             action={
               <Pressable onPress={() => router.push('/achievements')} hitSlop={8} accessibilityRole="button">
                 <ThemedText type="smallBold" style={{ color: Brand.sea }}>
-                  View all
+                  {t('common.viewAll')}
                 </ThemedText>
               </Pressable>
             }
@@ -143,7 +154,7 @@ export default function ProfileScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badges} style={styles.bleed}>
             {badges.slice(0, 12).map((badge) => (
               <PressableScale key={badge.id} onPress={() => router.push('/achievements')} style={styles.badge} accessibilityLabel={badge.title}>
-                <HexBadge icon={badge.icon} size={58} locked={badge.unlockedAt === null} />
+                <HexBadge glyph={achievementGlyph(badge.id)} size={58} locked={badge.unlockedAt === null} />
                 <ThemedText style={styles.badgeLabel} numberOfLines={2}>
                   {badge.title}
                 </ThemedText>
@@ -153,13 +164,16 @@ export default function ProfileScreen() {
         </Reveal>
 
         <Reveal index={4} style={styles.links}>
-          <LinkRow icon="trophy-outline" label="Leaderboard" onPress={() => router.push('/leaderboard')} />
-          <LinkRow icon="time-outline" label="History" onPress={() => router.push('/history')} />
-          <LinkRow icon="bookmark-outline" label="Saved posts" onPress={() => router.push('/saved')} />
-          <LinkRow icon="diamond-outline" label="Baltic Challenges Pro" detail="€4.99/mo" onPress={() => router.push('/pro')} />
-          <LinkRow icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
+          {user.role === 'admin' && (
+            <LinkRow icon="shield-checkmark-outline" label={t('profile.admin')} onPress={() => router.push('/admin')} />
+          )}
+          <LinkRow icon="trophy-outline" label={t('profile.leaderboard')} onPress={() => router.push('/leaderboard')} />
+          <LinkRow icon="time-outline" label={t('profile.history')} onPress={() => router.push('/history')} />
+          <LinkRow icon="bookmark-outline" label={t('profile.saved')} onPress={() => router.push('/saved')} />
+          <LinkRow icon="diamond-outline" label={t('profile.pro')} detail={t('profile.proPrice')} onPress={() => router.push('/pro')} />
+          <LinkRow icon="settings-outline" label={t('profile.settings')} onPress={() => router.push('/settings')} />
         </Reveal>
-        <ThemedText style={styles.credit}>Cover photo: {BRAND_IMAGES.profileCover.credit}</ThemedText>
+        <ThemedText style={styles.credit}>{t('profile.coverCredit', { credit: BRAND_IMAGES.profileCover.credit })}</ThemedText>
       </View>
     </ScrollView>
   );
@@ -245,9 +259,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
-  flag: {
-    fontSize: 24,
-    lineHeight: 30,
+  streak: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   statsCard: {
     gap: 0,

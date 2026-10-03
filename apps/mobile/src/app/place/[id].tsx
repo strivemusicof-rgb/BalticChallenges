@@ -15,9 +15,12 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { Tag } from '@/components/ui/tag';
 import { Brand, Radius, Spacing } from '@/constants/theme';
 import { usePlace } from '@/hooks/social-queries';
-import { COUNTRY_LABELS, DIFFICULTY_LABELS } from '@/lib/format';
+import { Flag, Glyph } from '@/components/ui/glyph';
+import { categoryGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 
 export default function PlaceScreen() {
+  const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const place = usePlace(id);
 
@@ -31,19 +34,19 @@ export default function PlaceScreen() {
   return (
     <HeroScroll
       image={info.images[0]}
-      fallback={challenges[0]?.icon ?? '📍'}
+      fallback={categoryGlyph(challenges[0]?.categoryId)}
       credit={info.imageCredit}
       refreshing={place.isRefetching}
       onRefresh={() => void place.refetch()}
       actions={
         info.officialUrl ? (
-          <IconButton icon="globe-outline" label="Official website" onPress={() => void WebBrowser.openBrowserAsync(info.officialUrl!)} />
+          <IconButton icon="globe-outline" label={t('place.website')} onPress={() => void WebBrowser.openBrowserAsync(info.officialUrl!)} />
         ) : null
       }
       footer={
         next ? (
           <Button
-            label={next.completed ? 'View challenge' : 'Start Challenge'}
+            label={next.completed ? t('place.viewChallenge') : t('challenge.start')}
             onPress={() => router.push({ pathname: '/challenge/[id]', params: { id: next.id } })}
           />
         ) : null
@@ -53,25 +56,28 @@ export default function PlaceScreen() {
         <View style={styles.location}>
           <Icon name="location-outline" size={15} color="#6B7A72" />
           <ThemedText type="small" themeColor="textSecondary">
-            {[info.city, COUNTRY_LABELS[info.country].name].filter(Boolean).join(', ')}
+            {[info.city, t(`countries.${info.country}`)].filter(Boolean).join(', ')}
           </ThemedText>
         </View>
       </Reveal>
 
       <Reveal index={1} style={styles.tags}>
         {info.region && <Tag label={info.region} tone="blue" />}
-        <Tag label={`${COUNTRY_LABELS[info.country].flag} ${COUNTRY_LABELS[info.country].name}`} />
+        <View style={styles.countryTag}>
+          <Flag country={info.country} width={18} />
+          <ThemedText type="small">{t(`countries.${info.country}`)}</ThemedText>
+        </View>
         <View style={styles.flex} />
-        {totalXp > 0 && <Tag label={`+${totalXp} XP`} icon="star" tone="amber" />}
+        {totalXp > 0 && <Tag label={t('common.xp', { xp: totalXp })} icon="star" tone="amber" />}
       </Reveal>
 
       <Reveal index={2}>
         <StatRow
           items={[
-            { value: info.explorerCount, label: 'explorers' },
-            { value: info.photoCount, label: 'photos' },
-            { value: info.postCount, label: 'posts' },
-            { value: info.challengeCount, label: 'challenges' },
+            { value: info.explorerCount, label: t('place.explorers') },
+            { value: info.photoCount, label: t('place.photos') },
+            { value: info.postCount, label: t('place.posts') },
+            { value: info.challengeCount, label: t('place.challenges') },
           ]}
         />
       </Reveal>
@@ -83,32 +89,36 @@ export default function PlaceScreen() {
       )}
 
       <Reveal index={4} style={styles.section}>
-        <SectionHeader title="Challenges here" />
+        <SectionHeader title={t('place.challengesHere')} />
         {challenges.map((challenge) => (
           <PressableScale
             key={challenge.id}
             onPress={() => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } })}
             style={styles.challengeRow}>
             <View style={[styles.challengeIcon, challenge.completed && styles.challengeIconDone]}>
-              <ThemedText style={styles.challengeEmoji}>{challenge.completed ? '✓' : challenge.icon}</ThemedText>
+              {challenge.completed ? (
+                <Glyph name="check-bold" size={20} color="#FFFFFF" />
+              ) : (
+                <Glyph name={categoryGlyph(challenge.categoryId)} size={20} color={Brand.sea} />
+              )}
             </View>
             <View style={styles.flex}>
               <ThemedText type="smallBold">{challenge.title}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                {DIFFICULTY_LABELS[challenge.difficulty].name}
-                {challenge.completed ? ' · Completed' : ''}
+                {t(`difficulty.${challenge.difficulty}.name`)}
+                {challenge.completed ? ` · ${t('common.completed')}` : ''}
               </ThemedText>
             </View>
-            <ThemedText style={styles.xp}>+{challenge.xpReward} XP</ThemedText>
+            <ThemedText style={styles.xp}>{t('common.xp', { xp: challenge.xpReward })}</ThemedText>
           </PressableScale>
         ))}
       </Reveal>
 
       <Reveal index={5} style={styles.section}>
-        <SectionHeader title="Community photos" />
+        <SectionHeader title={t('place.communityPhotos')} />
         {posts.length === 0 ? (
           <ThemedText type="small" themeColor="textSecondary">
-            No one has shared this place yet. Be the first after you complete a challenge here.
+            {t('place.noPhotos')}
           </ThemedText>
         ) : (
           posts.map((post) => <PostCard key={post.id} post={post} />)
@@ -166,11 +176,14 @@ const styles = StyleSheet.create({
   challengeIconDone: {
     backgroundColor: Brand.success,
   },
-  challengeEmoji: {
-    fontSize: 20,
-    lineHeight: 26,
-    color: '#FFFFFF',
-    fontWeight: 800,
+  countryTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F0F3F1',
+    borderRadius: Radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
   xp: {
     color: Brand.sea,

@@ -6,17 +6,18 @@ import { Avatar } from '@/components/avatar';
 import { PostCard } from '@/components/post-card';
 import { ErrorState, LoadingState, Screen, SectionHeader } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/button';
-import { Radius, Spacing } from '@/constants/theme';
+import { Icon } from '@/components/ui/icon';
+import { PressableScale } from '@/components/ui/pressable-scale';
+import { Brand, Radius, Spacing } from '@/constants/theme';
 import { useAddComment, useComments, useDeleteComment, usePost, useReport } from '@/hooks/social-queries';
-import { useTheme } from '@/hooks/use-theme';
+import { showAlert } from '@/lib/dialog';
 import { timeAgo } from '@/lib/format';
+import { useT } from '@/lib/i18n';
 import { askReportReason, reportReceived } from '@/lib/moderation-actions';
 import type { Comment } from '@/lib/types';
-import { showAlert } from '@/lib/dialog';
 
 export default function PostScreen() {
-  const theme = useTheme();
+  const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const post = usePost(id);
   const comments = useComments(id);
@@ -31,13 +32,11 @@ export default function PostScreen() {
   function commentMenu(comment: Comment) {
     const canDelete = comment.isMine || post.data?.isMine;
     showAlert(comment.author.displayName, undefined, [
-      ...(canDelete
-        ? [{ text: 'Delete comment', style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }]
-        : []),
+      ...(canDelete ? [{ text: t('post.deleteComment'), style: 'destructive' as const, onPress: () => remove.mutate(comment.id) }] : []),
       ...(!comment.isMine
         ? [
             {
-              text: 'Report comment',
+              text: t('post.reportComment'),
               onPress: async () => {
                 const reason = await askReportReason('comment');
                 if (reason) report.mutate({ targetType: 'comment', targetId: comment.id, reason }, { onSuccess: reportReceived });
@@ -45,7 +44,7 @@ export default function PostScreen() {
             },
           ]
         : []),
-      { text: 'Cancel', style: 'cancel' as const },
+      { text: t('common.cancel'), style: 'cancel' as const },
     ]);
   }
 
@@ -54,7 +53,7 @@ export default function PostScreen() {
     if (!body) return;
     add.mutate(body, {
       onSuccess: () => setDraft(''),
-      onError: (error) => showAlert('Could not comment', error.message),
+      onError: (error) => showAlert(t('post.commentFailed'), error.message),
     });
   }
 
@@ -62,43 +61,47 @@ export default function PostScreen() {
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
       <Screen edges={[]} refreshing={comments.isRefetching} onRefresh={() => void comments.refetch()}>
         <PostCard post={post.data} detail />
-        <SectionHeader title={`Comments (${post.data.commentCount})`} />
+        <SectionHeader title={t('post.commentsTitle', { count: post.data.commentCount })} />
         {comments.data?.map((comment) => (
           <Pressable key={comment.id} onLongPress={() => commentMenu(comment)} style={styles.comment}>
             <Pressable onPress={() => router.push({ pathname: '/user/[id]', params: { id: comment.author.id } })}>
-              <Avatar name={comment.author.displayName} url={comment.author.avatarUrl} size={32} />
+              <Avatar name={comment.author.displayName} url={comment.author.avatarUrl} size={34} />
             </Pressable>
-            <View style={[styles.bubble, { backgroundColor: theme.backgroundElement }]}>
-              <ThemedText type="smallBold">
-                {comment.author.displayName}{' '}
-                <ThemedText type="small" themeColor="textSecondary">
-                  {timeAgo(comment.createdAt)}
-                </ThemedText>
-              </ThemedText>
-              <ThemedText>{comment.body}</ThemedText>
+            <View style={styles.bubble}>
+              <View style={styles.bubbleHeader}>
+                <ThemedText type="smallBold">{comment.author.displayName}</ThemedText>
+                <ThemedText style={styles.time}>{timeAgo(comment.createdAt)}</ThemedText>
+              </View>
+              <ThemedText style={styles.body}>{comment.body}</ThemedText>
             </View>
-            <Pressable onPress={() => commentMenu(comment)} hitSlop={10} accessibilityLabel="Comment options">
-              <ThemedText themeColor="textSecondary">⋯</ThemedText>
+            <Pressable onPress={() => commentMenu(comment)} hitSlop={10} accessibilityLabel={t('post.commentOptions')}>
+              <Icon name="ellipsis-horizontal" size={18} color="#9AA7A0" />
             </Pressable>
           </Pressable>
         ))}
         {comments.data?.length === 0 && (
           <ThemedText type="small" themeColor="textSecondary">
-            No comments yet. Say something nice!
+            {t('post.noComments')}
           </ThemedText>
         )}
       </Screen>
-      <View style={[styles.composer, { borderColor: theme.border, backgroundColor: theme.background }]}>
+      <View style={styles.composer}>
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder="Add a comment…"
-          placeholderTextColor={theme.textSecondary}
+          placeholder={t('post.addComment')}
+          placeholderTextColor="#8A9790"
           maxLength={1000}
           multiline
-          style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement }]}
+          style={styles.input}
         />
-        <Button label="Send" disabled={!draft.trim()} loading={add.isPending} onPress={send} />
+        <PressableScale
+          onPress={send}
+          disabled={!draft.trim() || add.isPending}
+          accessibilityLabel={t('post.send')}
+          style={[styles.send, (!draft.trim() || add.isPending) && styles.sendDisabled]}>
+          <Icon name="arrow-up" size={20} color="#FFFFFF" />
+        </PressableScale>
       </View>
     </KeyboardAvoidingView>
   );
@@ -107,33 +110,63 @@ export default function PostScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   comment: {
     flexDirection: 'row',
-    gap: Spacing.two,
+    gap: Spacing.two + 2,
     alignItems: 'flex-start',
   },
   bubble: {
     flex: 1,
     borderRadius: Radius.medium,
-    padding: Spacing.two + 2,
-    gap: Spacing.half,
+    padding: Spacing.two + 4,
+    gap: 2,
+    backgroundColor: '#F4F7F5',
+  },
+  bubbleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  time: {
+    fontSize: 12,
+    color: '#8A9790',
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 21,
   },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: Spacing.two,
-    padding: Spacing.two,
+    padding: Spacing.two + 2,
     paddingBottom: Spacing.four,
     borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E6ECE8',
+    backgroundColor: '#FFFFFF',
   },
   input: {
     flex: 1,
     maxHeight: 120,
     minHeight: 44,
-    borderRadius: Radius.medium,
+    borderRadius: 22,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two + 2,
     fontSize: 16,
+    color: '#15211B',
+    backgroundColor: '#F2F5F3',
+  },
+  send: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Brand.sea,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendDisabled: {
+    opacity: 0.4,
   },
 });

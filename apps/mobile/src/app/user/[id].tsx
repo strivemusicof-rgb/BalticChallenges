@@ -16,10 +16,14 @@ import { Brand, Spacing } from '@/constants/theme';
 import { useBlock, useFollow, usePublicProfile, useReport, useUserPosts } from '@/hooks/social-queries';
 import { BRAND_IMAGES } from '@/lib/brand-images';
 import { showAlert } from '@/lib/dialog';
-import { COUNTRY_LABELS } from '@/lib/format';
+import { Flag } from '@/components/ui/glyph';
+import { formatNumber, levelTitle } from '@/lib/format';
+import { achievementGlyph } from '@/lib/glyphs';
+import { useT } from '@/lib/i18n';
 import { askReportReason, confirmBlock, reportReceived } from '@/lib/moderation-actions';
 
 export default function UserScreen() {
+  const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const profile = usePublicProfile(id);
   const posts = useUserPosts(id);
@@ -35,32 +39,32 @@ export default function UserScreen() {
   function showMenu() {
     showAlert(user.displayName, undefined, [
       {
-        text: 'Report profile',
+        text: t('user.report'),
         onPress: async () => {
           const reason = await askReportReason('profile');
           if (reason) report.mutate({ targetType: 'user', targetId: user.id, reason }, { onSuccess: reportReceived });
         },
       },
       relationship.blockedByMe
-        ? { text: 'Unblock', onPress: () => block.mutate({ id: user.id, block: false }) }
+        ? { text: t('user.unblock'), onPress: () => block.mutate({ id: user.id, block: false }) }
         : {
-            text: 'Block',
+            text: t('user.block'),
             style: 'destructive',
             onPress: async () => {
               if (await confirmBlock(user.displayName)) block.mutate({ id: user.id, block: true });
             },
           },
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
     ]);
   }
 
   const followLabel = relationship.following
     ? relationship.isFriend
-      ? 'Friends'
-      : 'Following'
+      ? t('user.friends')
+      : t('user.following')
     : relationship.followsMe
-      ? 'Follow back'
-      : 'Follow';
+      ? t('user.followBack')
+      : t('user.follow');
 
   return (
     <HeroScroll
@@ -68,7 +72,7 @@ export default function UserScreen() {
       height={200}
       refreshing={profile.isRefetching}
       onRefresh={() => void Promise.all([profile.refetch(), posts.refetch()])}
-      actions={relationship.isMe ? null : <IconButton icon="ellipsis-horizontal" label="Profile options" onPress={showMenu} />}
+      actions={relationship.isMe ? null : <IconButton icon="ellipsis-horizontal" label={t('user.options')} onPress={showMenu} />}
       overlay={
         <View style={styles.avatarWrap}>
           <View style={styles.avatarRing}>
@@ -79,7 +83,7 @@ export default function UserScreen() {
       <Reveal style={styles.header}>
         <ThemedText style={styles.name}>{user.displayName}</ThemedText>
         <ThemedText style={styles.level}>
-          {user.level.title} LVL {user.level.level}
+          {t('common.levelTitle', { title: levelTitle(user.level.title), level: user.level.level })}
         </ThemedText>
         {user.bio.length > 0 && (
           <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
@@ -91,28 +95,28 @@ export default function UserScreen() {
             <ProgressBar progress={user.level.progress} height={8} />
           </View>
           <ThemedText type="small" themeColor="textSecondary">
-            {user.level.xp.toLocaleString()} XP
+            {t('common.xpTotal', { xp: formatNumber(user.level.xp) })}
           </ThemedText>
         </View>
         {stats && (
           <View style={styles.counts}>
             <Pressable onPress={() => router.push({ pathname: '/follows', params: { id: user.id, direction: 'followers' } })}>
               <ThemedText type="small" themeColor="textSecondary">
-                <ThemedText type="smallBold">{stats.followers}</ThemedText> followers
+                <ThemedText type="smallBold">{stats.followers}</ThemedText> {t('profile.followers')}
               </ThemedText>
             </Pressable>
             <Pressable onPress={() => router.push({ pathname: '/follows', params: { id: user.id, direction: 'following' } })}>
               <ThemedText type="small" themeColor="textSecondary">
-                <ThemedText type="smallBold">{stats.following}</ThemedText> following
+                <ThemedText type="smallBold">{stats.following}</ThemedText> {t('profile.following')}
               </ThemedText>
             </Pressable>
           </View>
         )}
         <View style={styles.cta}>
           {relationship.isMe ? (
-            <Button variant="secondary" label="Edit profile" icon="create-outline" onPress={() => router.push('/settings')} />
+            <Button variant="secondary" label={t('profile.editProfile')} icon="create-outline" onPress={() => router.push('/settings')} />
           ) : relationship.blockedByMe ? (
-            <Button variant="secondary" label="Unblock" onPress={() => block.mutate({ id: user.id, block: false })} />
+            <Button variant="secondary" label={t('user.unblock')} onPress={() => block.mutate({ id: user.id, block: false })} />
           ) : (
             <Button
               variant={relationship.following ? 'secondary' : 'primary'}
@@ -127,9 +131,9 @@ export default function UserScreen() {
 
       {!canView ? (
         <EmptyState
-          emoji="🔒"
-          title={user.profileVisibility === 'friends' ? 'Friends only' : 'Private profile'}
-          body={user.profileVisibility === 'friends' ? 'Follow each other to see adventures and badges.' : undefined}
+          icon="lock-outline"
+          title={user.profileVisibility === 'friends' ? t('user.friendsOnly') : t('user.private')}
+          body={user.profileVisibility === 'friends' ? t('user.friendsOnlyBody') : undefined}
         />
       ) : (
         <>
@@ -138,27 +142,27 @@ export default function UserScreen() {
               <View style={styles.countries}>
                 {stats.countryProgress.map((country) => (
                   <View key={country.country} style={styles.country}>
-                    <ThemedText style={styles.flag}>{COUNTRY_LABELS[country.country].flag}</ThemedText>
+                    <Flag country={country.country} width={22} />
                     <ThemedText type="smallBold">{country.percent}%</ThemedText>
                   </View>
                 ))}
               </View>
               <StatRow
                 items={[
-                  { value: stats.challengesCompleted, label: 'challenges' },
-                  { value: stats.placesVisited, label: 'places' },
-                  { value: stats.achievementsUnlocked, label: 'badges' },
+                  { value: stats.challengesCompleted, label: t('profile.challenges') },
+                  { value: stats.placesVisited, label: t('profile.places') },
+                  { value: stats.achievementsUnlocked, label: t('profile.badges') },
                 ]}
               />
             </Reveal>
           )}
           {badges.length > 0 && (
             <Reveal index={2} style={styles.section}>
-              <SectionHeader title="Badges" />
+              <SectionHeader title={t('collections.badges')} />
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badges} style={styles.bleed}>
                 {badges.map((badge) => (
                   <View key={badge.id} style={styles.badge} accessibilityLabel={badge.title}>
-                    <HexBadge icon={badge.icon} size={54} />
+                    <HexBadge glyph={achievementGlyph(badge.id)} size={54} />
                     <ThemedText style={styles.badgeLabel} numberOfLines={2}>
                       {badge.title}
                     </ThemedText>
@@ -167,11 +171,11 @@ export default function UserScreen() {
               </ScrollView>
             </Reveal>
           )}
-          <SectionHeader title="Adventures" />
-          {posts.data?.length === 0 && <EmptyState emoji="🗺️" title="No posts yet" />}
+          <SectionHeader title={t('user.adventures')} />
+          {posts.data?.length === 0 && <EmptyState icon="map-outline" title={t('user.noPosts')} />}
           {posts.data?.map((post) => <PostCard key={post.id} post={post} />)}
           {posts.hasNextPage && (
-            <Button variant="ghost" label="Load more" loading={posts.isFetchingNextPage} onPress={() => void posts.fetchNextPage()} />
+            <Button variant="ghost" label={t('user.loadMore')} loading={posts.isFetchingNextPage} onPress={() => void posts.fetchNextPage()} />
           )}
         </>
       )}
@@ -237,10 +241,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-  },
-  flag: {
-    fontSize: 22,
-    lineHeight: 28,
   },
   section: {
     gap: Spacing.three,

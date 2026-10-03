@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { notFound } from '../errors.js';
+import { tr, type I18n } from '../i18n.js';
 import { parse, type RoutePlugin } from '../http.js';
 import { findChallenges } from '../services/challenges.js';
 
@@ -19,14 +20,15 @@ interface CollectionRow {
   completed: number;
   completed_at: Date | null;
   image_url: string | null;
+  i18n: I18n;
 }
 
 function toCollection(row: CollectionRow) {
   return {
     id: row.id,
     slug: row.slug,
-    title: row.title,
-    description: row.description,
+    title: tr(row.i18n, 'title', row.title),
+    description: tr(row.i18n, 'description', row.description),
     icon: row.icon,
     kind: row.kind,
     country: row.country,
@@ -41,7 +43,7 @@ function toCollection(row: CollectionRow) {
 }
 
 const COLLECTION_SELECT = `
-  SELECT c.id, c.slug, c.title, c.description, c.icon, c.kind, c.country::text AS country, c.xp_reward, c.is_pro,
+  SELECT c.id, c.slug, c.title, c.description, c.i18n, c.icon, c.kind, c.country::text AS country, c.xp_reward, c.is_pro,
          c.ends_at,
          count(ci.challenge_id) AS total,
          count(a.id) AS completed,

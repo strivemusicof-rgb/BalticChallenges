@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Brand, Radius } from '@/constants/theme';
 
-const SPRING = { damping: 20, stiffness: 260, mass: 0.7 };
+const SLIDE = { duration: 220, easing: Easing.out(Easing.cubic) };
 
 interface SegmentedProps<T extends string> {
   options: readonly { id: T; label: string }[];
@@ -23,7 +23,7 @@ export function Segmented<T extends string>({ options, value, onChange, variant 
   const offset = useSharedValue(0);
 
   useEffect(() => {
-    offset.set(withSpring(index * segment, SPRING));
+    offset.set(withTiming(index * segment, SLIDE));
   }, [index, segment, offset]);
 
   const indicator = useAnimatedStyle(() => ({ transform: [{ translateX: offset.get() }] }));
