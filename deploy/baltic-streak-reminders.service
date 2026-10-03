@@ -1,0 +1,17 @@
+[Unit]
+Description=Baltic Challenges progress reminder pushes (streak, weekly goal, level)
+After=network-online.target postgresql.service
+
+[Service]
+Type=oneshot
+User=baltic
+Group=baltic
+WorkingDirectory=/opt/baltic-challenges/current
+EnvironmentFile=/etc/baltic-challenges/api.env
+ExecStart=/usr/bin/node dist/scripts/streak-reminders.js
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true

@@ -1,0 +1,30 @@
+[Unit]
+Description=Baltic Challenges API
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=baltic
+Group=baltic
+WorkingDirectory=/opt/baltic-challenges/current
+EnvironmentFile=/etc/baltic-challenges/api.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=3
+TimeoutStopSec=15
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+ReadWritePaths=/var/lib/baltic-challenges/uploads
+
+[Install]
+WantedBy=multi-user.target

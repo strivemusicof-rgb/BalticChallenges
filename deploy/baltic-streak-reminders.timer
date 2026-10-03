@@ -1,0 +1,9 @@
+[Unit]
+Description=Evening streak reminders (18:30 Riga time)
+
+[Timer]
+OnCalendar=*-*-* 18:30:00 Europe/Riga
+Persistent=false
+
+[Install]
+WantedBy=timers.target

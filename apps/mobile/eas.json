@@ -1,0 +1,48 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://vps-1a18ee51.vps.ovh.net",
+        "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://vps-1a18ee51.vps.ovh.net",
+        "EAS_BUILD_NO_EXPO_GO_WARNING": "true"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6818814848",
+        "appleTeamId": "EYFA6K2Q5Y"
+      }
+    },
+    "local": {
+      "ios": {
+        "ascAppId": "6818814848",
+        "appleTeamId": "EYFA6K2Q5Y",
+        "ascApiKeyPath": "C:/Users/Julij/Downloads/AuthKey_2K43R46V6D.p8",
+        "ascApiKeyId": "2K43R46V6D",
+        "ascApiKeyIssuerId": "4cf4861c-0d3e-4548-a7f8-30c80d046f83"
+      }
+    },
+    "ci": {
+      "ios": {
+        "ascAppId": "6818814848",
+        "appleTeamId": "EYFA6K2Q5Y",
+        "ascApiKeyPath": "./asc-api-key.p8",
+        "ascApiKeyId": "2K43R46V6D",
+        "ascApiKeyIssuerId": "4cf4861c-0d3e-4548-a7f8-30c80d046f83"
+      }
+    }
+  }
+}

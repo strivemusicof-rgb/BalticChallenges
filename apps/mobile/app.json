@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "Baltic Challenges",
+    "slug": "baltic-challenges",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "balticchallenges",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.balticchallenges.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.balticchallenges.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B5C7A",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B5C7A",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Baltic Challenges uses your location to show nearby challenges and verify location-based challenges. Your exact location is never shown to other people."
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Baltic Challenges lets you choose photos to share your adventures and set a profile picture. Location data is removed from shared photos.",
+          "cameraPermission": "Baltic Challenges uses the camera so you can photograph your adventures."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0B5C7A"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "baseUrl": "/app",
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "06a78cd3-16bc-438f-ad7a-bcab5d63ecb7"
+      }
+    }
+  }
+}

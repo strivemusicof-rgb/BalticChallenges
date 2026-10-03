@@ -1,0 +1,46 @@
+name: iOS → TestFlight
+
+# Builds the iOS app on EAS (Expo's cloud Macs) and submits it to TestFlight.
+# Runs on every push to main that touches the mobile app, or manually from the Actions tab.
+on:
+  push:
+    branches: [main]
+    paths: ['apps/mobile/**']
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - run: npx tsc --noEmit
+
+      # The App Store Connect API key (.p8 contents) lives in the ASC_API_KEY_P8 repository secret.
+      - name: Write App Store Connect API key
+        run: printf '%s' "$ASC_API_KEY_P8" > asc-api-key.p8
+        env:
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+
+      # Waits for the cloud build so the key file is still here when EAS submits it to TestFlight.
+      - run: eas build --platform ios --profile production --non-interactive --auto-submit-with-profile ci

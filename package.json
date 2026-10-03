@@ -1,0 +1,8 @@
+{
+  "name": "baltic-challenges",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix apps/mobile run start -- --offline",
+    "start:tunnel": "npm --prefix apps/mobile run start -- --tunnel"
+  }
+}
