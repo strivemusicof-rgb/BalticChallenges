@@ -34,6 +34,7 @@ jobs:
 
       - run: npm ci
 
+      - run: echo '/// <reference types="expo/types" />' > expo-env.d.ts
       - run: npx tsc --noEmit
 
       # The App Store Connect API key (.p8 contents) lives in the ASC_API_KEY_P8 repository secret.
