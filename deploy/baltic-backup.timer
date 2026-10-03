@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly Baltic Challenges backup (03:30 Riga time)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Riga
+Persistent=true
+
+[Install]
+WantedBy=timers.target

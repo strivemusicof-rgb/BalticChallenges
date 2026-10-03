@@ -8,6 +8,7 @@ import { canSeeSql, loadPosts } from '../services/posts.js';
 import { getLevelInfo } from '../services/progression.js';
 import { loadStats } from '../services/users.js';
 import { tr, type I18n } from '../i18n.js';
+import { pushTexts } from '../services/push-texts.js';
 
 const IdParams = z.object({ id: UuidSchema });
 
@@ -159,11 +160,8 @@ export const socialRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
       if (inserted.rowCount === 0 && !rel.following) throw notFound('User');
       if (inserted.rowCount === 1) {
         const { rows } = await db.query<{ display_name: string }>('SELECT display_name FROM users WHERE id = $1', [uid]);
-        push.notify([id], 'social', {
-          title: 'New follower',
-          body: `${rows[0]?.display_name ?? 'Someone'} started following you`,
-          url: `/user/${uid}`,
-        });
+        const name = rows[0]?.display_name ?? '';
+        push.notify([id], 'social', (lang) => ({ ...pushTexts(lang).newFollower(name), url: `/user/${uid}` }));
       }
       return reply.code(204).send();
     },

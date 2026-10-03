@@ -17,9 +17,10 @@ const PAGE_SIZE = 20;
 
 type PostPage = { posts: Post[] };
 
-function usePostPages(key: unknown[], path: string, query: Record<string, string> = {}) {
+function usePostPages(key: unknown[], path: string, query: Record<string, string> = {}, enabled = true) {
   return useInfiniteQuery({
     queryKey: key,
+    enabled,
     queryFn: ({ pageParam }) =>
       api<PostPage>(path, { query: { ...query, limit: PAGE_SIZE, before: pageParam ?? undefined } }),
     initialPageParam: null as string | null,
@@ -28,7 +29,16 @@ function usePostPages(key: unknown[], path: string, query: Record<string, string
   });
 }
 
-export const useFeed = (scope: 'following' | 'friends' | 'global') => usePostPages(['feed', scope], '/v1/feed', { scope });
+export type FeedScope = 'following' | 'friends' | 'nearby' | 'global';
+
+export function useFeed(scope: FeedScope, near?: { lat: number; lng: number } | null) {
+  // ~1 km rounding keeps the nearby feed from refetching on every GPS update.
+  const lat = near ? (Math.round(near.lat * 100) / 100).toString() : undefined;
+  const lng = near ? (Math.round(near.lng * 100) / 100).toString() : undefined;
+  const query: Record<string, string> = { scope };
+  if (scope === 'nearby' && lat && lng) Object.assign(query, { lat, lng });
+  return usePostPages(['feed', scope, lat, lng], '/v1/feed', query, scope !== 'nearby' || Boolean(lat));
+}
 export const useUserPosts = (id: string) => usePostPages(['user-posts', id], `/v1/users/${id}/posts`);
 export const useSavedPosts = () => usePostPages(['saved'], '/v1/me/saved');
 

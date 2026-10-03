@@ -183,7 +183,7 @@ export async function findChallengeDetail(db: DbClient, idOrSlug: string, userId
   const [summary] = await findChallenges(db, { userId, ids: [id], limit: 1 });
   if (!summary) return null;
 
-  const [place, stats, collections] = await Promise.all([
+  const [place, stats, collections, steps] = await Promise.all([
     summary.place
       ? db.query<{
           terrain: string | null;
@@ -216,12 +216,45 @@ export async function findChallengeDetail(db: DbClient, idOrSlug: string, userId
        WHERE ci.challenge_id = $1 AND c.status = 'published' ORDER BY c.sort`,
       [id],
     ),
+    db.query<{
+      id: string;
+      position: number;
+      title: string;
+      place_id: string | null;
+      place_name: string | null;
+      place_i18n: I18n;
+      lat: number;
+      lng: number;
+      radius_m: number;
+      image_url: string | null;
+      steps_done: number | null;
+    }>(
+      `SELECT s.id, s.position, s.title, s.place_id, p.name AS place_name, p.i18n AS place_i18n,
+              ST_Y(coalesce(s.geog, p.geog)::geometry) AS lat, ST_X(coalesce(s.geog, p.geog)::geometry) AS lng,
+              coalesce(s.radius_m, p.radius_m, 150) AS radius_m, p.images[1] AS image_url,
+              (SELECT a.steps_done FROM challenge_attempts a WHERE a.challenge_id = s.challenge_id AND a.user_id = $2::uuid
+                 AND a.status IN ('in_progress', 'completed', 'flagged')) AS steps_done
+       FROM challenge_steps s LEFT JOIN places p ON p.id = s.place_id
+       WHERE s.challenge_id = $1 ORDER BY s.position`,
+      [id, userId],
+    ),
   ]);
 
   const placeRow = place?.rows[0];
   return {
     ...summary,
     explorers: stats.rows[0]?.explorers ?? 0,
+    steps: steps.rows.map((step) => ({
+      id: step.id,
+      position: step.position,
+      title: step.place_name ? tr(step.place_i18n, 'name', step.place_name) : step.title,
+      placeId: step.place_id,
+      lat: step.lat,
+      lng: step.lng,
+      radiusM: step.radius_m,
+      imageUrl: step.image_url,
+      done: summary.userStatus === 'completed' || (step.steps_done ?? 0) >= step.position,
+    })),
     collections: collections.rows.map(({ i18n, ...row }) => ({ ...row, title: tr(i18n, 'title', row.title) })),
     safety: placeRow
       ? {

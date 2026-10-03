@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
+import { CompareCard } from '@/components/compare-card';
 import { HeroScroll } from '@/components/hero-scroll';
 import { PostCard } from '@/components/post-card';
 import { Reveal } from '@/components/reveal';
@@ -154,6 +155,12 @@ export default function UserScreen() {
                   { value: stats.achievementsUnlocked, label: t('profile.badges') },
                 ]}
               />
+            </Reveal>
+          )}
+          {stats && !relationship.isMe && (
+            <Reveal index={2} style={styles.section}>
+              <SectionHeader title={t('user.compare')} />
+              <CompareCard name={user.displayName} avatarUrl={user.avatarUrl} xp={user.level.xp} stats={stats} />
             </Reveal>
           )}
           {badges.length > 0 && (

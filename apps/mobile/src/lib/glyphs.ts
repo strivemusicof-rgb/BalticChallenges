@@ -102,6 +102,10 @@ const COLLECTION: Record<string, GlyphName> = {
   'baltic-manors': 'home-city-outline',
   'sacred-places': 'church',
   'waterfalls-cliffs': 'waterfall',
+  'baltic-lighthouses': 'lighthouse',
+  'baltic-viewpoints': 'binoculars',
+  'wild-nature': 'pine-tree',
+  'baltic-trails': 'hiking',
 };
 
 export function collectionGlyph(slug: string): GlyphName {

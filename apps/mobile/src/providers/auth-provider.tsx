@@ -14,6 +14,7 @@ interface AuthContextValue {
   state: AuthState;
   signIn: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
+  signInWithApple: (identityToken: string, fullName?: string) => Promise<void>;
   signOut: () => Promise<void>;
   setUser: (user: User) => void;
 }
@@ -65,6 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             body: { email, password, displayName },
             auth: false,
           }),
+        ),
+      signInWithApple: async (identityToken, fullName) =>
+        acceptSession(
+          await api<Session>('/v1/auth/apple', { method: 'POST', body: { identityToken, fullName }, auth: false }),
         ),
       signOut: async () => {
         const refreshToken = await loadRefreshToken();

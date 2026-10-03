@@ -1,0 +1,7 @@
+[Unit]
+Description=Baltic Challenges nightly backup (database and uploads)
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/baltic-challenges/current/deploy/backup.sh

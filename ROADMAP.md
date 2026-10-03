@@ -98,7 +98,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [ ] 🚧 Git repository and branching strategy (GitHub repo strivemusicof-rgb/BalticChallenges, pushing to main; no branching strategy yet)
 - [x] Expo + TypeScript project scaffold
 - [ ] 🚧 Linting, formatting, strict TypeScript (strict TypeScript everywhere; ESLint on the mobile app via `eslint-config-expo`; no Prettier or API lint yet)
-- [ ] 🚧 CI: typecheck, lint and tests on every push (GitHub Actions builds iOS and submits to TestFlight; no lint/test job yet)
+- [x] CI: typecheck, lint and tests on every push (`checks.yml`; `ios-testflight.yml` builds and submits iOS)
 - [ ] 🚧 EAS Build set up for iOS and Android (iOS builds and TestFlight submission work; Android not set up)
 - [ ] Separate dev, staging and production environments
 - [x] Secrets management (server secrets generated on the VPS in `/etc/baltic-challenges/api.env`, readable only by root and the service)
@@ -117,7 +117,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 > Find a challenge → go there → complete it → earn XP → unlock something.
 
 ### Authentication
-- [ ] 🚧 Sign in with Apple (server token verification done; needs an Apple Developer account, `APPLE_CLIENT_IDS`, and the app button)
+- [ ] 🚧 Sign in with Apple (server verification, `APPLE_CLIENT_IDS` and the app button done; needs the Sign In with Apple capability ticked on the App ID and a new TestFlight build)
 - [ ] 🚧 Sign in with Google (server token verification done; needs Google OAuth client IDs, `GOOGLE_CLIENT_IDS`, and the app button)
 - [x] Email sign-in (magic link or password)
 - [x] Session handling and secure token storage
@@ -260,7 +260,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] Follow / unfollow
 - [x] Friends (mutual follow)
 - [ ] 🚧 Friend search and invite links (search by name done; invite links need a public web domain / deep links)
-- [ ] Compare progress with a friend
+- [x] Compare progress with a friend
 
 ### Posts
 - [x] 📸 Adventure post (photo + location + challenge; a challenge can only be attached if you completed it)
@@ -271,7 +271,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 
 ### Community feed
 - [x] Following / friends feed
-- [ ] 🚧 Nearby / Baltic-wide feed (Baltic-wide done; nearby not yet)
+- [x] Nearby / Baltic-wide feed (nearby = places within 50 km)
 - [x] ❤️ Like
 - [x] 💬 Comment
 - [x] 📌 Save
@@ -287,7 +287,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 
 ### Friend competition (basic)
 - [ ] Type H — Social: complete a challenge with a friend
-- [ ] 🚧 Friend activity notifications ("Anna completed a challenge"), with throttling (new follower, like and comment pushes done; completion activity not yet)
+- [x] Friend activity notifications ("Anna completed a challenge"), with throttling (friends only, max 3 per day; all pushes now in the user's language)
 
 ### Leaderboards
 - [x] Friends leaderboard
@@ -371,9 +371,9 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [ ] Advanced map: clustering, search, more filters (Places, Friends, Events)
 - [ ] Type C — Photo challenges (camera capture or upload)
 - [ ] Type E — Route challenges (GPS-recorded route, e.g. 10 km trail)
-- [ ] Type F — Multi-step / multi-checkpoint challenges (e.g. Gauja Explorer: viewpoint → sandstone cliff → trail → photo → 5 km walk, 750 XP + special badge)
-- [ ] GPS challenge mode: distance to the next checkpoint, progress bar, [OPEN MAP]
-- [ ] "📍 CHECKPOINT FOUND!" moment, then confirm
+- [ ] 🚧 Type F — Multi-step / multi-checkpoint challenges (GPS checkpoints done: 5 trails in Rīga, Gauja valley, Vilnius, Tallinn and the Curonian Spit; photo and walk steps not yet)
+- [x] GPS challenge mode: distance to the next checkpoint, progress bar, [OPEN MAP]
+- [x] "📍 CHECKPOINT FOUND!" moment, then confirm
 - [ ] Background GPS tracking for routes (battery-aware)
 - [ ] 🥾 Route posts (GPS route + stats + photos)
 - [ ] Offline data: download region challenge packs (Pro)
@@ -557,7 +557,7 @@ Release tasks:
 - [ ] Google Play listing (data safety form)
 - [ ] Privacy policy, Terms of Service, support page
 - [ ] Production monitoring and alerting
-- [ ] Backups and disaster recovery
+- [ ] 🚧 Backups and disaster recovery (nightly database + uploads backup on the VPS, 14 days kept; no off-site copy yet)
 - [ ] Load test for nearby queries and the feed
 - [ ] Submitted to App Store
 - [ ] Submitted to Google Play
@@ -635,6 +635,7 @@ Needs: **Phase 6, 7 (recommendations), 8, 9, 10 (first part)**, plus:
 | 2026-10-02 | Phase 2: Riga-day streaks with 7/30-day badges, +50 XP challenge-of-the-day bonus, weekly and monthly goals, Early Bird / Night Explorer / Weekly Warrior badges, animated level-up celebration, history screen, edit profile and avatar, explore list view. Push notifications (Expo) with per-type settings and an evening reminder job (streak, weekly goal ending, close to level; max one per day). |
 | 2026-10-02 | Phase 3: public profiles, follow / mutual friends, people search, posts with photos (EXIF stripped, re-encoded on the server, duplicate detection), following and Baltic-wide feeds, likes, comments, saves, place pages, friends / weekly / country / Baltic leaderboards. |
 | 2026-10-02 | Phase 3.5: report and block everywhere, multilingual text filter and link-spam rules, privacy controls, versioned terms consent, draft privacy / terms / support pages, flagged-completion review. Admin web dashboard at `/admin/` (stats, reports, pending posts, flagged completions, users and bans, places and challenges editors, audit log). |
+| 2026-10-03 | Multi-checkpoint trails (5) with GPS checkpoint mode, Lighthouses / Viewpoints / Wild Nature / Trails collections, nearby feed, compare with a friend, friend activity pushes, push notifications in the user's language, Sign in with Apple button, CI checks, nightly VPS backups. |
 | 2026-10-03 | Latvian and Russian translations (UI and all content, API picks language from Accept-Language), emoji replaced by an icon set, calmer animations, in-app admin panel for admin accounts, GitHub repo and TestFlight pipeline. |
 | 2026-10-03 | Full app redesign to the 15-screen reference (forest-green design system, photo cards, hex badges, animated segmented tabs, spring press feedback, parallax photo headers). Wikimedia Commons photos for 79 of 94 places, with credits. New screens: Achievements, Daily/Weekly/Monthly, Pro paywall (UI only), Create Post type picker, GPS challenge mode with a dark map, photo step on completion (stored as proof). Web test build served at `/app/` with a Leaflet/OpenStreetMap map. API: collection cover images, km explored and photo stats, friends feed, optional proof photo on completion. |
 | 2026-10-02 | Content batch 2: 61 more places (94 challenges: 32 LV, 31 LT, 31 EE) and six new collections (Rīga / Vilnius / Tallinn highlights, Baltic Manors, Sacred Places, Falls & Cliffs). Reports on deleted content now close themselves. |

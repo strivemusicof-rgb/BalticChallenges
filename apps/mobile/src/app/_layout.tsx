@@ -9,8 +9,8 @@ import { useTranslation } from 'react-i18next';
 
 import { DialogHost } from '@/components/dialog-host';
 import { Brand } from '@/constants/theme';
-import { ApiError } from '@/lib/api';
-import { restoreLanguage } from '@/lib/i18n';
+import { api, ApiError } from '@/lib/api';
+import { currentLanguage, restoreLanguage } from '@/lib/i18n';
 import { handleNotificationTaps, registerForPushNotifications } from '@/lib/notifications';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 
@@ -61,6 +61,12 @@ function RootNavigator() {
   const signedIn = state.status === 'signedIn';
   const onboarded = signedIn && state.user.onboarded;
   const ready = onboarded && state.user.termsAccepted;
+
+  // Keep the server's copy of the language in sync so push notifications arrive in it.
+  useEffect(() => {
+    if (!ready) return;
+    api('/v1/me', { method: 'PATCH', body: { language: currentLanguage() } }).catch(() => undefined);
+  }, [ready]);
 
   useEffect(() => {
     if (!ready) return;

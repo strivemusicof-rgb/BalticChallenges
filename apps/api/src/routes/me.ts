@@ -35,6 +35,7 @@ const PatchMeBody = z
       .strict(),
     completeOnboarding: z.literal(true),
     acceptTerms: z.literal(CURRENT_TERMS_VERSION),
+    language: z.enum(['en', 'lv', 'ru']),
   })
   .partial()
   .strict();
@@ -70,6 +71,7 @@ export const meRoutes: RoutePlugin = (app, { db, auth, photos }) => {
     if (body.profileVisibility !== undefined) set('profile_visibility', body.profileVisibility, '::visibility');
     if (body.showPostLocation !== undefined) set('show_post_location', body.showPostLocation);
     if (body.hideHomeArea !== undefined) set('hide_home_area', body.hideHomeArea);
+    if (body.language !== undefined) set('language', body.language);
     if (body.notifications?.progress !== undefined) set('notify_progress', body.notifications.progress);
     if (body.notifications?.social !== undefined) set('notify_social', body.notifications.social);
     if (body.notifications?.newChallenges !== undefined) set('notify_new_challenges', body.notifications.newChallenges);

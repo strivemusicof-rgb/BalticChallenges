@@ -189,6 +189,24 @@ function DetailView({
         </Card>
       )}
 
+      {data.steps.length > 0 && (
+        <View style={styles.section}>
+          <SectionHeader title={t('challenge.route')} subtitle={t('challenge.stops', { count: data.steps.length })} />
+          {data.steps.map((step) => (
+            <View key={step.id} style={styles.stepRow}>
+              <View style={[styles.stepNumber, step.done && styles.stepNumberDone]}>
+                {step.done ? (
+                  <Icon name="checkmark" size={14} color="#FFFFFF" />
+                ) : (
+                  <ThemedText style={styles.stepNumberText}>{step.position}</ThemedText>
+                )}
+              </View>
+              <ThemedText style={styles.stepTitle}>{step.title}</ThemedText>
+            </View>
+          ))}
+        </View>
+      )}
+
       {data.place && (
         <PressableScale onPress={() => router.push({ pathname: '/place/[id]', params: { id: data.place!.id } })} style={styles.placeLink}>
           <Photo uri={data.imageUrl} fallback={categoryGlyph(data.categoryId)} style={styles.placeThumb} />
@@ -248,28 +266,42 @@ function GpsMode({
   data,
   onVerify,
   onDetails,
+  verifying,
 }: {
   data: ChallengeDetail;
   onVerify: () => void;
   onDetails: () => void;
+  verifying: boolean;
 }) {
   const t = useT();
   const insets = useSafeAreaInsets();
   const abandon = useAbandonChallenge(data.id);
-  const live = useLiveDistance(data.place, true);
-  const radius = data.place?.radiusM ?? 150;
-  const distance = live.distance ?? data.distanceM;
+
+  // Trails aim at the next unvisited checkpoint; single challenges at their place.
+  const steps = data.steps;
+  const next = steps.find((step) => !step.done) ?? null;
+  const doneCount = steps.filter((step) => step.done).length;
+  const totalSteps = Math.max(steps.length, 1);
+  const target = next ? { lat: next.lat, lng: next.lng } : data.place ? { lat: data.place.lat, lng: data.place.lng } : null;
+  const targetName = next?.title ?? data.place?.name ?? data.title;
+  const targetImage = next?.imageUrl ?? data.imageUrl;
+
+  const live = useLiveDistance(target, true);
+  const radius = next?.radiusM ?? data.place?.radiusM ?? 150;
+  const distance = live.distance ?? (next ? null : data.distanceM);
   const inRange = live.distance !== null && live.distance <= radius;
   const approach = distance === null ? 0.05 : Math.max(0.05, Math.min(1, 1 - (distance - radius) / 5000));
+  const overall = steps.length > 0 ? (doneCount + (inRange ? 1 : approach * 0.5)) / totalSteps : inRange ? 1 : approach;
+  const mapChallenge = data.place && target ? { ...data, place: { ...data.place, lat: target.lat, lng: target.lng } } : data;
 
   return (
     <View style={styles.gpsScreen}>
       <ChallengeMap
-        challenges={[data]}
+        challenges={[mapChallenge]}
         userCoords={live.coords}
         selectedId={data.id}
         onSelect={() => undefined}
-        routeTo={data.place ? { lat: data.place.lat, lng: data.place.lng } : null}
+        routeTo={target}
         dark
       />
 
@@ -282,7 +314,7 @@ function GpsMode({
             </View>
             <View style={styles.flex}>
               <ThemedText style={styles.gpsTitle} numberOfLines={1}>
-                {data.place?.name ?? data.title}
+                {steps.length > 0 ? data.title : targetName}
               </ThemedText>
               <ThemedText style={styles.gpsDistance}>
                 {live.distance === null ? t('challenge.locating') : inRange ? t('challenge.youAreHere') : formatDistance(live.distance)}
@@ -292,10 +324,22 @@ function GpsMode({
         </View>
         <View style={styles.gpsProgress}>
           <View style={styles.flex}>
-            <ProgressBar progress={inRange ? 1 : approach} color="#4ADE80" track="rgba(255,255,255,0.25)" height={8} />
+            <ProgressBar progress={overall} color="#4ADE80" track="rgba(255,255,255,0.25)" height={8} />
           </View>
-          <ThemedText style={styles.gpsCount}>{inRange ? '1 / 1' : '0 / 1'}</ThemedText>
+          <ThemedText style={styles.gpsCount}>
+            {steps.length > 0 ? `${doneCount} / ${totalSteps}` : inRange ? '1 / 1' : '0 / 1'}
+          </ThemedText>
         </View>
+        {steps.length > 0 && (
+          <View style={styles.stepDots}>
+            {steps.map((step) => (
+              <View
+                key={step.id}
+                style={[styles.stepDot, step.done && styles.stepDotDone, step.id === next?.id && styles.stepDotNext]}
+              />
+            ))}
+          </View>
+        )}
       </View>
 
       <Animated.View entering={FadeInUp} style={[styles.gpsSheet, { paddingBottom: insets.bottom + Spacing.three }]}>
@@ -306,13 +350,13 @@ function GpsMode({
           </Animated.View>
         )}
         <View style={styles.checkpoint}>
-          <Photo uri={data.imageUrl} fallback={categoryGlyph(data.categoryId)} style={styles.checkpointPhoto} />
+          <Photo uri={targetImage} fallback={categoryGlyph(data.categoryId)} style={styles.checkpointPhoto} />
           <View style={styles.flex}>
             <ThemedText type="small" themeColor="textSecondary">
-              {t('challenge.nextCheckpoint')}
+              {steps.length > 0 ? t('challenge.stopOf', { current: doneCount + 1, total: totalSteps }) : t('challenge.nextCheckpoint')}
             </ThemedText>
             <ThemedText style={styles.checkpointTitle} numberOfLines={2}>
-              {data.place?.name ?? data.title}
+              {targetName}
             </ThemedText>
           </View>
         </View>
@@ -340,7 +384,12 @@ function GpsMode({
           {t('challenge.withinRadius', { radius: formatDistance(radius) })}
           {live.accuracy !== null ? ` · ${t('challenge.accuracy', { m: Math.round(live.accuracy) })}` : ''}
         </ThemedText>
-        <Button label={inRange ? t('challenge.continue') : t('challenge.imHere')} icon={inRange ? 'checkmark' : 'locate'} onPress={onVerify} />
+        <Button
+          label={inRange ? t('challenge.continue') : t('challenge.imHere')}
+          icon={inRange ? 'checkmark' : 'locate'}
+          loading={verifying}
+          onPress={onVerify}
+        />
         <Button label={t('challenge.openMap')} icon="map-outline" variant="outline" onPress={() => openDirections(data)} />
         <View style={styles.gpsLinks}>
           <Pressable onPress={onDetails} hitSlop={8} accessibilityRole="button">
@@ -527,6 +576,7 @@ function Celebration({
 type Mode = 'detail' | 'gps' | 'photo';
 
 export default function ChallengeScreen() {
+  const t = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const challenge = useChallenge(id);
   const challengeId = challenge.data?.id ?? id;
@@ -555,12 +605,25 @@ export default function ChallengeScreen() {
     }
   }
 
+  async function handleCheckpoint() {
+    try {
+      const result = await complete.mutateAsync({});
+      if (result.status === 'checkpoint') {
+        showAlert(t('challenge.found'), t('challenge.checkpointDone', { done: result.stepsDone, total: result.totalSteps }));
+      } else if (result.status !== 'completed') {
+        showAlert(t('challenge.notYet'), result.message);
+      }
+    } catch (error) {
+      showAlert(t('challenge.notYet'), error instanceof Error ? error.message : t('challenge.verifyFailed'));
+    }
+  }
+
   async function handleComplete(photo: string | null) {
     setFeedback(null);
     setPhotoUri(photo);
     try {
       const result = await complete.mutateAsync({ photoUri: photo });
-      if (result.status !== 'completed') setFeedback(result.message);
+      if (result.status === 'rejected' || result.status === 'flagged') setFeedback(result.message);
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : i18n.t('challenge.verifyFailed'));
     }
@@ -578,7 +641,16 @@ export default function ChallengeScreen() {
     );
   }
   if (view === 'gps' && data.userStatus === 'in_progress') {
-    return <GpsMode data={data} onVerify={() => setMode('photo')} onDetails={() => setMode('detail')} />;
+    // Every trail checkpoint but the last is checked in directly; the final one goes through the photo step.
+    const remaining = data.steps.filter((step) => !step.done).length;
+    return (
+      <GpsMode
+        data={data}
+        verifying={complete.isPending}
+        onVerify={() => (remaining > 1 ? void handleCheckpoint() : setMode('photo'))}
+        onDetails={() => setMode('detail')}
+      />
+    );
   }
   return <DetailView data={data} onStart={handleStart} starting={start.isPending} onResume={() => setMode('gps')} feedback={feedback} />;
 }
@@ -628,6 +700,32 @@ const styles = StyleSheet.create({
   },
   statusError: {
     backgroundColor: '#FDECEC',
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+  },
+  stepNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Brand.mint,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNumberDone: {
+    backgroundColor: Brand.success,
+  },
+  stepNumberText: {
+    fontSize: 13,
+    fontWeight: 800,
+    color: Brand.sea,
+  },
+  stepTitle: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: 600,
   },
   placeLink: {
     flexDirection: 'row',
@@ -761,6 +859,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
     paddingHorizontal: Spacing.two,
+  },
+  stepDots: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: Spacing.two,
+  },
+  stepDot: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+  },
+  stepDotDone: {
+    backgroundColor: '#4ADE80',
+  },
+  stepDotNext: {
+    backgroundColor: '#FFFFFF',
   },
   gpsCount: {
     color: '#FFFFFF',

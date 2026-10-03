@@ -223,6 +223,11 @@ export const ru = {
     noneBody: 'Попробуйте другую категорию или запрос.',
   },
   challenge: {
+    stopOf: 'Точка {{current}} из {{total}}',
+    checkpointDone: 'Точка {{done}} из {{total}} пройдена. Вперёд к следующей!',
+    notYet: 'Вы ещё не на месте',
+    route: 'Маршрут',
+    stops: 'Точек: {{count}}',
     explorers: 'участников',
     away: 'до места',
     duration: 'время',
@@ -342,6 +347,10 @@ export const ru = {
     emptyBody: 'Выполните задание и займите первое место.',
   },
   community: {
+    nearby: 'Рядом',
+    emptyNearby: 'Рядом пока ничего не публиковали',
+    emptyNearbyBody: 'Здесь появляются публикации из мест в радиусе 50 км.',
+    nearbyNeedsLocation: 'Смотрите, чем делятся путешественники вокруг вас',
     title: 'Сообщество',
     following: 'Подписки',
     friends: 'Друзья',
@@ -511,6 +520,8 @@ export const ru = {
     agree: 'Я согласен',
   },
   user: {
+    compare: 'Сравнить прогресс',
+    vs: 'VS',
     follow: 'Подписаться',
     following: 'Вы подписаны',
     friends: 'Друзья',

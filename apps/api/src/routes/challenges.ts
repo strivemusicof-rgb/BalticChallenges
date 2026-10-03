@@ -4,7 +4,8 @@ import { userId } from '../auth/plugin.js';
 import { withTransaction } from '../db.js';
 import { evaluateCheckIn } from '../domain/verification.js';
 import { badRequest, conflict, forbidden, notFound } from '../errors.js';
-import { tr } from '../i18n.js';
+import { tr, type I18n } from '../i18n.js';
+import { pushTexts } from '../services/push-texts.js';
 import { Coordinates, CountrySchema, parse, UuidSchema, type RoutePlugin } from '../http.js';
 import { findChallengeDetail, findChallenges } from '../services/challenges.js';
 import { finalizeCompletion, todaysChallengeId } from '../services/completion.js';
@@ -34,7 +35,33 @@ const CompleteBody = z.object({
   photoId: UuidSchema.optional(),
 });
 
-export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
+export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
+  /** Tells mutual followers about a completion; at most 3 friend pushes per person per day. */
+  async function notifyFriends(actorId: string, challengeId: string) {
+    const { rows } = await db.query<{ friend_id: string; actor_name: string; title: string; i18n: I18n }>(
+      `SELECT f.follower_id AS friend_id, u.display_name AS actor_name, ch.title, ch.i18n
+       FROM follows f
+       JOIN follows back ON back.follower_id = $1 AND back.followee_id = f.follower_id
+       JOIN users u ON u.id = $1
+       JOIN challenges ch ON ch.id = $2
+       WHERE f.followee_id = $1
+         AND (SELECT count(*) FROM push_reminders r
+              WHERE r.user_id = f.follower_id AND r.kind = 'friend_activity' AND r.sent_at > now() - interval '1 day') < 3`,
+      [actorId, challengeId],
+    );
+    for (const row of rows) {
+      const inserted = await db.query(
+        `INSERT INTO push_reminders (user_id, kind, key) VALUES ($1, 'friend_activity', $2) ON CONFLICT DO NOTHING`,
+        [row.friend_id, `${actorId}:${challengeId}`],
+      );
+      if (inserted.rowCount !== 1) continue;
+      push.notify([row.friend_id], 'social', (lang) => ({
+        ...pushTexts(lang).friendCompleted(row.actor_name, (lang === 'lv' || lang === 'ru' ? row.i18n?.[lang]?.title : null) ?? row.title),
+        url: `/challenge/${challengeId}`,
+      }));
+    }
+  }
+
   app.get('/v1/categories', async () => {
     const { rows } = await db.query(
       `SELECT c.id, c.parent_id AS "parentId", c.name, c.icon, c.i18n,
@@ -117,20 +144,27 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
       const body = parse(CompleteBody, request.body);
       const uid = userId(request);
 
-      return withTransaction(db, async (client) => {
+      const result = await withTransaction(db, async (client) => {
+        // Trails (challenges with steps) check the next unvisited step; other challenges check their place.
         const { rows: targetRows } = await client.query<{
           attempt_id: string;
           attempt_status: string;
+          steps_done: number;
+          step_id: string | null;
+          step_count: number;
           xp_reward: number;
           verification: string;
           radius_m: number;
           distance_m: number;
         }>(
-          `SELECT a.id AS attempt_id, a.status AS attempt_status, ch.xp_reward, ch.verification, p.radius_m,
-                  ST_Distance(p.geog, ST_SetSRID(ST_MakePoint($3, $4), 4326)::geography) AS distance_m
+          `SELECT a.id AS attempt_id, a.status AS attempt_status, a.steps_done, st.id AS step_id,
+                  (SELECT count(*)::int FROM challenge_steps s WHERE s.challenge_id = ch.id) AS step_count,
+                  ch.xp_reward, ch.verification, coalesce(st.radius_m, p.radius_m) AS radius_m,
+                  ST_Distance(coalesce(st.geog, p.geog), ST_SetSRID(ST_MakePoint($3, $4), 4326)::geography) AS distance_m
            FROM challenge_attempts a
            JOIN challenges ch ON ch.id = a.challenge_id
            JOIN places p ON p.id = ch.place_id
+           LEFT JOIN challenge_steps st ON st.challenge_id = ch.id AND st.position = a.steps_done + 1
            WHERE a.user_id = $1 AND a.challenge_id = $2 AND a.status IN ('in_progress', 'completed', 'flagged')
            FOR UPDATE OF a`,
           [uid, id, body.lng, body.lat],
@@ -170,8 +204,8 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
         });
 
         await client.query(
-          `INSERT INTO check_ins (user_id, attempt_id, geog, accuracy_m, is_mocked, device_time, distance_m, verdict, reason)
-           VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326)::geography, $5, $6, $7, $8, $9, $10)`,
+          `INSERT INTO check_ins (user_id, attempt_id, geog, accuracy_m, is_mocked, device_time, distance_m, verdict, reason, step_id)
+           VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326)::geography, $5, $6, $7, $8, $9, $10, $11)`,
           [
             uid,
             target.attempt_id,
@@ -183,6 +217,7 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
             target.distance_m,
             result.verdict,
             result.verdict === 'accepted' ? null : result.reason,
+            target.step_id,
           ],
         );
 
@@ -202,6 +237,14 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
           return { status: 'flagged' as const, reason: result.reason, message: result.message, distanceM };
         }
 
+        if (target.step_count > 0) {
+          const stepsDone = target.steps_done + 1;
+          await client.query('UPDATE challenge_attempts SET steps_done = $2 WHERE id = $1', [target.attempt_id, stepsDone]);
+          if (stepsDone < target.step_count) {
+            return { status: 'checkpoint' as const, stepsDone, totalSteps: target.step_count, distanceM };
+          }
+        }
+
         const isDaily = (await todaysChallengeId(client, uid)) === id;
         const outcome = await finalizeCompletion(client, {
           userId: uid,
@@ -212,6 +255,10 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth }) => {
         });
         return { status: 'completed' as const, distanceM, ...outcome };
       });
+      if (result.status === 'completed') {
+        notifyFriends(uid, id).catch((error: unknown) => request.log.warn({ err: error }, 'friend activity push failed'));
+      }
+      return result;
     },
   );
 };

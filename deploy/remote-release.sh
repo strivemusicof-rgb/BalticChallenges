@@ -15,7 +15,7 @@ rm "$BASE/releases/$RELEASE_ID.tgz"
 cd "$RELEASE"
 npm ci --omit=dev --no-audit --no-fund --loglevel=error
 
-for unit in baltic-api.service baltic-streak-reminders.service baltic-streak-reminders.timer; do
+for unit in baltic-api.service baltic-streak-reminders.service baltic-streak-reminders.timer baltic-backup.service baltic-backup.timer; do
   sudo install -m 644 "deploy/$unit" "/etc/systemd/system/$unit"
 done
 if ! sudo cmp -s deploy/Caddyfile /etc/caddy/Caddyfile; then
@@ -36,6 +36,7 @@ mv -T "$BASE/current.tmp" "$BASE/current"
 sudo systemctl daemon-reload
 sudo systemctl enable baltic-api >/dev/null 2>&1
 sudo systemctl enable --now baltic-streak-reminders.timer >/dev/null 2>&1
+sudo systemctl enable --now baltic-backup.timer >/dev/null 2>&1
 sudo systemctl restart baltic-api
 
 for _ in $(seq 1 20); do

@@ -201,8 +201,22 @@ export interface ChallengeSummary {
   userStatus: 'in_progress' | 'completed' | 'flagged' | null;
 }
 
+export interface ChallengeStep {
+  id: string;
+  position: number;
+  title: string;
+  placeId: string | null;
+  lat: number;
+  lng: number;
+  radiusM: number;
+  imageUrl: string | null;
+  done: boolean;
+}
+
 export interface ChallengeDetail extends ChallengeSummary {
   explorers: number;
+  /** Ordered checkpoints for trails; empty for single-place challenges. */
+  steps: ChallengeStep[];
   collections: { slug: string; title: string; icon: string }[];
   images: string[];
   safety: {
@@ -297,4 +311,5 @@ export type CompletionResult =
       streak: number;
       unlocked: UnlockedReward[];
     }
+  | { status: 'checkpoint'; stepsDone: number; totalSteps: number; distanceM: number }
   | { status: 'rejected' | 'flagged'; reason: string; message: string; distanceM: number };

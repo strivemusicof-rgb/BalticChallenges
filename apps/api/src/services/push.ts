@@ -48,19 +48,24 @@ export function createPushService(config: Pick<Config, 'EXPO_ACCESS_TOKEN'>, db:
     }
   }
 
-  /** Fire-and-forget: never throws, never blocks the request that triggered it. */
-  function notify(userIds: string[], category: PushCategory, message: PushMessage) {
+  /**
+   * Fire-and-forget: never throws, never blocks the request that triggered it.
+   * `message` may be a function of the recipient's language so each person gets their own copy.
+   */
+  function notify(userIds: string[], category: PushCategory, message: PushMessage | ((lang: string) => PushMessage)) {
     if (userIds.length === 0) return;
     void (async () => {
-      const { rows } = await db.query<{ token: string }>(
-        `SELECT t.token FROM push_tokens t JOIN users u ON u.id = t.user_id
+      const { rows } = await db.query<{ token: string; language: string }>(
+        `SELECT t.token, u.language FROM push_tokens t JOIN users u ON u.id = t.user_id
          WHERE t.user_id = ANY($1::uuid[]) AND u.${PREF_COLUMN[category]} AND u.banned_at IS NULL`,
         [userIds],
       );
-      await sendToTokens(
-        rows.map((row) => row.token),
-        message,
-      );
+      for (const [language, group] of Map.groupBy(rows, (row) => row.language)) {
+        await sendToTokens(
+          group.map((row) => row.token),
+          typeof message === 'function' ? message(language) : message,
+        );
+      }
     })().catch((error: unknown) => log.warn({ err: error }, 'push notify failed'));
   }
 

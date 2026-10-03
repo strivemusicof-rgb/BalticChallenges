@@ -8,6 +8,7 @@
 import { createPool } from '../db.js';
 import { loadGoalProgress } from '../services/goals.js';
 import { createPushService, type PushMessage } from '../services/push.js';
+import { pushTexts } from '../services/push-texts.js';
 
 const MIN_STREAK = 2;
 const LEVEL_CLOSE_XP = 100;
@@ -17,7 +18,7 @@ type Kind = 'streak' | 'goal_ending' | 'level_close';
 interface Reminder {
   kind: Kind;
   key: string;
-  message: PushMessage;
+  message: (lang: string) => PushMessage;
 }
 
 const db = createPool(process.env.DATABASE_URL ?? '');
@@ -38,11 +39,7 @@ async function streakReminders(): Promise<Map<string, Reminder>> {
       {
         kind: 'streak',
         key: row.day,
-        message: {
-          title: `🔥 Keep your ${row.current_streak}-day streak`,
-          body: 'Complete any challenge before midnight to keep it going.',
-          url: '/challenges',
-        },
+        message: (lang: string) => ({ ...pushTexts(lang).streak(row.current_streak), url: '/challenges' }),
       },
     ]),
   );
@@ -62,11 +59,7 @@ async function goalEndingReminders(userIds: string[]): Promise<Map<string, Remin
     result.set(userId, {
       kind: 'goal_ending',
       key: `${goal.slug}:${goal.periodKey}`,
-      message: {
-        title: `${goal.icon} ${goal.title} ends tomorrow`,
-        body: `You're at ${goal.current}/${goal.target}. Finish it for +${goal.xpReward} XP.`,
-        url: '/',
-      },
+      message: (lang: string) => ({ ...pushTexts(lang).goalEnding(goal.title, goal.current, goal.target, goal.xpReward), url: '/' }),
     });
   }
   return result;
@@ -85,24 +78,20 @@ async function levelCloseReminders(): Promise<Map<string, Reminder>> {
       {
         kind: 'level_close',
         key: String(row.next_level),
-        message: {
-          title: `⭐ ${row.missing} XP to Level ${row.next_level}`,
-          body: 'One more challenge should do it.',
-          url: '/challenges',
-        },
+        message: (lang: string) => ({ ...pushTexts(lang).levelClose(row.missing, row.next_level), url: '/challenges' }),
       },
     ]),
   );
 }
 
 try {
-  const { rows: eligible } = await db.query<{ user_id: string; token: string }>(
-    `SELECT t.user_id, t.token
+  const { rows: eligible } = await db.query<{ user_id: string; token: string; language: string }>(
+    `SELECT t.user_id, t.token, u.language
      FROM push_tokens t JOIN users u ON u.id = t.user_id
      WHERE u.notify_progress AND u.banned_at IS NULL
        AND NOT EXISTS (
          SELECT 1 FROM push_reminders r
-         WHERE r.user_id = u.id AND r.sent_at > now() - interval '20 hours'
+         WHERE r.user_id = u.id AND r.kind <> 'friend_activity' AND r.sent_at > now() - interval '20 hours'
        )`,
   );
   const tokensByUser = Map.groupBy(eligible, (row) => row.user_id);
@@ -127,7 +116,7 @@ try {
     );
     await push.sendToTokens(
       tokensByUser.get(userId)!.map((row) => row.token),
-      reminder.message,
+      reminder.message(tokensByUser.get(userId)![0]!.language),
     );
     delivered += 1;
   }

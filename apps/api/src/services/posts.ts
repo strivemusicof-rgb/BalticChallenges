@@ -12,6 +12,8 @@ export interface PostQuery {
   /** Only posts by mutual follows (plus the viewer's own). */
   friends?: boolean;
   placeId?: string;
+  /** Only posts tagged at a place within `km` of this point. */
+  near?: { lat: number; lng: number; km: number };
   challengeId?: string;
   before?: string;
   limit?: number;
@@ -105,6 +107,11 @@ export async function loadPosts(db: DbClient, photos: PhotoStore, query: PostQue
     where.push(`(p.user_id = $1 OR (
       EXISTS (SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.followee_id = p.user_id) AND
       EXISTS (SELECT 1 FROM follows f WHERE f.follower_id = p.user_id AND f.followee_id = $1)))`);
+  }
+  if (query.near) {
+    where.push(
+      `p.show_location AND ST_DWithin(pl.geog, ST_SetSRID(ST_MakePoint(${add(query.near.lng)}::float8, ${add(query.near.lat)}::float8), 4326)::geography, ${add(query.near.km * 1000)})`,
+    );
   }
   if (query.before) where.push(`p.created_at < ${add(query.before)}`);
   const limit = add(Math.min(query.limit ?? 20, 50));

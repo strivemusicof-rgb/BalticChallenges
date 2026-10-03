@@ -217,6 +217,11 @@ export const en = {
     noneBody: 'Try another category or search term.',
   },
   challenge: {
+    stopOf: 'Stop {{current}} of {{total}}',
+    checkpointDone: 'Checkpoint {{done}} of {{total}} done. On to the next one!',
+    notYet: 'Not there yet',
+    route: 'Route',
+    stops: '{{count}} stops',
     explorers: 'explorers',
     away: 'away',
     duration: 'duration',
@@ -334,6 +339,10 @@ export const en = {
     emptyBody: 'Complete a challenge to claim the top spot.',
   },
   community: {
+    nearby: 'Nearby',
+    emptyNearby: 'Nothing shared nearby yet',
+    emptyNearbyBody: 'Posts from places within 50 km show up here.',
+    nearbyNeedsLocation: 'See what explorers share around you',
     title: 'Community',
     following: 'Following',
     friends: 'Friends',
@@ -504,6 +513,8 @@ export const en = {
     agree: 'I agree',
   },
   user: {
+    compare: 'Compare progress',
+    vs: 'VS',
     follow: 'Follow',
     following: 'Following',
     friends: 'Friends',

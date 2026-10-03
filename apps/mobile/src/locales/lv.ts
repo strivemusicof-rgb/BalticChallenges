@@ -220,6 +220,11 @@ export const lv = {
     noneBody: 'Izmēģini citu kategoriju vai meklējumu.',
   },
   challenge: {
+    stopOf: '{{current}}. pietura no {{total}}',
+    checkpointDone: 'Kontrolpunkts {{done}} no {{total}} izpildīts. Uz nākamo!',
+    notYet: 'Vēl neesi tur',
+    route: 'Maršruts',
+    stops: '{{count}} pieturas',
     explorers: 'ceļotāji',
     away: 'attālums',
     duration: 'ilgums',
@@ -338,6 +343,10 @@ export const lv = {
     emptyBody: 'Izpildi izaicinājumu un ieņem pirmo vietu.',
   },
   community: {
+    nearby: 'Tuvumā',
+    emptyNearby: 'Tuvumā vēl nekas nav publicēts',
+    emptyNearbyBody: 'Šeit redzami ieraksti no vietām 50 km rādiusā.',
+    nearbyNeedsLocation: 'Redzi, ar ko dalās ceļotāji tev apkārt',
     title: 'Kopiena',
     following: 'Sekoju',
     friends: 'Draugi',
@@ -507,6 +516,8 @@ export const lv = {
     agree: 'Piekrītu',
   },
   user: {
+    compare: 'Salīdzināt progresu',
+    vs: 'PRET',
     follow: 'Sekot',
     following: 'Sekoju',
     friends: 'Draugi',

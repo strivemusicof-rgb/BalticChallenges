@@ -3,10 +3,11 @@ import { z } from 'zod';
 import { userId } from '../auth/plugin.js';
 import { withTransaction } from '../db.js';
 import { badRequest, forbidden, notFound } from '../errors.js';
-import { assertCleanText, PageQuery, parse, UuidSchema, type RoutePlugin } from '../http.js';
+import { assertCleanText, Coordinates, PageQuery, parse, UuidSchema, type RoutePlugin } from '../http.js';
 import { PHOTO_MAX_BYTES } from '../services/photos.js';
 import { canSeeSql, loadPosts } from '../services/posts.js';
 import { tr, type I18n } from '../i18n.js';
+import { pushTexts } from '../services/push-texts.js';
 
 const IdParams = z.object({ id: UuidSchema });
 
@@ -152,12 +153,23 @@ export const postRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
   );
 
   app.get('/v1/feed', { preHandler: auth.requireAuth }, async (request) => {
-    const query = parse(PageQuery.extend({ scope: z.enum(['following', 'friends', 'global']).default('global') }), request.query);
+    const query = parse(
+      PageQuery.extend({
+        scope: z.enum(['following', 'friends', 'nearby', 'global']).default('global'),
+        lat: Coordinates.lat.optional(),
+        lng: Coordinates.lng.optional(),
+      }),
+      request.query,
+    );
+    if (query.scope === 'nearby' && (query.lat === undefined || query.lng === undefined)) {
+      throw badRequest('location_required', 'The nearby feed needs lat and lng');
+    }
     return {
       posts: await loadPosts(db, photos, {
         viewerId: userId(request),
         following: query.scope === 'following',
         friends: query.scope === 'friends',
+        near: query.scope === 'nearby' ? { lat: query.lat!, lng: query.lng!, km: 50 } : undefined,
         before: query.before,
         limit: query.limit,
       }),
@@ -246,11 +258,11 @@ export const postRoutes: RoutePlugin = (app, { db, auth, photos, push }) => {
         [id, uid, body.body],
       );
       if (!post.isMine) {
-        push.notify([post.author.id], 'social', {
-          title: `${rows[0]!.author.displayName} commented`,
-          body: body.body.slice(0, 120),
+        const name = rows[0]!.author.displayName;
+        push.notify([post.author.id], 'social', (lang) => ({
+          ...pushTexts(lang).comment(name, body.body.slice(0, 120)),
           url: `/post/${id}`,
-        });
+        }));
       }
       return reply.code(201).send({ comment: rows[0] });
     },

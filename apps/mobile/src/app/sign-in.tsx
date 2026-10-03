@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AppleSignInButton } from '@/components/apple-sign-in';
 import { LogoMark } from '@/components/logo';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
@@ -94,6 +95,7 @@ export default function SignInScreen() {
           </Animated.View>
           <Animated.View entering={FadeIn.delay(350).duration(500)} style={styles.splashBottom}>
             <Button label={t('auth.getStarted')} variant="light" onPress={() => open('register')} style={styles.pill} />
+            <AppleSignInButton variant="white" />
             <Button variant="ghost" label={t('auth.haveAccount')} textColor="#FFFFFF" onPress={() => open('login')} />
             <ThemedText style={styles.credit}>{t('common.photoCredit', { credit: `${BRAND_IMAGES.welcome.credit} · Wikimedia Commons` })}</ThemedText>
           </Animated.View>
@@ -163,6 +165,7 @@ export default function SignInScreen() {
               disabled={!canSubmit}
               onPress={submit}
             />
+            <AppleSignInButton variant="black" />
             <Button
               variant="ghost"
               label={mode === 'register' ? t('auth.haveAccount') : t('auth.createNew')}

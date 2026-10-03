@@ -14,6 +14,8 @@ param(
 
 # Native tools write progress to stderr; failures are detected through $LASTEXITCODE instead.
 $ErrorActionPreference = "Continue"
+# Pipe text to ssh as UTF-8 without a byte-order mark (bash would read the BOM as part of the first line).
+$OutputEncoding = New-Object System.Text.UTF8Encoding $false
 $root = Split-Path -Parent $PSScriptRoot
 $api = Join-Path $root "apps\api"
 $releaseId = Get-Date -Format "yyyyMMdd-HHmmss"
