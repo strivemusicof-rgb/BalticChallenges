@@ -397,8 +397,8 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 
 ### Content pipeline
 - [ ] Content sourcing guidelines (official tourism data, licensing, attribution)
-- [ ] Bulk import tool (CSV / JSON → locations + challenges)
-- [ ] Content QA checklist (coordinates verified, safety metadata complete, photos licensed)
+- [ ] 🚧 Bulk import tool (CSV / JSON → locations + challenges) (`db/content/latvia.json` → `build-migration.mjs` generates places, challenges, translations and collections; no admin upload yet)
+- [ ] 🚧 Content QA checklist (coordinates verified, safety metadata complete, photos licensed) (`scripts/resolve-latvia*.mjs` checks every point against Latvian Wikipedia and OpenStreetMap and only takes CC-licensed Wikimedia photos; no written checklist yet)
 - [ ] 🚧 Translations: EN + LV + LT + ET (+ RU optional) (EN, LV and RU done for the whole app and all content; LT and ET not started)
 
 ### Content targets
@@ -421,7 +421,7 @@ Beta coverage (challenges per city): Tallinn 9 · Rīga 8 · Vilnius 8 · Kaunas
 - [ ] Tallinn · [ ] Tartu · [ ] Pärnu
 
 ### Country collections
-- [ ] 🇱🇻 Discover Latvia — 100 places
+- [x] 🇱🇻 Discover Latvia — 100 places (134 places, 85 with photos, plus Rīga & Jūrmala, Vidzeme, Kurzeme, Zemgale and Latgale collections)
 - [ ] 🇱🇹 Discover Lithuania — 100 places
 - [ ] 🇪🇪 Discover Estonia — 100 places
 
@@ -477,9 +477,9 @@ Beta coverage (challenges per city): Tallinn 9 · Rīga 8 · Vilnius 8 · Kaunas
 - [ ] Type I — Time-limited challenges (e.g. "Visit 3 locations this weekend")
 
 ### Community events
-- [ ] Shared community progress bar (e.g. 82,430 / 100,000)
-- [ ] Everyone who took part gets a badge when the goal is reached
-- [ ] 🇱🇻 Explore Latvia — 100 Places
+- [x] Shared community progress bar (e.g. 82,430 / 100,000) (every event has a goal; every completed challenge in Latvia during the event counts; goal and reward set in the admin Events tab)
+- [x] Everyone who took part gets a badge when the goal is reached (reward XP plus a push for all participants, Stronger Together and Heart of Latvia badges)
+- [x] 🇱🇻 Explore Latvia — 100 Places
 - [ ] 🇱🇹 Discover Lithuania
 - [ ] 🇪🇪 Estonia Explorer
 - [ ] 🌊 Baltic Coast Challenge
@@ -642,3 +642,4 @@ Needs: **Phase 6, 7 (recommendations), 8, 9, 10 (first part)**, plus:
 | 2026-10-03 | Multi-checkpoint trails (5) with GPS checkpoint mode, Lighthouses / Viewpoints / Wild Nature / Trails collections, nearby feed, compare with a friend, friend activity pushes, push notifications in the user's language, Sign in with Apple button, CI checks, nightly VPS backups. |
 | 2026-10-03 | Latvian is the default language. Seasonal events: Autumn in Latvia (live), Halloween, Latvia's November, Christmas, White Winter, Easter, 4 May, Spring, Jāņi and Summer, each with challenges, a collection and a limited badge, scheduled by date and switchable in the admin Events tab. Event banner on Home. |
 | 2026-10-03 | Play modes: level rewards (avatar frames, stats, LVL 10+ challenges), photo challenges, GPS route challenges with plausibility checks, collection challenges (any order), offline check-in queue and cached app data, shareable image cards, friend duels with +100 XP prize. 9 new Latvian challenges. |
+| 2026-10-03 | 102 new Latvian places (Rīga, Jūrmala, Gauja valley, Kurzeme coast, Zemgale, Latgale lakes) with EN/LV/RU text, checked coordinates and Wikimedia photos; five regional collections; new places added to all seasonal events; community goals with shared progress, rewards and pushes. iOS build 10 on TestFlight (Sign in with Apple capability synced, new provisioning profile). |
