@@ -95,11 +95,11 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] Moderation and audit log model
 
 ### Engineering setup
-- [ ] 🚧 Git repository and branching strategy (local repo created; no remote or branching strategy yet)
+- [ ] 🚧 Git repository and branching strategy (GitHub repo strivemusicof-rgb/BalticChallenges, pushing to main; no branching strategy yet)
 - [x] Expo + TypeScript project scaffold
 - [ ] 🚧 Linting, formatting, strict TypeScript (strict TypeScript everywhere; ESLint on the mobile app via `eslint-config-expo`; no Prettier or API lint yet)
-- [ ] CI: typecheck, lint and tests on every push
-- [ ] EAS Build set up for iOS and Android
+- [ ] 🚧 CI: typecheck, lint and tests on every push (GitHub Actions builds iOS and submits to TestFlight; no lint/test job yet)
+- [ ] 🚧 EAS Build set up for iOS and Android (iOS builds and TestFlight submission work; Android not set up)
 - [ ] Separate dev, staging and production environments
 - [x] Secrets management (server secrets generated on the VPS in `/etc/baltic-challenges/api.env`, readable only by root and the service)
 
@@ -185,7 +185,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 
 ### Exit criteria
 - [ ] 🚧 A new user can sign up, finish onboarding, find a nearby challenge, go there, complete it via GPS and see their XP go up (verified end-to-end against the live API by `smoke-test.ps1`; not yet tested on a phone)
-- [ ] Internal TestFlight / Play internal testing build is running
+- [x] Internal TestFlight / Play internal testing build is running (iOS TestFlight; Play not yet)
 
 ---
 
@@ -398,7 +398,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [ ] Content sourcing guidelines (official tourism data, licensing, attribution)
 - [ ] Bulk import tool (CSV / JSON → locations + challenges)
 - [ ] Content QA checklist (coordinates verified, safety metadata complete, photos licensed)
-- [ ] Translations: EN + LV + LT + ET (+ RU optional)
+- [ ] 🚧 Translations: EN + LV + LT + ET (+ RU optional) (EN, LV and RU done for the whole app and all content; LT and ET not started)
 
 ### Content targets
 
@@ -635,5 +635,6 @@ Needs: **Phase 6, 7 (recommendations), 8, 9, 10 (first part)**, plus:
 | 2026-10-02 | Phase 2: Riga-day streaks with 7/30-day badges, +50 XP challenge-of-the-day bonus, weekly and monthly goals, Early Bird / Night Explorer / Weekly Warrior badges, animated level-up celebration, history screen, edit profile and avatar, explore list view. Push notifications (Expo) with per-type settings and an evening reminder job (streak, weekly goal ending, close to level; max one per day). |
 | 2026-10-02 | Phase 3: public profiles, follow / mutual friends, people search, posts with photos (EXIF stripped, re-encoded on the server, duplicate detection), following and Baltic-wide feeds, likes, comments, saves, place pages, friends / weekly / country / Baltic leaderboards. |
 | 2026-10-02 | Phase 3.5: report and block everywhere, multilingual text filter and link-spam rules, privacy controls, versioned terms consent, draft privacy / terms / support pages, flagged-completion review. Admin web dashboard at `/admin/` (stats, reports, pending posts, flagged completions, users and bans, places and challenges editors, audit log). |
+| 2026-10-03 | Latvian and Russian translations (UI and all content, API picks language from Accept-Language), emoji replaced by an icon set, calmer animations, in-app admin panel for admin accounts, GitHub repo and TestFlight pipeline. |
 | 2026-10-03 | Full app redesign to the 15-screen reference (forest-green design system, photo cards, hex badges, animated segmented tabs, spring press feedback, parallax photo headers). Wikimedia Commons photos for 79 of 94 places, with credits. New screens: Achievements, Daily/Weekly/Monthly, Pro paywall (UI only), Create Post type picker, GPS challenge mode with a dark map, photo step on completion (stored as proof). Web test build served at `/app/` with a Leaflet/OpenStreetMap map. API: collection cover images, km explored and photo stats, friends feed, optional proof photo on completion. |
 | 2026-10-02 | Content batch 2: 61 more places (94 challenges: 32 LV, 31 LT, 31 EE) and six new collections (Rīga / Vilnius / Tallinn highlights, Baltic Manors, Sacred Places, Falls & Cliffs). Reports on deleted content now close themselves. |
