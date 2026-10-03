@@ -24,11 +24,11 @@
 | 2 | Make It Actually Fun | 3–5 wks | 🟨 In progress |
 | 3 | Social | 4–6 wks | 🟨 In progress |
 | 3.5 | Trust, Safety & Launch Monetization | 2–3 wks | 🟨 In progress |
-| 4 | Advanced Exploration | 4–6 wks | ⬜ Not started |
+| 4 | Advanced Exploration | 4–6 wks | 🟨 In progress |
 | 5 | Baltic Content Expansion | 3–6 wks (ongoing) | 🟨 In progress |
 | 6 | Monetization (full) | — | ⬜ Not started |
 | 7 | AI | — | ⬜ Not started |
-| 8 | Events & Seasons | — | ⬜ Not started |
+| 8 | Events & Seasons | — | 🟨 In progress |
 | 9 | Community-Created Challenges | — | ⬜ Not started |
 | 10 | Business Ecosystem | — | ⬜ Not started |
 
@@ -36,7 +36,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 
 **Tech stack:** React Native + Expo · TypeScript · Backend/API · PostgreSQL (+ PostGIS) · Cloud photo storage · Push notifications · Maps/GPS · Apple/Google auth · Apple/Google subscriptions. Mobile only (iOS + Android).
 
-**As built:** Expo SDK 57 + Expo Router (`apps/mobile`) · Fastify 5 + TypeScript API (`apps/api`) · PostgreSQL 16 + PostGIS 3.4 · Caddy (HTTPS) · all on the OVH VPS at `https://vps-1a18ee51.vps.ovh.net`. Admin dashboard (`apps/admin`, Vite + React) served at `/admin/`. Deploy with `scripts/deploy-api.ps1` (builds the API and admin); verify the live API with `scripts/smoke-test.ps1`.
+**As built:** Expo SDK 57 + Expo Router (`apps/mobile`, UI in EN / LV / RU, Latvian by default) · Fastify 5 + TypeScript API (`apps/api`) · PostgreSQL 16 + PostGIS 3.4 · Caddy (HTTPS) · all on the OVH VPS at `https://vps-1a18ee51.vps.ovh.net`. Admin dashboard (`apps/admin`, Vite + React) served at `/admin/`. Deploy with `scripts/deploy-api.ps1` (builds the API and admin); verify the live API with `scripts/smoke-test.ps1`.
 
 ---
 
@@ -46,7 +46,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] Settle on the working name (Baltic Challenges) and list the alternatives: Baltic Quest, Explore Baltics, Baltic Explorer, Baltic Challenge
 - [ ] Check that domain names and App Store / Play Store names are available
 - [ ] Logo and app icon (first version)
-- [ ] 🚧 Design system: colors, typography, spacing, icons, category emoji/icon set (tokens in `constants/theme.ts`, category emoji in the database; needs a designer pass)
+- [ ] 🚧 Design system: colors, typography, spacing, icons, category icon set (forest-green tokens in `constants/theme.ts`, Material Community icons per category in `lib/glyphs.ts`; needs a designer pass)
 - [x] Component library spec: cards, XP bar, badges, buttons, map markers, progress bars
 - [ ] Figma: onboarding (5 screens)
 - [ ] Figma: Home
@@ -230,7 +230,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 ### Collections
 - [x] Collection screen: progress bar, XP reward, completion badge
 - [x] Visual cards showing ✓ completed and 🔒 locked items
-- [ ] 🚧 Specialist collections: 🏰 Castles, 🌊 Coast, 🌲 Nature, 🏛️ Historic Cities, 🗼 Lighthouses, 🌅 Viewpoints, 🥾 Hiking, 🚲 Cycling, 📸 Photography, 🐾 Wildlife (Castles, Coast, Manors, Sacred Places, Falls & Cliffs, and Rīga / Vilnius / Tallinn highlights exist)
+- [ ] 🚧 Specialist collections: 🏰 Castles, 🌊 Coast, 🌲 Nature, 🏛️ Historic Cities, 🗼 Lighthouses, 🌅 Viewpoints, 🥾 Hiking, 🚲 Cycling, 📸 Photography, 🐾 Wildlife (Castles, Coast, Wild Nature, Lighthouses, Viewpoints, Trails, Manors, Sacred Places, Falls & Cliffs, and Rīga / Vilnius / Tallinn highlights exist; Cycling, Photography and Wildlife not yet)
 - [ ] Type D — Collection challenge (several locations counting toward one challenge)
 
 ### Progress tracking
@@ -635,8 +635,8 @@ Needs: **Phase 6, 7 (recommendations), 8, 9, 10 (first part)**, plus:
 | 2026-10-02 | Phase 2: Riga-day streaks with 7/30-day badges, +50 XP challenge-of-the-day bonus, weekly and monthly goals, Early Bird / Night Explorer / Weekly Warrior badges, animated level-up celebration, history screen, edit profile and avatar, explore list view. Push notifications (Expo) with per-type settings and an evening reminder job (streak, weekly goal ending, close to level; max one per day). |
 | 2026-10-02 | Phase 3: public profiles, follow / mutual friends, people search, posts with photos (EXIF stripped, re-encoded on the server, duplicate detection), following and Baltic-wide feeds, likes, comments, saves, place pages, friends / weekly / country / Baltic leaderboards. |
 | 2026-10-02 | Phase 3.5: report and block everywhere, multilingual text filter and link-spam rules, privacy controls, versioned terms consent, draft privacy / terms / support pages, flagged-completion review. Admin web dashboard at `/admin/` (stats, reports, pending posts, flagged completions, users and bans, places and challenges editors, audit log). |
-| 2026-10-03 | Latvian is the default language. Seasonal events: Autumn in Latvia (live), Halloween, Latvia's November, Christmas, White Winter, Easter, 4 May, Spring, Jāņi and Summer, each with challenges, a collection and a limited badge, scheduled by date and switchable in the admin Events tab. Event banner on Home. |
-| 2026-10-03 | Multi-checkpoint trails (5) with GPS checkpoint mode, Lighthouses / Viewpoints / Wild Nature / Trails collections, nearby feed, compare with a friend, friend activity pushes, push notifications in the user's language, Sign in with Apple button, CI checks, nightly VPS backups. |
-| 2026-10-03 | Latvian and Russian translations (UI and all content, API picks language from Accept-Language), emoji replaced by an icon set, calmer animations, in-app admin panel for admin accounts, GitHub repo and TestFlight pipeline. |
-| 2026-10-03 | Full app redesign to the 15-screen reference (forest-green design system, photo cards, hex badges, animated segmented tabs, spring press feedback, parallax photo headers). Wikimedia Commons photos for 79 of 94 places, with credits. New screens: Achievements, Daily/Weekly/Monthly, Pro paywall (UI only), Create Post type picker, GPS challenge mode with a dark map, photo step on completion (stored as proof). Web test build served at `/app/` with a Leaflet/OpenStreetMap map. API: collection cover images, km explored and photo stats, friends feed, optional proof photo on completion. |
 | 2026-10-02 | Content batch 2: 61 more places (94 challenges: 32 LV, 31 LT, 31 EE) and six new collections (Rīga / Vilnius / Tallinn highlights, Baltic Manors, Sacred Places, Falls & Cliffs). Reports on deleted content now close themselves. |
+| 2026-10-03 | Full app redesign to the 15-screen reference (forest-green design system, photo cards, hex badges, animated segmented tabs, spring press feedback, parallax photo headers). Wikimedia Commons photos for 79 of 94 places, with credits. New screens: Achievements, Daily/Weekly/Monthly, Pro paywall (UI only), Create Post type picker, GPS challenge mode with a dark map, photo step on completion (stored as proof). Web test build served at `/app/` with a Leaflet/OpenStreetMap map. API: collection cover images, km explored and photo stats, friends feed, optional proof photo on completion. |
+| 2026-10-03 | Latvian and Russian translations (UI and all content, API picks language from Accept-Language), emoji replaced by an icon set, calmer animations, in-app admin panel for admin accounts, GitHub repo and TestFlight pipeline. |
+| 2026-10-03 | Multi-checkpoint trails (5) with GPS checkpoint mode, Lighthouses / Viewpoints / Wild Nature / Trails collections, nearby feed, compare with a friend, friend activity pushes, push notifications in the user's language, Sign in with Apple button, CI checks, nightly VPS backups. |
+| 2026-10-03 | Latvian is the default language. Seasonal events: Autumn in Latvia (live), Halloween, Latvia's November, Christmas, White Winter, Easter, 4 May, Spring, Jāņi and Summer, each with challenges, a collection and a limited badge, scheduled by date and switchable in the admin Events tab. Event banner on Home. |
