@@ -1,3 +1,4 @@
+import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
 import { currentLanguage } from '@/lib/i18n';
@@ -74,8 +75,9 @@ export async function uploadImage<T>(path: string, uri: string): Promise<T> {
     // On the web the picker returns a blob:/data: URL; send the actual bytes.
     form.append('file', await (await fetch(uri)).blob(), 'photo.jpg');
   } else {
-    // React Native's FormData accepts { uri, name, type } descriptors for files.
-    form.append('file', { uri, name: 'photo.jpg', type: 'image/jpeg' } as unknown as Blob);
+    // Expo's fetch only reads real file objects; React Native's { uri, name, type } descriptors make it
+    // throw before the request is sent (which looked like "no connection").
+    form.append('file', new File(uri), 'photo.jpg');
   }
   return api<T>(path, { method: 'POST', form });
 }

@@ -47,9 +47,12 @@ async function save() {
   emit();
 }
 
-/** True for "no connection" failures, as opposed to the server answering with an error. */
+/**
+ * True for "no connection" failures, as opposed to the server answering with an error.
+ * `api()` reports a request that never got an answer as status 0.
+ */
 export function isOfflineError(error: unknown): boolean {
-  return !(error instanceof ApiError);
+  return error instanceof ApiError ? error.status === 0 : true;
 }
 
 export async function enqueue(item: WithoutId<QueuedItem>) {
