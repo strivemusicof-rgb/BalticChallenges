@@ -22,6 +22,7 @@ import { useLocation } from '@/hooks/use-location';
 import { formatDistance } from '@/lib/format';
 import { categoryGlyph } from '@/lib/glyphs';
 import { useT } from '@/lib/i18n';
+import { useQueuedItems } from '@/lib/offline-queue';
 import type { ChallengeSummary } from '@/lib/types';
 
 function TodayCard({ challenge, bonus }: { challenge: ChallengeSummary; bonus: number }) {
@@ -104,6 +105,8 @@ export default function HomeScreen() {
           <TodayCard challenge={todaysChallenge} bonus={dailyBonusXp} />
         </Reveal>
       )}
+
+      <PendingSync />
 
       <Reveal index={3}>
         <SeasonBanner />
@@ -188,7 +191,34 @@ export default function HomeScreen() {
   );
 }
 
+/** Shown while offline check-ins are waiting to be sent. */
+function PendingSync() {
+  const t = useT();
+  const queued = useQueuedItems();
+  if (queued.length === 0) return null;
+  return (
+    <View style={styles.pending}>
+      <Icon name="cloud-upload-outline" size={18} color={Brand.sea} />
+      <ThemedText type="smallBold" style={styles.pendingText}>
+        {t('offline.waiting', { count: queued.length })}
+      </ThemedText>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  pending: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    padding: Spacing.three,
+    borderRadius: Radius.medium,
+    backgroundColor: Brand.mint,
+  },
+  pendingText: {
+    flex: 1,
+    color: Brand.sea,
+  },
   section: {
     gap: Spacing.three,
   },

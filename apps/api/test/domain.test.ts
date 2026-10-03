@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 
 import { hourInWindow, isRuleMet, ruleProgress, type PlayerProgress } from '../src/domain/achievements.js';
 import { levelForXp } from '../src/domain/levels.js';
-import { evaluateCheckIn, haversineDistanceM } from '../src/domain/verification.js';
+import { evaluateCheckIn, evaluateRoute, haversineDistanceM } from '../src/domain/verification.js';
 
 const now = new Date('2026-10-02T12:00:00Z');
 const cesis = { lat: 57.313, lng: 25.2705 };
@@ -126,5 +126,47 @@ describe('achievement rules', () => {
         progress,
       ),
     );
+  });
+});
+
+describe('offline check-ins', () => {
+  const base = { distanceM: 10, radiusM: 100, previous: null, now };
+  it('accepts a fix queued an hour ago', () => {
+    const deviceTime = new Date(now.getTime() - 3_600_000);
+    assert.equal(evaluateCheckIn({ ...base, fix: fix({ deviceTime }), offline: true }).verdict, 'accepted');
+  });
+  it('flags a fix queued a day ago and rejects one older than three days', () => {
+    const day = new Date(now.getTime() - 24 * 3_600_000);
+    const old = new Date(now.getTime() - 80 * 3_600_000);
+    assert.equal(evaluateCheckIn({ ...base, fix: fix({ deviceTime: day }), offline: true }).verdict, 'flagged');
+    assert.equal(evaluateCheckIn({ ...base, fix: fix({ deviceTime: old }), offline: true }).verdict, 'rejected');
+  });
+  it('still rejects a stale fix that was not queued offline', () => {
+    const deviceTime = new Date(now.getTime() - 3_600_000);
+    assert.equal(evaluateCheckIn({ ...base, fix: fix({ deviceTime }) }).verdict, 'rejected');
+  });
+});
+
+describe('route verification', () => {
+  // A straight walk east from Cēsis: ~70 m every minute.
+  const walk = (count: number, stepDeg = 0.001, stepMs = 60_000) =>
+    Array.from({ length: count }, (_, i) => ({ lat: cesis.lat, lng: cesis.lng + i * stepDeg, t: i * stepMs, accuracyM: 8 }));
+  const rules = { start: cesis, startRadiusM: 300, maxSpeedKmh: 20 };
+
+  it('accepts a long enough walk that starts at the place', () => {
+    const result = evaluateRoute({ ...rules, points: walk(60), minDistanceM: 3000 });
+    assert.equal(result.verdict, 'accepted');
+    assert.ok(result.distanceM > 3000);
+  });
+  it('rejects a walk that is too short or starts elsewhere', () => {
+    assert.equal(evaluateRoute({ ...rules, points: walk(20), minDistanceM: 3000 }).verdict, 'rejected');
+    const away = walk(60).map((p) => ({ ...p, lat: p.lat + 0.1 }));
+    assert.equal(evaluateRoute({ ...rules, points: away, minDistanceM: 3000 }).verdict, 'rejected');
+  });
+  it('does not count driving towards the distance', () => {
+    const drive = walk(60, 0.01); // ~600 m per minute = 36 km/h
+    const result = evaluateRoute({ ...rules, points: drive, minDistanceM: 3000 });
+    assert.equal(result.verdict, 'rejected');
+    assert.equal(result.distanceM, 0);
   });
 });

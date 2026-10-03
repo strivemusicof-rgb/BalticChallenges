@@ -3,6 +3,8 @@ import type { Lang } from '../i18n.js';
 /** Push notification copy in each supported language. */
 const TEXTS = {
   en: {
+    duelInvite: (name: string) => ({ title: `${name} challenged you`, body: 'Accept the duel and see who explores more.' }),
+    duelAccepted: (name: string) => ({ title: `${name} accepted your challenge`, body: 'The duel has started. Good luck!' }),
     newFollower: (name: string) => ({ title: 'New follower', body: `${name} started following you` }),
     comment: (name: string, body: string) => ({ title: `${name} commented`, body }),
     friendCompleted: (name: string, challenge: string) => ({ title: `${name} completed a challenge`, body: challenge }),
@@ -20,6 +22,8 @@ const TEXTS = {
     }),
   },
   lv: {
+    duelInvite: (name: string) => ({ title: `${name} tevi izaicināja`, body: 'Pieņem dueli un noskaidro, kurš ceļo vairāk.' }),
+    duelAccepted: (name: string) => ({ title: `${name} pieņēma tavu izaicinājumu`, body: 'Duelis ir sācies. Veiksmi!' }),
     newFollower: (name: string) => ({ title: 'Jauns sekotājs', body: `${name} sāka tev sekot` }),
     comment: (name: string, body: string) => ({ title: `${name} komentēja`, body }),
     friendCompleted: (name: string, challenge: string) => ({ title: `${name} izpildīja izaicinājumu`, body: challenge }),
@@ -37,6 +41,8 @@ const TEXTS = {
     }),
   },
   ru: {
+    duelInvite: (name: string) => ({ title: `${name} бросил вам вызов`, body: 'Примите дуэль и узнайте, кто исследует больше.' }),
+    duelAccepted: (name: string) => ({ title: `${name} принял ваш вызов`, body: 'Дуэль началась. Удачи!' }),
     newFollower: (name: string) => ({ title: 'Новый подписчик', body: `${name} подписался на вас` }),
     comment: (name: string, body: string) => ({ title: `${name} оставил комментарий`, body }),
     friendCompleted: (name: string, challenge: string) => ({ title: `${name} выполнил задание`, body: challenge }),

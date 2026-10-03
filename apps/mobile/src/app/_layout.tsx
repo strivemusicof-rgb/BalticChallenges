@@ -1,16 +1,22 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AppState } from 'react-native';
 
 import { DialogHost } from '@/components/dialog-host';
 import { Brand } from '@/constants/theme';
 import { api, ApiError } from '@/lib/api';
 import { currentLanguage, restoreLanguage } from '@/lib/i18n';
+import { flushQueue } from '@/lib/offline-queue';
 import { handleNotificationTaps, registerForPushNotifications } from '@/lib/notifications';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 
@@ -31,19 +37,54 @@ const STACK_OPTIONS = {
   contentStyle: { backgroundColor: '#FFFFFF' },
 };
 
+const CACHE_MAX_AGE = 7 * 24 * 3_600_000;
+
+// The query cache is saved on the device so screens opened before still work without a connection.
+const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'bc.queryCache', throttleTime: 2000 });
+
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 30_000,
+        gcTime: CACHE_MAX_AGE,
         retry: (failureCount, error) => !(error instanceof ApiError && error.status >= 400 && error.status < 500) && failureCount < 2,
       },
     },
   });
 }
 
+/** Sends queued offline check-ins when the app opens, returns to the foreground or the connection comes back. */
+function OfflineSync() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const sync = () =>
+      void flushQueue().then((sent) => {
+        if (sent > 0) void queryClient.invalidateQueries();
+      });
+    sync();
+    const unsubscribeNet = NetInfo.addEventListener((network) => {
+      if (network.isConnected) sync();
+    });
+    const appState = AppState.addEventListener('change', (next) => {
+      if (next === 'active') sync();
+    });
+    return () => {
+      unsubscribeNet();
+      appState.remove();
+    };
+  }, [queryClient]);
+  return null;
+}
+
 function RootNavigator() {
   const { state } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Never show one account's cached data to the next person who signs in on this phone.
+  useEffect(() => {
+    if (state.status === 'signedOut') queryClient.clear();
+  }, [state.status, queryClient]);
   const { t } = useTranslation();
   // Icons are drawn with fonts; load them before the first frame so they never flash as boxes.
   const [fontsLoaded, fontError] = useFonts({ ...Ionicons.font, ...MaterialCommunityIcons.font });
@@ -107,6 +148,9 @@ function RootNavigator() {
         <Stack.Screen name="people" options={{ title: t('titles.people') }} />
         <Stack.Screen name="follows" options={{ title: '' }} />
         <Stack.Screen name="admin/index" options={{ title: t('titles.admin') }} />
+        <Stack.Screen name="levels" options={{ title: t('titles.levels') }} />
+        <Stack.Screen name="duels" options={{ title: t('titles.duels') }} />
+        <Stack.Screen name="duel-new" options={{ title: t('titles.duelNew'), presentation: 'modal' }} />
       </Stack.Protected>
     </Stack>
   );
@@ -123,13 +167,20 @@ export default function RootLayout() {
   }, [language, queryClient]);
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: CACHE_MAX_AGE,
+        dehydrateOptions: { shouldDehydrateQuery: (query) => query.state.status === 'success' && query.queryKey[0] !== 'admin' },
+      }}>
       <ThemeProvider value={NAV_THEME}>
         <AuthProvider>
           <RootNavigator key={language} />
+          <OfflineSync />
           <DialogHost />
         </AuthProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

@@ -14,7 +14,7 @@ export function UserRow({ user, leading, trailing }: { user: UserSummary; leadin
   return (
     <Card style={styles.row} onPress={() => router.push({ pathname: '/user/[id]', params: { id: user.id } })}>
       {leading}
-      <Avatar name={user.displayName} url={user.avatarUrl} />
+      <Avatar name={user.displayName} url={user.avatarUrl} level={user.level} />
       <View style={styles.flex}>
         <ThemedText type="smallBold">{user.displayName}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">

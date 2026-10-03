@@ -21,6 +21,7 @@ import { BRAND_IMAGES } from '@/lib/brand-images';
 
 import { formatNumber, levelTitle } from '@/lib/format';
 import { achievementGlyph } from '@/lib/glyphs';
+import { STATS_LEVEL } from '@/lib/levels';
 import { useT } from '@/lib/i18n';
 
 function LinkRow({ icon, label, detail, onPress }: { icon: IconName; label: string; detail?: string; onPress: () => void }) {
@@ -64,7 +65,7 @@ export default function ProfileScreen() {
       <View style={styles.body}>
         <Reveal style={styles.header}>
           <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel={t('profile.editProfile')} style={styles.avatarRing}>
-            <Avatar name={user.displayName} url={user.avatarUrl} size={96} />
+            <Avatar name={user.displayName} url={user.avatarUrl} size={96} level={user.level.level} />
           </Pressable>
           <ThemedText style={styles.name}>{user.displayName}</ThemedText>
           <ThemedText style={styles.level}>
@@ -140,6 +141,27 @@ export default function ProfileScreen() {
           </Card>
         </Reveal>
 
+        <Reveal index={2}>
+          {user.level.level >= STATS_LEVEL ? (
+            <Card style={styles.statsCard}>
+              <StatRow
+                items={[
+                  { value: user.streak.longest, label: t('profile.bestStreak') },
+                  { value: stats.collectionsCompleted, label: t('profile.collectionsDone') },
+                  { value: stats.achievementsUnlocked, label: t('profile.badges') },
+                ]}
+              />
+            </Card>
+          ) : (
+            <PressableScale onPress={() => router.push('/levels')} style={styles.lockedStats}>
+              <Icon name="lock-closed-outline" size={18} color="#8A9790" />
+              <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+                {t('profile.statsLocked', { level: STATS_LEVEL })}
+              </ThemedText>
+            </PressableScale>
+          )}
+        </Reveal>
+
         <Reveal index={3} style={styles.section}>
           <SectionHeader
             title={t('collections.badges')}
@@ -167,6 +189,8 @@ export default function ProfileScreen() {
           {user.role === 'admin' && (
             <LinkRow icon="shield-checkmark-outline" label={t('profile.admin')} onPress={() => router.push('/admin')} />
           )}
+          <LinkRow icon="star-outline" label={t('profile.levelRewards')} onPress={() => router.push('/levels')} />
+          <LinkRow icon="flash-outline" label={t('profile.duels')} onPress={() => router.push('/duels')} />
           <LinkRow icon="trophy-outline" label={t('profile.leaderboard')} onPress={() => router.push('/leaderboard')} />
           <LinkRow icon="time-outline" label={t('profile.history')} onPress={() => router.push('/history')} />
           <LinkRow icon="bookmark-outline" label={t('profile.saved')} onPress={() => router.push('/saved')} />
@@ -263,6 +287,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  lockedStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    padding: Spacing.three,
+    borderRadius: Radius.large,
+    backgroundColor: '#F7F9F8',
   },
   statsCard: {
     gap: 0,

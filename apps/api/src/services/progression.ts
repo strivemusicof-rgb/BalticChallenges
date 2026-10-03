@@ -19,7 +19,8 @@ export type XpSource =
   | 'monthly'
   | 'goal'
   | 'streak'
-  | 'admin';
+  | 'admin'
+  | 'duel';
 
 let levelsCache: LevelRow[] | null = null;
 

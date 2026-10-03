@@ -93,7 +93,7 @@ function PostCardBase({ post, detail = false }: { post: Post; detail?: boolean }
     <View style={styles.card}>
       <View style={styles.header}>
         <Pressable onPress={openAuthor} style={styles.author} accessibilityRole="link">
-          <Avatar name={post.author.displayName} url={post.author.avatarUrl} size={40} />
+          <Avatar name={post.author.displayName} url={post.author.avatarUrl} size={40} level={post.author.level} />
           <View style={styles.flex}>
             <ThemedText type="smallBold">{post.author.displayName}</ThemedText>
             <ThemedText style={styles.meta} numberOfLines={1}>

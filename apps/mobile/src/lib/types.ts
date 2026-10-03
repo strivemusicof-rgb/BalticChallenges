@@ -197,6 +197,10 @@ export interface ChallengeSummary {
   } | null;
   imageUrl: string | null;
   imageCredit: string | null;
+  /** Players below this level cannot start the challenge. */
+  minLevel: number;
+  /** e.g. { distanceKm } for routes, { anyOrder } for visit-all challenges. */
+  requirements: { distanceKm?: number; maxSpeedKmh?: number; anyOrder?: boolean };
   distanceM: number | null;
   userStatus: 'in_progress' | 'completed' | 'flagged' | null;
 }
@@ -312,4 +316,24 @@ export type CompletionResult =
       unlocked: UnlockedReward[];
     }
   | { status: 'checkpoint'; stepsDone: number; totalSteps: number; distanceM: number }
+  | { status: 'queued' }
   | { status: 'rejected' | 'flagged'; reason: string; message: string; distanceM: number };
+
+export interface DuelSide extends UserSummary {
+  score: number;
+}
+
+export interface Duel {
+  id: string;
+  metric: 'challenges' | 'xp' | 'places';
+  days: number;
+  status: 'pending' | 'active' | 'declined' | 'cancelled' | 'finished';
+  startsAt: string | null;
+  endsAt: string | null;
+  winnerId: string | null;
+  createdAt: string;
+  isChallenger: boolean;
+  challenger: DuelSide;
+  opponent: DuelSide;
+  winXp: number;
+}

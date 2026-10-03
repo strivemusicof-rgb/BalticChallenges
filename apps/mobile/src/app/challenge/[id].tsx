@@ -23,7 +23,13 @@ import { PressableScale } from '@/components/ui/pressable-scale';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Tag } from '@/components/ui/tag';
 import { Brand, MaxContentWidth, Radius, Shadow, Spacing } from '@/constants/theme';
-import { useAbandonChallenge, useChallenge, useCompleteChallenge, useStartChallenge } from '@/hooks/queries';
+import { RouteMode } from '@/components/route-mode';
+import { ShareCardButton } from '@/components/share-card';
+import { useAbandonChallenge, useChallenge, useCompleteChallenge, useStartChallenge, useSubmitRoute } from '@/hooks/queries';
+import { useLocation } from '@/hooks/use-location';
+import { distanceM } from '@/lib/geo';
+import type { RoutePoint } from '@/lib/route-recorder';
+import { useCurrentUser } from '@/providers/auth-provider';
 import { useReport } from '@/hooks/social-queries';
 import { useLiveDistance } from '@/hooks/use-live-distance';
 import { showAlert } from '@/lib/dialog';
@@ -111,10 +117,14 @@ function DetailView({
 }) {
   const report = useReport();
   const t = useT();
+  const me = useCurrentUser();
+  const locked = data.userStatus === null && me.level.level < data.minLevel;
   const where = [data.place?.city, data.country && t(`countries.${data.country}`)].filter(Boolean).join(', ');
 
   const footer =
-    data.userStatus === null ? (
+    locked ? (
+      <Button label={t('challenge.unlocksAt', { level: data.minLevel })} icon="lock-closed" disabled onPress={() => undefined} />
+    ) : data.userStatus === null ? (
       <Button label={t('challenge.start')} icon="flag-outline" loading={starting} onPress={onStart} />
     ) : data.userStatus === 'in_progress' ? (
       <Button label={t('challenge.resume')} icon="navigate" onPress={onResume} />
@@ -143,6 +153,11 @@ function DetailView({
         <Tag label={data.categoryName} tone="green" />
         <Tag label={t(`difficulty.${data.difficulty}.name`)} tone="blue" />
         {data.endsAt && <Tag label={t('challenge.until', { date: shortDate(data.endsAt) })} icon="time-outline" tone="amber" />}
+        {data.verification === 'gps_photo' && <Tag label={t('challenge.photoChallenge')} icon="camera" tone="blue" />}
+        {data.verification === 'route' && (
+          <Tag label={t('challenge.routeKm', { km: data.requirements.distanceKm ?? 1 })} icon="walk" tone="blue" />
+        )}
+        {data.minLevel > 1 && <Tag label={t('common.level', { level: `${data.minLevel}+` })} icon="lock-closed-outline" tone={locked ? 'red' : 'grey'} />}
         <View style={styles.flex} />
         <Tag label={t('common.xp', { xp: data.xpReward })} icon="star" tone="amber" />
       </Reveal>
@@ -280,7 +295,12 @@ function GpsMode({
 
   // Trails aim at the next unvisited checkpoint; single challenges at their place.
   const steps = data.steps;
-  const next = steps.find((step) => !step.done) ?? null;
+  const here = useLocation().coords;
+  const open = steps.filter((step) => !step.done);
+  const next =
+    data.requirements.anyOrder && here
+      ? ([...open].sort((a, b) => distanceM(here, a) - distanceM(here, b))[0] ?? null)
+      : (open[0] ?? null);
   const doneCount = steps.filter((step) => step.done).length;
   const totalSteps = Math.max(steps.length, 1);
   const target = next ? { lat: next.lat, lng: next.lng } : data.place ? { lat: data.place.lat, lng: data.place.lng } : null;
@@ -478,7 +498,7 @@ function PhotoStep({
             <>
               <Button label={t('challenge.takePhoto')} icon="camera" onPress={() => take('camera')} />
               <Button label={t('challenge.upload')} icon="image-outline" variant="outline" onPress={() => take('library')} />
-              <Pressable onPress={() => onSubmit(null)} disabled={submitting} accessibilityRole="button" style={styles.skip}>
+              <Pressable onPress={() => onSubmit(null)} disabled={submitting || data.verification === 'gps_photo'} accessibilityRole="button" style={[styles.skip, data.verification === 'gps_photo' && styles.hidden]}>
                 <ThemedText type="smallBold" style={{ color: Brand.sea }}>
                   {submitting ? t('challenge.verifying') : t('challenge.skip')}
                 </ThemedText>
@@ -504,6 +524,7 @@ function Celebration({
   photoUri: string | null;
 }) {
   const t = useT();
+  const me = useCurrentUser();
   const done = () => {
     registerForPushNotifications({ prompt: true }).catch(() => undefined);
     router.navigate('/');
@@ -556,9 +577,22 @@ function Celebration({
         ))}
       </View>
       <View style={styles.celebrateActions}>
+        <ShareCardButton
+          variant="primary"
+          content={{
+            kicker: t('share.completed'),
+            title: challenge.title,
+            xp: result.xpEarned,
+            photo: photoUri ?? challenge.imageUrl,
+            glyph: categoryGlyph(challenge.categoryId),
+            name: me.displayName,
+            level: result.level.level,
+          }}
+        />
         <Button
-          label={t('challenge.share')}
-          icon="share-social-outline"
+          label={t('share.post')}
+          variant="outline"
+          icon="people-outline"
           onPress={() =>
             router.push({
               pathname: '/new-post',
@@ -574,7 +608,7 @@ function Celebration({
 
 // ── Screen ─────────────────────────────────────────────────────────────────
 
-type Mode = 'detail' | 'gps' | 'photo';
+type Mode = 'detail' | 'gps' | 'photo' | 'route';
 
 export default function ChallengeScreen() {
   const t = useT();
@@ -583,6 +617,7 @@ export default function ChallengeScreen() {
   const challengeId = challenge.data?.id ?? id;
   const start = useStartChallenge(challengeId);
   const complete = useCompleteChallenge(challengeId);
+  const route = useSubmitRoute(challengeId);
   const [mode, setMode] = useState<Mode | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -592,7 +627,8 @@ export default function ChallengeScreen() {
   if (challenge.isError) return <ErrorState error={challenge.error} onRetry={() => challenge.refetch()} />;
   const data = challenge.data;
   // Until the user switches views, a challenge that is already running opens straight into GPS mode.
-  const view: Mode = mode ?? (data.userStatus === 'in_progress' ? 'gps' : 'detail');
+  const runningView: Mode = data.verification === 'route' ? 'route' : 'gps';
+  const view: Mode = mode ?? (data.userStatus === 'in_progress' ? runningView : 'detail');
 
   if (complete.data?.status === 'completed') return <Celebration result={complete.data} challenge={data} photoUri={photoUri} />;
 
@@ -600,7 +636,7 @@ export default function ChallengeScreen() {
     setFeedback(null);
     try {
       await start.mutateAsync();
-      setMode('gps');
+      setMode(runningView);
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : i18n.t('challenge.startFailed'));
     }
@@ -608,10 +644,12 @@ export default function ChallengeScreen() {
 
   async function handleCheckpoint() {
     try {
-      const result = await complete.mutateAsync({});
+      const result = await complete.mutateAsync({ title: data.title });
       if (result.status === 'checkpoint') {
         showAlert(t('challenge.found'), t('challenge.checkpointDone', { done: result.stepsDone, total: result.totalSteps }));
-      } else if (result.status !== 'completed') {
+      } else if (result.status === 'queued') {
+        showAlert(t('offline.savedTitle'), t('offline.savedBody'));
+      } else if (result.status === 'rejected' || result.status === 'flagged') {
         showAlert(t('challenge.notYet'), result.message);
       }
     } catch (error) {
@@ -623,11 +661,32 @@ export default function ChallengeScreen() {
     setFeedback(null);
     setPhotoUri(photo);
     try {
-      const result = await complete.mutateAsync({ photoUri: photo });
+      const result = await complete.mutateAsync({ photoUri: photo, title: data.title });
       if (result.status === 'rejected' || result.status === 'flagged') setFeedback(result.message);
+      if (result.status === 'queued') {
+        showAlert(t('offline.savedTitle'), t('offline.savedBody'));
+        setMode('detail');
+      }
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : i18n.t('challenge.verifyFailed'));
     }
+  }
+
+  async function handleRoute(points: RoutePoint[]) {
+    setFeedback(null);
+    try {
+      const result = await route.mutateAsync({ points, title: data.title });
+      if (result.status === 'queued') showAlert(t('offline.savedTitle'), t('offline.savedBody'));
+      else if (result.status === 'rejected' || result.status === 'flagged') showAlert(t('challenge.notYet'), result.message);
+    } catch (error) {
+      showAlert(t('challenge.notYet'), error instanceof Error ? error.message : t('challenge.verifyFailed'));
+    }
+  }
+
+  if (route.data?.status === 'completed') return <Celebration result={route.data} challenge={data} photoUri={null} />;
+
+  if (view === 'route' && data.userStatus === 'in_progress') {
+    return <RouteMode data={data} submitting={route.isPending} onFinish={(points) => void handleRoute(points)} onDetails={() => setMode('detail')} />;
   }
 
   if (view === 'photo' && data.userStatus === 'in_progress') {
@@ -653,7 +712,7 @@ export default function ChallengeScreen() {
       />
     );
   }
-  return <DetailView data={data} onStart={handleStart} starting={start.isPending} onResume={() => setMode('gps')} feedback={feedback} />;
+  return <DetailView data={data} onStart={handleStart} starting={start.isPending} onResume={() => setMode(runningView)} feedback={feedback} />;
 }
 
 const styles = StyleSheet.create({
@@ -1004,6 +1063,9 @@ const styles = StyleSheet.create({
   photoActions: {
     gap: Spacing.three,
     paddingBottom: Spacing.three,
+  },
+  hidden: {
+    display: 'none',
   },
   skip: {
     alignItems: 'center',

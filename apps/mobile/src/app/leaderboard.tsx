@@ -41,7 +41,7 @@ function Row({ entry, isMe, metric }: { entry: LeaderboardEntry; isMe: boolean; 
       <View style={[styles.rank, medal ? { backgroundColor: medal } : null]}>
         <ThemedText style={[styles.rankText, medal ? { color: '#FFFFFF' } : null]}>{entry.rank}</ThemedText>
       </View>
-      <Avatar name={entry.displayName} url={entry.avatarUrl} size={40} />
+      <Avatar name={entry.displayName} url={entry.avatarUrl} size={40} level={entry.level} />
       <View style={styles.flex}>
         <ThemedText type="smallBold">{isMe ? `${entry.displayName} (${t('common.you')})` : entry.displayName}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">

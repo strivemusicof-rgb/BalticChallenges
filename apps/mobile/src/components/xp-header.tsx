@@ -26,7 +26,7 @@ export function XpHeader({ name, avatarUrl, level }: { name: string; avatarUrl?:
   return (
     <View style={styles.container}>
       <Pressable onPress={() => router.navigate('/profile')} accessibilityRole="button" accessibilityLabel={t('tabs.profile')}>
-        <Avatar name={name} url={avatarUrl ?? null} size={52} />
+        <Avatar name={name} url={avatarUrl ?? null} size={52} level={level.level} />
       </Pressable>
       <View style={styles.flex}>
         <ThemedText style={styles.greeting} numberOfLines={1}>

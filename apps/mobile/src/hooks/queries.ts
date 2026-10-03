@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getVerificationFix, type Coordinates } from '@/hooks/use-location';
 import { api, uploadImage } from '@/lib/api';
+import { enqueue, isOfflineError } from '@/lib/offline-queue';
+import type { RoutePoint } from '@/lib/route-recorder';
 import type {
   Achievement,
   Category,
@@ -168,11 +170,34 @@ export function useStartChallenge(id: string) {
 export function useCompleteChallenge(id: string) {
   const invalidate = useInvalidateProgress();
   return useMutation({
-    mutationFn: async ({ photoUri }: { photoUri?: string | null } = {}) => {
+    mutationFn: async ({ photoUri, title = '' }: { photoUri?: string | null; title?: string } = {}): Promise<CompletionResult> => {
       const fix = await getVerificationFix();
-      // The photo is optional proof; upload it first so the completion can reference it.
-      const photoId = photoUri ? (await uploadImage<{ photo: { id: string } }>('/v1/photos', photoUri)).photo.id : undefined;
-      return api<CompletionResult>(`/v1/challenges/${id}/complete`, { method: 'POST', body: { ...fix, photoId } });
+      try {
+        // The photo is proof; upload it first so the completion can reference it.
+        const photoId = photoUri ? (await uploadImage<{ photo: { id: string } }>('/v1/photos', photoUri)).photo.id : undefined;
+        return await api<CompletionResult>(`/v1/challenges/${id}/complete`, { method: 'POST', body: { ...fix, photoId } });
+      } catch (error) {
+        // No connection: keep the GPS fix (and photo) and send it when the phone is back online.
+        if (!isOfflineError(error)) throw error;
+        await enqueue({ kind: 'complete', challengeId: id, challengeTitle: title, fix, photoUri: photoUri ?? null });
+        return { status: 'queued' };
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useSubmitRoute(id: string) {
+  const invalidate = useInvalidateProgress();
+  return useMutation({
+    mutationFn: async ({ points, title = '' }: { points: RoutePoint[]; title?: string }): Promise<CompletionResult> => {
+      try {
+        return await api<CompletionResult>(`/v1/challenges/${id}/route`, { method: 'POST', body: { points } });
+      } catch (error) {
+        if (!isOfflineError(error)) throw error;
+        await enqueue({ kind: 'route', challengeId: id, challengeTitle: title, points });
+        return { status: 'queued' };
+      }
     },
     onSuccess: invalidate,
   });

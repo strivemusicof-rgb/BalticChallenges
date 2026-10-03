@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { userId } from '../auth/plugin.js';
 import { withTransaction } from '../db.js';
-import { evaluateCheckIn } from '../domain/verification.js';
+import { evaluateCheckIn, evaluateRoute } from '../domain/verification.js';
 import { badRequest, conflict, forbidden, notFound } from '../errors.js';
 import { tr, type I18n } from '../i18n.js';
 import { pushTexts } from '../services/push-texts.js';
@@ -33,6 +33,22 @@ const CompleteBody = z.object({
   isMocked: z.boolean().default(false),
   recordedAt: z.iso.datetime({ offset: true }),
   photoId: UuidSchema.optional(),
+  /** The fix was recorded without a connection and synced later. */
+  offline: z.boolean().default(false),
+});
+
+const RouteBody = z.object({
+  points: z
+    .array(
+      z.object({
+        lat: Coordinates.lat,
+        lng: Coordinates.lng,
+        t: z.number().int().nonnegative(),
+        accuracyM: z.number().nonnegative().max(10_000),
+      }),
+    )
+    .min(2)
+    .max(20_000),
 });
 
 export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
@@ -103,14 +119,18 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
   app.post('/v1/challenges/:id/start', { preHandler: auth.requireAuth }, async (request, reply) => {
     const { id } = parse(z.object({ id: UuidSchema }), request.params);
     const uid = userId(request);
-    const { rows: challengeRows } = await db.query<{ is_pro: boolean }>(
-      `SELECT is_pro FROM challenges WHERE id = $1 AND status = 'published'
-         AND (starts_at IS NULL OR starts_at <= now()) AND (ends_at IS NULL OR ends_at > now())`,
-      [id],
+    const { rows: challengeRows } = await db.query<{ is_pro: boolean; min_level: number; user_level: number }>(
+      `SELECT ch.is_pro, ch.min_level, (SELECT level FROM users WHERE id = $2) AS user_level
+       FROM challenges ch WHERE ch.id = $1 AND ch.status = 'published'
+         AND (ch.starts_at IS NULL OR ch.starts_at <= now()) AND (ch.ends_at IS NULL OR ch.ends_at > now())`,
+      [id, uid],
     );
     const challenge = challengeRows[0];
     if (!challenge) throw notFound('Challenge');
     if (challenge.is_pro) throw forbidden('This challenge requires Baltic Challenges Pro');
+    if (challenge.user_level < challenge.min_level) {
+      throw forbidden(`This challenge unlocks at level ${challenge.min_level}`);
+    }
 
     const { rows } = await db.query<{ id: string; status: string; started_at: Date }>(
       `INSERT INTO challenge_attempts (user_id, challenge_id) VALUES ($1, $2)
@@ -157,14 +177,25 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
           radius_m: number;
           distance_m: number;
         }>(
-          `SELECT a.id AS attempt_id, a.status AS attempt_status, a.steps_done, st.id AS step_id,
+          // Ordered trails take the lowest unvisited step; "any order" challenges take the nearest one.
+          `SELECT a.id AS attempt_id, a.status AS attempt_status, st.id AS step_id,
                   (SELECT count(*)::int FROM challenge_steps s WHERE s.challenge_id = ch.id) AS step_count,
+                  (SELECT count(DISTINCT c.step_id)::int FROM check_ins c
+                    WHERE c.attempt_id = a.id AND c.verdict = 'accepted' AND c.step_id IS NOT NULL) AS steps_done,
                   ch.xp_reward, ch.verification, coalesce(st.radius_m, p.radius_m) AS radius_m,
                   ST_Distance(coalesce(st.geog, p.geog), ST_SetSRID(ST_MakePoint($3, $4), 4326)::geography) AS distance_m
            FROM challenge_attempts a
            JOIN challenges ch ON ch.id = a.challenge_id
            JOIN places p ON p.id = ch.place_id
-           LEFT JOIN challenge_steps st ON st.challenge_id = ch.id AND st.position = a.steps_done + 1
+           LEFT JOIN LATERAL (
+             SELECT s.id, s.geog, s.radius_m FROM challenge_steps s
+             WHERE s.challenge_id = ch.id
+               AND NOT EXISTS (SELECT 1 FROM check_ins c WHERE c.attempt_id = a.id AND c.step_id = s.id AND c.verdict = 'accepted')
+             ORDER BY CASE WHEN coalesce((ch.requirements->>'anyOrder')::boolean, false)
+                           THEN ST_Distance(s.geog, ST_SetSRID(ST_MakePoint($3, $4), 4326)::geography)
+                           ELSE s.position END
+             LIMIT 1
+           ) st ON true
            WHERE a.user_id = $1 AND a.challenge_id = $2 AND a.status IN ('in_progress', 'completed', 'flagged')
            FOR UPDATE OF a`,
           [uid, id, body.lng, body.lat],
@@ -177,8 +208,14 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
         if (target.attempt_status === 'flagged') {
           throw conflict('under_review', 'This completion is being reviewed');
         }
-        if (target.verification !== 'gps' && target.verification !== 'gps_checkin') {
+        if (target.verification === 'route') {
+          throw badRequest('route_required', 'Record the route to complete this challenge');
+        }
+        if (!['gps', 'gps_checkin', 'gps_photo'].includes(target.verification)) {
           throw badRequest('unsupported_verification', 'This challenge type is not available in this app version');
+        }
+        if (target.verification === 'gps_photo' && !body.photoId) {
+          throw badRequest('photo_required', 'Take a photo at the place to complete this challenge');
         }
 
         const { rows: previousRows } = await client.query<{ lat: number; lng: number; at: Date }>(
@@ -201,6 +238,7 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
           radiusM: target.radius_m,
           previous: previousRows[0] ?? null,
           now,
+          offline: body.offline,
         });
 
         await client.query(
@@ -254,6 +292,83 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
           isDaily,
         });
         return { status: 'completed' as const, distanceM, ...outcome };
+      });
+      if (result.status === 'completed') {
+        notifyFriends(uid, id).catch((error: unknown) => request.log.warn({ err: error }, 'friend activity push failed'));
+      }
+      return result;
+    },
+  );
+
+  app.post(
+    '/v1/challenges/:id/route',
+    { preHandler: auth.requireAuth, config: { rateLimit: { max: 10, timeWindow: '1 minute' } }, bodyLimit: 2 * 1024 * 1024 },
+    async (request) => {
+      const { id } = parse(z.object({ id: UuidSchema }), request.params);
+      const body = parse(RouteBody, request.body);
+      const uid = userId(request);
+
+      const result = await withTransaction(db, async (client) => {
+        const { rows } = await client.query<{
+          attempt_id: string;
+          attempt_status: string;
+          xp_reward: number;
+          verification: string;
+          requirements: { distanceKm?: number; maxSpeedKmh?: number };
+          lat: number;
+          lng: number;
+          radius_m: number;
+        }>(
+          `SELECT a.id AS attempt_id, a.status AS attempt_status, ch.xp_reward, ch.verification, ch.requirements,
+                  ST_Y(p.geog::geometry) AS lat, ST_X(p.geog::geometry) AS lng, p.radius_m
+           FROM challenge_attempts a
+           JOIN challenges ch ON ch.id = a.challenge_id
+           JOIN places p ON p.id = ch.place_id
+           WHERE a.user_id = $1 AND a.challenge_id = $2 AND a.status IN ('in_progress', 'completed', 'flagged')
+           FOR UPDATE OF a`,
+          [uid, id],
+        );
+        const target = rows[0];
+        if (!target) throw badRequest('not_started', 'Start this challenge before completing it');
+        if (target.attempt_status !== 'in_progress') throw conflict('already_completed', 'You have already completed this challenge');
+        if (target.verification !== 'route') throw badRequest('not_a_route', 'This challenge is completed by checking in');
+
+        const verdict = evaluateRoute({
+          points: body.points,
+          start: { lat: target.lat, lng: target.lng },
+          startRadiusM: Math.max(target.radius_m, 300),
+          minDistanceM: (target.requirements.distanceKm ?? 1) * 1000,
+          maxSpeedKmh: target.requirements.maxSpeedKmh ?? 25,
+        });
+        await client.query(
+          `INSERT INTO route_tracks (attempt_id, user_id, distance_m, duration_s, points, verdict, reason)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            target.attempt_id,
+            uid,
+            verdict.distanceM,
+            verdict.durationS,
+            JSON.stringify(body.points),
+            verdict.verdict,
+            verdict.verdict === 'accepted' ? null : verdict.reason,
+          ],
+        );
+        if (verdict.verdict === 'rejected') {
+          return { status: 'rejected' as const, reason: verdict.reason, message: verdict.message, distanceM: verdict.distanceM };
+        }
+        if (verdict.verdict === 'flagged') {
+          await client.query(`UPDATE challenge_attempts SET status = 'flagged' WHERE id = $1`, [target.attempt_id]);
+          return { status: 'flagged' as const, reason: verdict.reason, message: verdict.message, distanceM: verdict.distanceM };
+        }
+        const isDaily = (await todaysChallengeId(client, uid)) === id;
+        const outcome = await finalizeCompletion(client, {
+          userId: uid,
+          attemptId: target.attempt_id,
+          challengeId: id,
+          xpReward: target.xp_reward,
+          isDaily,
+        });
+        return { status: 'completed' as const, distanceM: verdict.distanceM, ...outcome };
       });
       if (result.status === 'completed') {
         notifyFriends(uid, id).catch((error: unknown) => request.log.warn({ err: error }, 'friend activity push failed'));

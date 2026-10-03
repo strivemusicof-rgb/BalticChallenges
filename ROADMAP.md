@@ -65,7 +65,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] Challenge type definitions (A–I: Visit, Discover, Photo, Collection, Route, Multi-step, Seasonal, Social, Time-limited)
 - [x] Category taxonomy: History, Nature, Baltic Coast, Adventure, Photography, Food, Cities, Family
 - [x] XP and level curve finalized (see the reference table at the end of this file)
-- [ ] 🚧 Level titles and what each level unlocks (titles done; unlocks not defined yet)
+- [x] Level titles and what each level unlocks (frames at 5/10/20/30/50, stats at 5, special challenges at 10; see Level rewards screen)
 - [x] Achievement rules format, i.e. how a badge's trigger condition is expressed
 - [x] Safety metadata spec for locations
 - [ ] 🚧 Privacy and location policy (approximate locations only, user-controlled; draft served at `/legal/privacy`, needs legal review)
@@ -197,10 +197,10 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] Full level curve implemented
 - [x] Level titles (Newcomer → Explorer → Adventurer → Pathfinder → Trailblazer → Baltic Master)
 - [x] Level-up animation and screen (animated celebration with level-up, streak and every reward unlocked)
-- [ ] Level unlocks: profile frames
+- [x] Level unlocks: profile frames (bronze 5, silver 10, gold 20, emerald 30, diamond 50; shown on every avatar)
 - [ ] Level unlocks: themes
-- [ ] Level unlocks: special challenges
-- [ ] Level unlocks: extra statistics
+- [x] Level unlocks: special challenges (`min_level`, checked server-side on start; e.g. Sigulda 10 km and Zemgale palaces at LVL 10)
+- [x] Level unlocks: extra statistics (best streak, collections done, badges from level 5)
 - [ ] Level unlocks: collections
 
 ### Streaks
@@ -231,7 +231,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] Collection screen: progress bar, XP reward, completion badge
 - [x] Visual cards showing ✓ completed and 🔒 locked items
 - [ ] 🚧 Specialist collections: 🏰 Castles, 🌊 Coast, 🌲 Nature, 🏛️ Historic Cities, 🗼 Lighthouses, 🌅 Viewpoints, 🥾 Hiking, 🚲 Cycling, 📸 Photography, 🐾 Wildlife (Castles, Coast, Wild Nature, Lighthouses, Viewpoints, Trails, Manors, Sacred Places, Falls & Cliffs, and Rīga / Vilnius / Tallinn highlights exist; Cycling, Photography and Wildlife not yet)
-- [ ] Type D — Collection challenge (several locations counting toward one challenge)
+- [x] Type D — Collection challenge (several locations counting toward one challenge, any order, nearest open stop is the target; 3 sets live)
 
 ### Progress tracking
 - [x] Challenge history screen
@@ -277,7 +277,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [x] 📌 Save
 - [x] 🚩 Report
 - [x] "Friends are exploring" section on Home
-- [ ] Shareable achievement cards for Instagram and other platforms
+- [x] Shareable achievement cards for Instagram and other platforms (4:5 image card from the celebration screen and from unlocked badges)
 
 ### Place pages
 - [x] Place page: country, explorer count, photo count, post count, challenge count
@@ -287,6 +287,7 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 
 ### Friend competition (basic)
 - [ ] Type H — Social: complete a challenge with a friend
+- [x] Friend duels: challenges / places / XP over 3–30 days, accept or decline, winner gets +100 XP
 - [x] Friend activity notifications ("Anna completed a challenge"), with throttling (friends only, max 3 per day; all pushes now in the user's language)
 
 ### Leaderboards
@@ -369,8 +370,8 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 ## Phase 4 — Advanced Exploration (4–6 weeks)
 
 - [ ] Advanced map: clustering, search, more filters (Places, Friends, Events)
-- [ ] Type C — Photo challenges (camera capture or upload)
-- [ ] Type E — Route challenges (GPS-recorded route, e.g. 10 km trail)
+- [x] Type C — Photo challenges (GPS + required photo, `gps_photo`; Kolkasrags, Rundāle, Turaida live)
+- [ ] 🚧 Type E — Route challenges (foreground GPS recording with keep-awake, server checks distance, start point and speed; Jūrmala 5 km, Ķemeri 3 km, Sigulda 10 km live; background tracking not yet)
 - [ ] 🚧 Type F — Multi-step / multi-checkpoint challenges (GPS checkpoints done: 5 trails in Rīga, Gauja valley, Vilnius, Tallinn and the Curonian Spit; photo and walk steps not yet)
 - [x] GPS challenge mode: distance to the next checkpoint, progress bar, [OPEN MAP]
 - [x] "📍 CHECKPOINT FOUND!" moment, then confirm
@@ -378,11 +379,11 @@ Status key: ⬜ Not started · 🟨 In progress · ✅ Done
 - [ ] 🥾 Route posts (GPS route + stats + photos)
 - [ ] Offline data: download region challenge packs (Pro)
 - [ ] Offline maps: download map tiles for a region (Pro)
-- [ ] Offline completions queued and synced when back online
-- [ ] Offline anti-cheat: signed timestamps and route plausibility checks at sync
+- [x] Offline completions queued and synced when back online (check-ins and routes; app data cached for 7 days; Home shows what is waiting)
+- [ ] 🚧 Offline anti-cheat: signed timestamps and route plausibility checks at sync (GPS fix age up to 72 h accepted, over 2 h goes to review; no signing yet)
 - [ ] Saved / bookmarked locations
 - [ ] Custom collections
-- [ ] Suspicious route detection
+- [x] Suspicious route detection (fast segments ignored, flagged when over 25% of the distance was too fast)
 - [ ] Statistics: total distance
 
 ### Exit criteria
@@ -640,3 +641,4 @@ Needs: **Phase 6, 7 (recommendations), 8, 9, 10 (first part)**, plus:
 | 2026-10-03 | Latvian and Russian translations (UI and all content, API picks language from Accept-Language), emoji replaced by an icon set, calmer animations, in-app admin panel for admin accounts, GitHub repo and TestFlight pipeline. |
 | 2026-10-03 | Multi-checkpoint trails (5) with GPS checkpoint mode, Lighthouses / Viewpoints / Wild Nature / Trails collections, nearby feed, compare with a friend, friend activity pushes, push notifications in the user's language, Sign in with Apple button, CI checks, nightly VPS backups. |
 | 2026-10-03 | Latvian is the default language. Seasonal events: Autumn in Latvia (live), Halloween, Latvia's November, Christmas, White Winter, Easter, 4 May, Spring, Jāņi and Summer, each with challenges, a collection and a limited badge, scheduled by date and switchable in the admin Events tab. Event banner on Home. |
+| 2026-10-03 | Play modes: level rewards (avatar frames, stats, LVL 10+ challenges), photo challenges, GPS route challenges with plausibility checks, collection challenges (any order), offline check-in queue and cached app data, shareable image cards, friend duels with +100 XP prize. 9 new Latvian challenges. |

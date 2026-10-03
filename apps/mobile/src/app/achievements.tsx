@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 
 import { EmptyState, ErrorState, LoadingState } from '@/components/screen';
+import { useShareCard } from '@/components/share-card';
 import { ThemedText } from '@/components/themed-text';
 import { Glyph } from '@/components/ui/glyph';
 import { HexBadge } from '@/components/ui/hex-badge';
@@ -11,9 +12,11 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { Segmented } from '@/components/ui/segmented';
 import { Brand, MaxContentWidth, Radius, Shadow, Spacing } from '@/constants/theme';
 import { useAchievements } from '@/hooks/queries';
+import { showAlert } from '@/lib/dialog';
 import { achievementGlyph } from '@/lib/glyphs';
 import { useT } from '@/lib/i18n';
 import type { Achievement } from '@/lib/types';
+import { useCurrentUser } from '@/providers/auth-provider';
 
 type Filter = 'all' | 'unlocked' | 'locked';
 const FILTERS = [
@@ -22,14 +25,23 @@ const FILTERS = [
   { id: 'locked', label: 'achievements.locked' },
 ] as const;
 
-function AchievementRow({ achievement }: { achievement: Achievement }) {
+function AchievementRow({ achievement, onShare }: { achievement: Achievement; onShare: () => void }) {
+  const t = useT();
   const unlocked = achievement.unlockedAt !== null;
   const { current, target } = achievement.progress;
   return (
     <PressableScale
       disabled={!unlocked}
       onPress={() =>
-        router.push({ pathname: '/new-post', params: { achievementId: achievement.id, achievementTitle: achievement.title } })
+        showAlert(achievement.title, undefined, [
+          { text: t('share.card'), onPress: onShare },
+          {
+            text: t('share.post'),
+            onPress: () =>
+              router.push({ pathname: '/new-post', params: { achievementId: achievement.id, achievementTitle: achievement.title } }),
+          },
+          { text: t('common.cancel'), style: 'cancel' },
+        ])
       }
       accessibilityLabel={`${achievement.title}: ${achievement.description}${unlocked ? ', unlocked. Tap to share.' : ''}`}
       style={styles.row}>
@@ -58,6 +70,8 @@ export default function AchievementsScreen() {
   const t = useT();
   const [filter, setFilter] = useState<Filter>('all');
   const achievements = useAchievements();
+  const me = useCurrentUser();
+  const card = useShareCard();
   const all = achievements.data ?? [];
   const list = all.filter((item) => (filter === 'all' ? true : filter === 'unlocked' ? item.unlockedAt !== null : item.unlockedAt === null));
   const unlockedCount = all.filter((item) => item.unlockedAt !== null).length;
@@ -67,7 +81,21 @@ export default function AchievementsScreen() {
       style={styles.screen}
       data={achievements.isSuccess ? list : []}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <AchievementRow achievement={item} />}
+      renderItem={({ item }) => (
+        <AchievementRow
+          achievement={item}
+          onShare={() =>
+            void card.share({
+              kicker: t('share.badgeUnlocked'),
+              title: item.title,
+              glyph: achievementGlyph(item.id),
+              name: me.displayName,
+              level: me.level.level,
+            })
+          }
+        />
+      )}
+      ListFooterComponent={card.host}
       contentContainerStyle={styles.content}
       ListHeaderComponent={
         <View style={styles.header}>

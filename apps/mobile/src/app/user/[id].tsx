@@ -77,7 +77,7 @@ export default function UserScreen() {
       overlay={
         <View style={styles.avatarWrap}>
           <View style={styles.avatarRing}>
-            <Avatar name={user.displayName} url={user.avatarUrl} size={92} />
+            <Avatar name={user.displayName} url={user.avatarUrl} size={92} level={user.level.level} />
           </View>
         </View>
       }>
@@ -125,6 +125,20 @@ export default function UserScreen() {
               label={followLabel}
               loading={follow.isPending}
               onPress={() => follow.mutate({ id: user.id, follow: !relationship.following })}
+            />
+          )}
+          {relationship.isFriend && !relationship.blockedByMe && (
+            <Button
+              variant="outline"
+              icon="flash-outline"
+              label={t('duels.challengeButton')}
+              style={styles.duelButton}
+              onPress={() =>
+                router.push({
+                  pathname: '/duel-new',
+                  params: { opponentId: user.id, name: user.displayName, avatarUrl: user.avatarUrl ?? '', level: String(user.level.level) },
+                })
+              }
             />
           )}
         </View>
@@ -233,6 +247,9 @@ const styles = StyleSheet.create({
   counts: {
     flexDirection: 'row',
     gap: Spacing.four,
+    marginTop: Spacing.two,
+  },
+  duelButton: {
     marginTop: Spacing.two,
   },
   cta: {

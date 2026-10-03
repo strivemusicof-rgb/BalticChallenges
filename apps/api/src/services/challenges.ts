@@ -26,6 +26,8 @@ export interface ChallengeSummary {
   } | null;
   imageUrl: string | null;
   imageCredit: string | null;
+  minLevel: number;
+  requirements: Record<string, unknown>;
   distanceM: number | null;
   userStatus: 'in_progress' | 'completed' | 'flagged' | null;
 }
@@ -71,6 +73,8 @@ interface Row {
   distance_m: number | null;
   user_status: ChallengeSummary['userStatus'];
   ch_i18n: I18n;
+  min_level: number;
+  requirements: Record<string, unknown>;
   cat_i18n: I18n;
   place_i18n: I18n;
 }
@@ -123,7 +127,7 @@ export async function findChallenges(db: DbClient, query: ChallengeQuery): Promi
             ch.country::text AS country, ch.difficulty, ch.xp_reward, ch.verification, ch.is_pro, ch.ends_at,
             p.id AS place_id, p.name AS place_name, p.city,
             ST_Y(p.geog::geometry) AS lat, ST_X(p.geog::geometry) AS lng, p.radius_m,
-            p.images[1] AS image_url, p.image_credit, ch.i18n AS ch_i18n, cat.i18n AS cat_i18n, p.i18n AS place_i18n,
+            p.images[1] AS image_url, p.image_credit, ch.i18n AS ch_i18n, ch.min_level, ch.requirements, cat.i18n AS cat_i18n, p.i18n AS place_i18n,
             ${distance} AS distance_m,
             a.status AS user_status
      FROM challenges ch
@@ -168,6 +172,8 @@ function toSummary(row: Row): ChallengeSummary {
         : null,
     imageUrl: row.image_url,
     imageCredit: row.image_credit,
+    minLevel: row.min_level,
+    requirements: row.requirements,
     distanceM: row.distance_m === null ? null : Math.round(row.distance_m),
     userStatus: row.user_status,
   };
@@ -227,13 +233,15 @@ export async function findChallengeDetail(db: DbClient, idOrSlug: string, userId
       lng: number;
       radius_m: number;
       image_url: string | null;
-      steps_done: number | null;
+      visited: boolean;
     }>(
       `SELECT s.id, s.position, s.title, s.place_id, p.name AS place_name, p.i18n AS place_i18n,
               ST_Y(coalesce(s.geog, p.geog)::geometry) AS lat, ST_X(coalesce(s.geog, p.geog)::geometry) AS lng,
               coalesce(s.radius_m, p.radius_m, 150) AS radius_m, p.images[1] AS image_url,
-              (SELECT a.steps_done FROM challenge_attempts a WHERE a.challenge_id = s.challenge_id AND a.user_id = $2::uuid
-                 AND a.status IN ('in_progress', 'completed', 'flagged')) AS steps_done
+              EXISTS (SELECT 1 FROM challenge_attempts a JOIN check_ins c ON c.attempt_id = a.id
+                      WHERE a.challenge_id = s.challenge_id AND a.user_id = $2::uuid
+                        AND a.status IN ('in_progress', 'completed', 'flagged')
+                        AND c.step_id = s.id AND c.verdict = 'accepted') AS visited
        FROM challenge_steps s LEFT JOIN places p ON p.id = s.place_id
        WHERE s.challenge_id = $1 ORDER BY s.position`,
       [id, userId],
@@ -253,7 +261,7 @@ export async function findChallengeDetail(db: DbClient, idOrSlug: string, userId
       lng: step.lng,
       radiusM: step.radius_m,
       imageUrl: step.image_url,
-      done: summary.userStatus === 'completed' || (step.steps_done ?? 0) >= step.position,
+      done: summary.userStatus === 'completed' || step.visited,
     })),
     collections: collections.rows.map(({ i18n, ...row }) => ({ ...row, title: tr(i18n, 'title', row.title) })),
     safety: placeRow

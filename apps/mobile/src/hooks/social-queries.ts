@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient, type InfiniteD
 import { api, uploadImage } from '@/lib/api';
 import type {
   Comment,
+  Duel,
   Country,
   Leaderboard,
   PlaceDetail,
@@ -254,5 +255,31 @@ export function usePlace(id: string) {
   return useQuery({
     queryKey: ['place', id],
     queryFn: () => api<PlaceDetail>(`/v1/places/${encodeURIComponent(id)}`),
+  });
+}
+
+export function useDuels() {
+  return useQuery({
+    queryKey: ['duels'],
+    queryFn: () => api<{ duels: Duel[] }>('/v1/duels'),
+    select: (data) => data.duels,
+  });
+}
+
+export function useCreateDuel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { opponentId: string; metric: Duel['metric']; days: number }) =>
+      api<{ duel: Duel }>('/v1/duels', { method: 'POST', body: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['duels'] }),
+  });
+}
+
+export function useDuelAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, action }: { id: string; action: 'accept' | 'decline' | 'cancel' }) =>
+      api<{ duel: Duel }>(`/v1/duels/${id}/${action}`, { method: 'POST', body: {} }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['duels'] }),
   });
 }
