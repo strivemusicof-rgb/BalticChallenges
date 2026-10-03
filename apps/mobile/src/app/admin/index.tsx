@@ -15,11 +15,11 @@ import { Brand, Radius, Spacing } from '@/constants/theme';
 import { api, API_URL } from '@/lib/api';
 import { showAlert } from '@/lib/dialog';
 import { formatDistance, formatNumber, timeAgo } from '@/lib/format';
-import type { GlyphName } from '@/lib/glyphs';
+import { collectionGlyph, eventColors, type GlyphName } from '@/lib/glyphs';
 import { useT } from '@/lib/i18n';
 import { useCurrentUser } from '@/providers/auth-provider';
 
-type Tab = 'overview' | 'moderation' | 'users' | 'content';
+type Tab = 'overview' | 'moderation' | 'users' | 'content' | 'events';
 
 interface Stats {
   usersTotal: number;
@@ -71,6 +71,81 @@ interface AdminUser {
   completions: number;
   flags: number;
   reports: number;
+}
+
+interface AdminEvent {
+  slug: string;
+  title: string;
+  status: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  live: boolean;
+  challenges: number;
+  finishers: number;
+}
+
+function Events() {
+  const t = useT();
+  const queryClient = useQueryClient();
+  const events = useQuery({ queryKey: ['admin', 'events'], queryFn: () => api<{ events: AdminEvent[] }>('/v1/admin/events') });
+  const toggle = useMutation({
+    mutationFn: ({ slug, active }: { slug: string; active: boolean }) =>
+      api(`/v1/admin/events/${slug}/state`, { method: 'POST', body: { active } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin'] });
+      void queryClient.invalidateQueries({ queryKey: ['collections'] });
+      void queryClient.invalidateQueries({ queryKey: ['home'] });
+    },
+    onError: (error) => showAlert(t('common.somethingWrong'), error.message),
+  });
+
+  if (events.isPending) return <LoadingState />;
+  if (events.isError) return <ErrorState error={events.error} onRetry={() => events.refetch()} />;
+
+  const date = (iso: string | null) =>
+    iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  return (
+    <View style={styles.section}>
+      <ThemedText type="small" themeColor="textSecondary">
+        {t('admin.eventsHint')}
+      </ThemedText>
+      {events.data.events.map((event) => {
+        const [from, to] = eventColors(event.slug);
+        const on = event.status === 'published';
+        return (
+          <View key={event.slug} style={[styles.item, styles.contentRow]}>
+            <View style={[styles.eventIcon, { backgroundColor: on ? from : '#C9D2CD' }]}>
+              <Glyph name={collectionGlyph(event.slug)} size={22} color={on ? '#FFFFFF' : '#6B7A72'} />
+            </View>
+            <View style={styles.flex}>
+              <View style={styles.itemHeader}>
+                <ThemedText type="smallBold" style={styles.flex}>
+                  {event.title}
+                </ThemedText>
+                {event.live ? (
+                  <Tag label={t('admin.live')} tone="green" />
+                ) : on ? (
+                  <Tag label={t('admin.scheduled')} tone="blue" />
+                ) : (
+                  <Tag label={t('admin.off')} />
+                )}
+              </View>
+              <ThemedText style={styles.meta}>
+                {date(event.startsAt)} – {date(event.endsAt ? new Date(new Date(event.endsAt).getTime() - 1).toISOString() : null)} ·{' '}
+                {event.challenges} {t('admin.challenges').toLowerCase()} · {event.finishers} ✓
+              </ThemedText>
+            </View>
+            <Switch
+              value={on}
+              trackColor={{ true: to }}
+              accessibilityLabel={event.title}
+              onValueChange={(active) => toggle.mutate({ slug: event.slug, active })}
+            />
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 
 interface AdminChallenge {
@@ -346,6 +421,7 @@ export default function AdminScreen() {
     { id: 'moderation', label: t('admin.queues') },
     { id: 'users', label: t('admin.users') },
     { id: 'content', label: t('admin.content') },
+    { id: 'events', label: t('admin.events') },
   ] as const;
 
   return (
@@ -361,6 +437,7 @@ export default function AdminScreen() {
       {tab === 'moderation' && <Moderation />}
       {tab === 'users' && <Users />}
       {tab === 'content' && <Content />}
+      {tab === 'events' && <Events />}
     </Screen>
   );
 }
@@ -422,6 +499,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
+  },
+  eventIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contentRow: {
     flexDirection: 'row',

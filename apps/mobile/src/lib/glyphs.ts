@@ -76,10 +76,11 @@ const ACHIEVEMENT: Record<string, GlyphName> = {
   'weekly-warrior': 'calendar-star',
   'lighthouse-keeper': 'lighthouse',
   'nature-lover': 'pine-tree',
+  'autumn-2026': 'leaf-maple',
 };
 
 export function achievementGlyph(id: string): GlyphName {
-  return ACHIEVEMENT[id] ?? 'medal-outline';
+  return ACHIEVEMENT[id] ?? eventFor(id)?.[1] ?? 'medal-outline';
 }
 
 const GOAL: Record<string, GlyphName> = {
@@ -106,10 +107,33 @@ const COLLECTION: Record<string, GlyphName> = {
   'baltic-viewpoints': 'binoculars',
   'wild-nature': 'pine-tree',
   'baltic-trails': 'hiking',
+  'autumn-latvia-2026': 'leaf-maple',
 };
 
+/** Seasonal events are keyed by slug prefix (e.g. "christmas-2026"), so new years need no code change. */
+const EVENTS: [prefix: string, glyph: GlyphName, colors: [string, string]][] = [
+  ['autumn', 'leaf-maple', ['#B4531B', '#E39A3B']],
+  ['halloween', 'ghost-outline', ['#2B1B3D', '#E0701F']],
+  ['latvia-november', 'flag-variant-outline', ['#7A1F2B', '#9E3039']],
+  ['christmas', 'pine-tree', ['#14532D', '#B91C1C']],
+  ['winter', 'snowflake', ['#1E3A5F', '#5B8DB8']],
+  ['easter', 'egg-easter', ['#4D7C0F', '#D9A520']],
+  ['may-4', 'flag-variant-outline', ['#7A1F2B', '#9E3039']],
+  ['spring', 'flower-tulip-outline', ['#15803D', '#84CC16']],
+  ['ligo', 'campfire', ['#166534', '#CA8A04']],
+  ['summer', 'weather-sunny', ['#0369A1', '#F59E0B']],
+];
+
+function eventFor(slug: string) {
+  return EVENTS.find(([prefix]) => slug.startsWith(prefix));
+}
+
+export function eventColors(slug: string): [string, string] {
+  return eventFor(slug)?.[2] ?? ['#1E5E46', '#2E9E62'];
+}
+
 export function collectionGlyph(slug: string): GlyphName {
-  return COLLECTION[slug] ?? 'map-outline';
+  return COLLECTION[slug] ?? eventFor(slug)?.[1] ?? 'map-outline';
 }
 
 /** Reward rows on the completion screen. */

@@ -145,6 +145,7 @@ export const ru = {
     saveFailed: 'Не удалось сохранить настройки',
   },
   home: {
+    seasonEvent: 'СЕЗОННОЕ СОБЫТИЕ',
     streak_one: 'Серия: {{count}} день',
     streak_few: 'Серия: {{count}} дня',
     streak_many: 'Серия: {{count}} дней',
@@ -223,6 +224,7 @@ export const ru = {
     noneBody: 'Попробуйте другую категорию или запрос.',
   },
   challenge: {
+    until: 'До {{date}}',
     stopOf: 'Точка {{current}} из {{total}}',
     checkpointDone: 'Точка {{done}} из {{total}} пройдена. Вперёд к следующей!',
     notYet: 'Вы ещё не на месте',
@@ -567,6 +569,11 @@ export const ru = {
     chooseLibrary: 'Выбрать из галереи',
   },
   admin: {
+    events: 'События',
+    eventsHint: 'Сезонные события работают автоматически в свои даты. Выключите, чтобы скрыть, или включите, чтобы начать сразу.',
+    live: 'Идёт',
+    scheduled: 'Запланировано',
+    off: 'Выключено',
     title: 'Админ-панель',
     overview: 'Обзор',
     users: 'Пользователи',

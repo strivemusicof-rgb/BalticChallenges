@@ -462,6 +462,48 @@ export const adminRoutes: RoutePlugin = (app, { db, auth }) => {
     return { ok: true };
   });
 
+  // ---- Seasonal events ------------------------------------------------------------------------
+
+  app.get('/v1/admin/events', staff, async () => {
+    const { rows } = await db.query(
+      `SELECT c.slug, c.title, c.status, c.starts_at AS "startsAt", c.ends_at AS "endsAt",
+              (c.status = 'published' AND (c.starts_at IS NULL OR c.starts_at <= now())
+                 AND (c.ends_at IS NULL OR c.ends_at > now())) AS live,
+              (SELECT count(*)::int FROM collection_items ci WHERE ci.collection_id = c.id) AS challenges,
+              (SELECT count(*)::int FROM user_collections uc WHERE uc.collection_id = c.id) AS finishers
+       FROM collections c WHERE c.kind = 'seasonal' ORDER BY c.starts_at NULLS LAST`,
+    );
+    return { events: rows };
+  });
+
+  // Switching an event on publishes it with its challenges and, if it is outside its dates, starts it now
+  // (and gives it two weeks if it already ended). Switching it off unpublishes both.
+  app.post('/v1/admin/events/:slug/state', adminOnly, async (request) => {
+    const { slug } = parse(z.object({ slug: z.string().min(1).max(80) }), request.params);
+    const { active } = parse(z.object({ active: z.boolean() }), request.body);
+    await withTransaction(db, async (client) => {
+      const { rows } = await client.query<{ id: string }>(
+        `UPDATE collections SET
+           status = $2::content_status,
+           starts_at = CASE WHEN $3 AND starts_at > now() THEN now() ELSE starts_at END,
+           ends_at = CASE WHEN $3 AND ends_at <= now() THEN now() + interval '14 days' ELSE ends_at END
+         WHERE slug = $1 AND kind = 'seasonal' RETURNING id`,
+        [slug, active ? 'published' : 'draft', active],
+      );
+      const event = rows[0];
+      if (!event) throw notFound('Event');
+      await client.query(
+        `UPDATE challenges ch SET status = $2::content_status,
+           starts_at = c.starts_at, ends_at = c.ends_at
+         FROM collection_items ci JOIN collections c ON c.id = ci.collection_id
+         WHERE ci.collection_id = $1 AND ch.id = ci.challenge_id AND ch.type = 'seasonal'`,
+        [event.id, active ? 'published' : 'draft'],
+      );
+      await audit(client, userId(request), active ? 'event_on' : 'event_off', 'collection', event.id);
+    });
+    return { ok: true };
+  });
+
   app.get('/v1/admin/reference', staff, async () => {
     const [categories, regions] = await Promise.all([
       db.query('SELECT id, parent_id AS "parentId", name, icon FROM categories ORDER BY sort'),

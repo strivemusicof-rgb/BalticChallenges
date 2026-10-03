@@ -143,6 +143,7 @@ export const en = {
     saveFailed: 'Could not save your preferences',
   },
   home: {
+    seasonEvent: 'SEASONAL EVENT',
     streak_one: '{{count}}-day streak',
     streak_other: '{{count}}-day streak',
     streakHint: 'Complete a challenge today to keep it',
@@ -217,6 +218,7 @@ export const en = {
     noneBody: 'Try another category or search term.',
   },
   challenge: {
+    until: 'Until {{date}}',
     stopOf: 'Stop {{current}} of {{total}}',
     checkpointDone: 'Checkpoint {{done}} of {{total}} done. On to the next one!',
     notYet: 'Not there yet',
@@ -560,6 +562,11 @@ export const en = {
     chooseLibrary: 'Choose from library',
   },
   admin: {
+    events: 'Events',
+    eventsHint: 'Seasonal events run automatically between their dates. Switch one off to hide it, or on to start it right away.',
+    live: 'Live',
+    scheduled: 'Scheduled',
+    off: 'Off',
     title: 'Admin',
     overview: 'Overview',
     users: 'Users',

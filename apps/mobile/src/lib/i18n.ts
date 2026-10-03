@@ -17,11 +17,12 @@ export type Language = (typeof LANGUAGES)[number]['code'];
 
 const SUPPORTED = new Set<string>(LANGUAGES.map((language) => language.code));
 
+/** Phone language if we support it; otherwise Latvian, the launch market. */
 function deviceLanguage(): Language {
   for (const locale of getLocales()) {
     if (locale.languageCode && SUPPORTED.has(locale.languageCode)) return locale.languageCode as Language;
   }
-  return 'en';
+  return 'lv';
 }
 
 void i18n.use(initReactI18next).init({

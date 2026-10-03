@@ -33,6 +33,12 @@ export function timeLeft(iso: string, now = Date.now()): string {
   return i18n.t('time.dLeft', { count: Math.round(hours / 24) });
 }
 
+/** "30 Nov" style date in the current language (the day before an exclusive end timestamp). */
+export function shortDate(iso: string): string {
+  const date = new Date(new Date(iso).getTime() - 1);
+  return date.toLocaleDateString(currentLanguage(), { day: 'numeric', month: 'short' });
+}
+
 /** Short month name (1-12) in the current language. */
 export function monthName(month: number): string {
   return new Date(2024, month - 1, 1).toLocaleString(currentLanguage(), { month: 'short' });

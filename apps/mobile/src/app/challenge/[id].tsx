@@ -27,7 +27,7 @@ import { useAbandonChallenge, useChallenge, useCompleteChallenge, useStartChalle
 import { useReport } from '@/hooks/social-queries';
 import { useLiveDistance } from '@/hooks/use-live-distance';
 import { showAlert } from '@/lib/dialog';
-import { formatDistance, formatNumber, levelTitle, monthName } from '@/lib/format';
+import { formatDistance, formatNumber, levelTitle, monthName, shortDate } from '@/lib/format';
 import { categoryGlyph, collectionGlyph, rewardGlyph } from '@/lib/glyphs';
 import { i18n, useT } from '@/lib/i18n';
 import { pickImage } from '@/lib/images';
@@ -142,6 +142,7 @@ function DetailView({
       <Reveal index={1} style={styles.tags}>
         <Tag label={data.categoryName} tone="green" />
         <Tag label={t(`difficulty.${data.difficulty}.name`)} tone="blue" />
+        {data.endsAt && <Tag label={t('challenge.until', { date: shortDate(data.endsAt) })} icon="time-outline" tone="amber" />}
         <View style={styles.flex} />
         <Tag label={t('common.xp', { xp: data.xpReward })} icon="star" tone="amber" />
       </Reveal>

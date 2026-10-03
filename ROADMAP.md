@@ -467,12 +467,12 @@ Beta coverage (challenges per city): Tallinn 9 · Rīga 8 · Vilnius 8 · Kaunas
 ## Phase 8 — Events & Seasons
 
 ### Seasons (every 3 months)
-- [ ] Season framework (start/end dates, season collection, limited badge)
-- [ ] 🌱 Spring Explorer
-- [ ] ☀️ Summer Adventure
-- [ ] 🍂 Autumn Explorer (3 forests, 2 viewpoints, 1 sunset, 1 autumn photo)
-- [ ] ❄️ Winter Baltic
-- [ ] Type G — Seasonal challenges (e.g. available September–November only)
+- [x] Season framework (start/end dates, season collection, limited badge; switched on/off from the in-app admin Events tab)
+- [x] 🌱 Spring Explorer (Pavasara mošanās, Apr–May 2027)
+- [x] ☀️ Summer Adventure (Vasara pie jūras, Jul–Aug 2027)
+- [x] 🍂 Autumn Explorer (Rudens Latvijā, live until 30 Nov 2026)
+- [x] ❄️ Winter Baltic (Baltā ziema, Jan–Feb 2027)
+- [x] Type G — Seasonal challenges (e.g. available September–November only); plus Halloween, Latvia's November (11 and 18 Nov), Christmas, Easter, 4 May and Jāņi events
 - [ ] Type I — Time-limited challenges (e.g. "Visit 3 locations this weekend")
 
 ### Community events
@@ -635,6 +635,7 @@ Needs: **Phase 6, 7 (recommendations), 8, 9, 10 (first part)**, plus:
 | 2026-10-02 | Phase 2: Riga-day streaks with 7/30-day badges, +50 XP challenge-of-the-day bonus, weekly and monthly goals, Early Bird / Night Explorer / Weekly Warrior badges, animated level-up celebration, history screen, edit profile and avatar, explore list view. Push notifications (Expo) with per-type settings and an evening reminder job (streak, weekly goal ending, close to level; max one per day). |
 | 2026-10-02 | Phase 3: public profiles, follow / mutual friends, people search, posts with photos (EXIF stripped, re-encoded on the server, duplicate detection), following and Baltic-wide feeds, likes, comments, saves, place pages, friends / weekly / country / Baltic leaderboards. |
 | 2026-10-02 | Phase 3.5: report and block everywhere, multilingual text filter and link-spam rules, privacy controls, versioned terms consent, draft privacy / terms / support pages, flagged-completion review. Admin web dashboard at `/admin/` (stats, reports, pending posts, flagged completions, users and bans, places and challenges editors, audit log). |
+| 2026-10-03 | Latvian is the default language. Seasonal events: Autumn in Latvia (live), Halloween, Latvia's November, Christmas, White Winter, Easter, 4 May, Spring, Jāņi and Summer, each with challenges, a collection and a limited badge, scheduled by date and switchable in the admin Events tab. Event banner on Home. |
 | 2026-10-03 | Multi-checkpoint trails (5) with GPS checkpoint mode, Lighthouses / Viewpoints / Wild Nature / Trails collections, nearby feed, compare with a friend, friend activity pushes, push notifications in the user's language, Sign in with Apple button, CI checks, nightly VPS backups. |
 | 2026-10-03 | Latvian and Russian translations (UI and all content, API picks language from Accept-Language), emoji replaced by an icon set, calmer animations, in-app admin panel for admin accounts, GitHub repo and TestFlight pipeline. |
 | 2026-10-03 | Full app redesign to the 15-screen reference (forest-green design system, photo cards, hex badges, animated segmented tabs, spring press feedback, parallax photo headers). Wikimedia Commons photos for 79 of 94 places, with credits. New screens: Achievements, Daily/Weekly/Monthly, Pro paywall (UI only), Create Post type picker, GPS challenge mode with a dark map, photo step on completion (stored as proof). Web test build served at `/app/` with a Leaflet/OpenStreetMap map. API: collection cover images, km explored and photo stats, friends feed, optional proof photo on completion. |

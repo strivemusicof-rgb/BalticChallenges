@@ -6,6 +6,7 @@ import { GoalCard } from '@/components/goal-card';
 import { Photo } from '@/components/photo';
 import { PostCard } from '@/components/post-card';
 import { Reveal } from '@/components/reveal';
+import { SeasonBanner } from '@/components/season-banner';
 import { EmptyState, ErrorState, LoadingState, Screen, SectionHeader } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
@@ -103,6 +104,10 @@ export default function HomeScreen() {
           <TodayCard challenge={todaysChallenge} bonus={dailyBonusXp} />
         </Reveal>
       )}
+
+      <Reveal index={3}>
+        <SeasonBanner />
+      </Reveal>
 
       {inProgress.length > 0 && (
         <Reveal index={3} style={styles.section}>

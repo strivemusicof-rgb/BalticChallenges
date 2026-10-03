@@ -144,6 +144,7 @@ export const lv = {
     saveFailed: 'Neizdevās saglabāt tavas izvēles',
   },
   home: {
+    seasonEvent: 'SEZONAS NOTIKUMS',
     streak_zero: '{{count}} dienu sērija',
     streak_one: '{{count}} dienas sērija',
     streak_other: '{{count}} dienu sērija',
@@ -220,6 +221,7 @@ export const lv = {
     noneBody: 'Izmēģini citu kategoriju vai meklējumu.',
   },
   challenge: {
+    until: 'Līdz {{date}}',
     stopOf: '{{current}}. pietura no {{total}}',
     checkpointDone: 'Kontrolpunkts {{done}} no {{total}} izpildīts. Uz nākamo!',
     notYet: 'Vēl neesi tur',
@@ -563,6 +565,11 @@ export const lv = {
     chooseLibrary: 'Izvēlēties no galerijas',
   },
   admin: {
+    events: 'Notikumi',
+    eventsHint: 'Sezonas notikumi darbojas automātiski savos datumos. Izslēdz, lai paslēptu, vai ieslēdz, lai sāktu uzreiz.',
+    live: 'Aktīvs',
+    scheduled: 'Ieplānots',
+    off: 'Izslēgts',
     title: 'Administrācija',
     overview: 'Pārskats',
     users: 'Lietotāji',
