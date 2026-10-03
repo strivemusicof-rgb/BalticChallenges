@@ -4,19 +4,7 @@ import { getVerificationFix, type Coordinates } from '@/hooks/use-location';
 import { api, uploadImage } from '@/lib/api';
 import { enqueue, isOfflineError } from '@/lib/offline-queue';
 import type { RoutePoint } from '@/lib/route-recorder';
-import type {
-  Achievement,
-  Category,
-  ChallengeDetail,
-  ChallengeSummary,
-  Collection,
-  CompletionResult,
-  Goal,
-  HistoryEntry,
-  HomeFeed,
-  Stats,
-  User,
-} from '@/lib/types';
+import type { Achievement, Category, ChallengeDetail, ChallengeSummary, Collection, CommunityGoal, CompletionResult, Goal, HistoryEntry, HomeFeed, Stats, User } from '@/lib/types';
 import { useAuth } from '@/providers/auth-provider';
 
 const roundCoord = (value: number | undefined) => (value === undefined ? undefined : Math.round(value * 1000) / 1000);
@@ -73,6 +61,16 @@ export function useCollections() {
     queryKey: ['collections'],
     queryFn: () => api<{ collections: Collection[] }>('/v1/collections'),
     select: (data) => data.collections,
+  });
+}
+
+/** Shared goals of the running events; refreshed after every completion. */
+export function useCommunityGoals() {
+  return useQuery({
+    queryKey: ['community'],
+    queryFn: () => api<{ goals: CommunityGoal[] }>('/v1/community'),
+    select: (data) => data.goals,
+    staleTime: 60_000,
   });
 }
 
@@ -153,7 +151,7 @@ function useInvalidateProgress() {
   const queryClient = useQueryClient();
   return () =>
     Promise.all(
-      ['home', 'challenges', 'challenge', 'collections', 'collection', 'me', 'achievements', 'goals', 'history'].map(
+      ['home', 'challenges', 'challenge', 'collections', 'collection', 'me', 'achievements', 'goals', 'history', 'community'].map(
         (key) => queryClient.invalidateQueries({ queryKey: [key] }),
       ),
     );

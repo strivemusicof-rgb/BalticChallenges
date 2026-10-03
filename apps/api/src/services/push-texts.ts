@@ -3,6 +3,7 @@ import type { Lang } from '../i18n.js';
 /** Push notification copy in each supported language. */
 const TEXTS = {
   en: {
+    communityReached: (event: string, xp: number) => ({ title: 'Goal reached together!', body: xp > 0 ? `${event}: everyone who helped gets +${xp} XP.` : `${event}: thank you for helping.` }),
     duelInvite: (name: string) => ({ title: `${name} challenged you`, body: 'Accept the duel and see who explores more.' }),
     duelAccepted: (name: string) => ({ title: `${name} accepted your challenge`, body: 'The duel has started. Good luck!' }),
     newFollower: (name: string) => ({ title: 'New follower', body: `${name} started following you` }),
@@ -22,6 +23,7 @@ const TEXTS = {
     }),
   },
   lv: {
+    communityReached: (event: string, xp: number) => ({ title: 'Kopā mēs to paveicām!', body: xp > 0 ? `${event}: visi, kas palīdzēja, saņem +${xp} XP.` : `${event}: paldies, ka palīdzēji.` }),
     duelInvite: (name: string) => ({ title: `${name} tevi izaicināja`, body: 'Pieņem dueli un noskaidro, kurš ceļo vairāk.' }),
     duelAccepted: (name: string) => ({ title: `${name} pieņēma tavu izaicinājumu`, body: 'Duelis ir sācies. Veiksmi!' }),
     newFollower: (name: string) => ({ title: 'Jauns sekotājs', body: `${name} sāka tev sekot` }),
@@ -41,6 +43,7 @@ const TEXTS = {
     }),
   },
   ru: {
+    communityReached: (event: string, xp: number) => ({ title: 'Вместе мы справились!', body: xp > 0 ? `${event}: все участники получают +${xp} XP.` : `${event}: спасибо за участие.` }),
     duelInvite: (name: string) => ({ title: `${name} бросил вам вызов`, body: 'Примите дуэль и узнайте, кто исследует больше.' }),
     duelAccepted: (name: string) => ({ title: `${name} принял ваш вызов`, body: 'Дуэль началась. Удачи!' }),
     newFollower: (name: string) => ({ title: 'Новый подписчик', body: `${name} подписался на вас` }),

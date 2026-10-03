@@ -20,7 +20,8 @@ export type XpSource =
   | 'goal'
   | 'streak'
   | 'admin'
-  | 'duel';
+  | 'duel'
+  | 'community';
 
 let levelsCache: LevelRow[] | null = null;
 
@@ -72,7 +73,7 @@ export interface UnlockedReward {
 }
 
 export async function loadProgress(db: DbClient, userId: string): Promise<PlayerProgress> {
-  const [completions, collections, achievements, streak, goals] = await Promise.all([
+  const [completions, collections, achievements, streak, goals, community] = await Promise.all([
     db.query<CompletionRecord>(
       `SELECT ch.category_id AS "categoryId", cat.parent_id AS "parentCategoryId",
               ch.country::text AS country, p.city,
@@ -95,6 +96,7 @@ export async function loadProgress(db: DbClient, userId: string): Promise<Player
        JOIN goals g ON g.id = ugc.goal_id WHERE ugc.user_id = $1 GROUP BY g.period`,
       [userId],
     ),
+    db.query<{ n: number }>(`SELECT count(*)::int AS n FROM xp_events WHERE user_id = $1 AND source = 'community'`, [userId]),
   ]);
   const goalCounts = new Map(goals.rows.map((row) => [row.period, row.n]));
   return {
@@ -103,6 +105,7 @@ export async function loadProgress(db: DbClient, userId: string): Promise<Player
     unlockedAchievementIds: new Set(achievements.rows.map((row) => row.id)),
     longestStreak: streak.rows[0]?.longest_streak ?? 0,
     goalsCompleted: { weekly: goalCounts.get('weekly') ?? 0, monthly: goalCounts.get('monthly') ?? 0 },
+    communityGoals: community.rows[0]?.n ?? 0,
   };
 }
 

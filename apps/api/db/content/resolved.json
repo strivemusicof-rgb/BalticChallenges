@@ -1,0 +1,980 @@
+{
+  "riga-castle": {
+    "article": "Rīgas pils",
+    "lat": 56.95083333,
+    "lng": 24.09972222,
+    "verified": true,
+    "movedKm": 0.06,
+    "credit": "Diego Delso · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Castillo_de_Riga,_Letonia,_2012-08-07,_DD_04.JPG",
+    "direct": true
+  },
+  "three-brothers": {
+    "article": "Trīs brāļi",
+    "lat": 56.95041111,
+    "lng": 24.10418611,
+    "verified": true,
+    "movedKm": 0.07,
+    "credit": "Martin Thirolf · CC BY-SA 2.0 de · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:3_Brueder.jpg",
+    "direct": true
+  },
+  "swedish-gate": {
+    "article": "Aldaru iela (Rīga)",
+    "lat": 56.9514451,
+    "lng": 24.1063783,
+    "verified": true,
+    "movedKm": 0.03,
+    "credit": "Diego Delso · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Puerta_Sueca,_Riga,_Letonia,_2012-08-07,_DD_01.JPG",
+    "direct": false,
+    "osm": "Zviedru vārti, Aldaru iela, Vecrīga, Latgales apkaime, Rīga, LV-1010, Latvija"
+  },
+  "powder-tower": {
+    "article": "Pulvertornis",
+    "lat": 56.9512224,
+    "lng": 24.1086779,
+    "verified": true,
+    "movedKm": 0.02,
+    "direct": false,
+    "osm": "Pulvertornis, Smilšu iela, Vecrīga, Latgales apkaime, Rīga, LV-1050, Latvija"
+  },
+  "cat-house": {
+    "article": "Kaķu nams",
+    "lat": 56.95018611,
+    "lng": 24.108425,
+    "verified": true,
+    "movedKm": 0.08,
+    "credit": "Horvat · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Building_in_Riga_4.JPG",
+    "direct": true
+  },
+  "st-johns-riga": {
+    "article": "Rīgas Svētā Jāņa baznīca",
+    "lat": 56.9475,
+    "lng": 24.11083333,
+    "verified": true,
+    "movedKm": 0.06,
+    "credit": "A.Buks · CC BY-SA 2.5 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Johann_Kirche_Riga_1.JPG",
+    "direct": true
+  },
+  "st-james-riga": {
+    "article": "Rīgas Svētā Jēkaba katedrāle",
+    "lat": 56.9508271,
+    "lng": 24.1047368,
+    "verified": true,
+    "movedKm": 0.08,
+    "direct": false,
+    "osm": "Svētā Jēkaba katedrāle, 9, Jēkaba iela, Vecrīga, Latgales apkaime, Rīga, LV-1050, Latvija"
+  },
+  "nativity-cathedral-riga": {
+    "article": "Rīgas Kristus Piedzimšanas katedrāle",
+    "lat": 56.95388889,
+    "lng": 24.11555556,
+    "verified": true,
+    "movedKm": 0.08,
+    "credit": "Diego Delso · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Catedral_de_la_Natividad_de_Cristo,_Riga,_Letonia,_2012-08-07,_DD_03.JPG",
+    "direct": true
+  },
+  "bastejkalns": {
+    "article": "1991. gada barikāžu laukums",
+    "lat": 56.9518934,
+    "lng": 24.1103824,
+    "verified": true,
+    "movedKm": 0.05,
+    "credit": "Aldis Dzenovskis · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Vecr%C4%ABga,_Central_District,_Riga,_LV-1050,_Latvia_-_panoramio_(410).jpg",
+    "direct": false,
+    "osm": "Bastejkalns, Centrs, Centra apkaime, Rīga, LV-1050, Latvija"
+  },
+  "national-opera-riga": {
+    "article": "Latvijas Nacionālā opera un balets",
+    "lat": 56.95527778,
+    "lng": 24.10472222,
+    "verified": true,
+    "movedKm": 0.9,
+    "credit": "Diego Delso · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Opera_Nacional,_Riga,_Letonia,_2012-08-07,_DD_04.JPG",
+    "direct": true
+  },
+  "academy-of-sciences": {
+    "article": "Latvijas Zinātņu akadēmija",
+    "lat": 56.94333333,
+    "lng": 24.12194444,
+    "verified": true,
+    "movedKm": 0.31,
+    "direct": true
+  },
+  "spikeri": {
+    "article": "Sarkanie spīķeri",
+    "lat": 56.9417278,
+    "lng": 24.1164724,
+    "verified": true,
+    "movedKm": 0.29,
+    "direct": false,
+    "osm": "Spīķeri, Latgales apkaime, Rīga, LV-1050, Latvija"
+  },
+  "vansu-bridge": {
+    "article": "Vanšu tilts (Rīga)",
+    "lat": 56.9511573,
+    "lng": 24.095383,
+    "verified": true,
+    "movedKm": 0.25,
+    "direct": false,
+    "osm": "Vanšu tilts, Krišjāņa Valdemāra iela, Ķīpsala, Rīga, LV-1048, Latvija"
+  },
+  "kipsala": {
+    "article": "Balasta dambis",
+    "lat": 56.9558101,
+    "lng": 24.0824978,
+    "verified": true,
+    "movedKm": 0.35,
+    "credit": "Olgerts V · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Balasta_dambis_(4).jpg",
+    "direct": false,
+    "osm": "Ķīpsala, Rīga, Latvija"
+  },
+  "agenskalns-market": {
+    "article": "Āgenskalna tirgus",
+    "lat": 56.93583333,
+    "lng": 24.0725,
+    "verified": true,
+    "movedKm": 0.59,
+    "credit": "Cirkulis11 · CC0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Agenskalna_Market.jpg",
+    "direct": true
+  },
+  "dzeguzkalns": {
+    "article": "Dzegužkalns",
+    "lat": 56.9625,
+    "lng": 24.06944444,
+    "verified": true,
+    "movedKm": 2.34,
+    "direct": true
+  },
+  "national-museum-of-art": {
+    "article": "Latvijas Nacionālais mākslas muzejs",
+    "lat": 56.95583333,
+    "lng": 24.11305556,
+    "verified": true,
+    "movedKm": 0.03,
+    "credit": "Trogain · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Buildings_in_riga_04.jpg",
+    "direct": true
+  },
+  "riga-motor-museum": {
+    "article": "Rīgas Motormuzejs",
+    "lat": 56.97055,
+    "lng": 24.22768611,
+    "verified": true,
+    "movedKm": 2.05,
+    "credit": "Nenea hartia · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:R%C4%ABgas_motormuzejs_(09.09.2022).jpg",
+    "direct": true
+  },
+  "ethnographic-open-air-museum": {
+    "article": "Latvijas Etnogrāfiskais brīvdabas muzejs",
+    "lat": 56.99490778,
+    "lng": 24.26157444,
+    "verified": true,
+    "movedKm": 2.03,
+    "credit": "Andrijko Z. · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Latvijas_Etnogr%C4%81fiskais_br%C4%ABvdabas_muzejs,_signboard.jpg",
+    "direct": true
+  },
+  "brothers-cemetery": {
+    "article": "Rīgas Brāļu kapi",
+    "lat": 56.982636,
+    "lng": 24.1510405,
+    "verified": true,
+    "movedKm": 0.63,
+    "direct": false,
+    "osm": "Brāļu kapi, Gaujas iela, Mežaparks, Centra apkaime, Rīga, LV-1026, Latvija"
+  },
+  "mezaparks-bandstand": {
+    "article": "Mežaparka Lielā estrāde",
+    "lat": 57.01527778,
+    "lng": 24.15138889,
+    "verified": true,
+    "movedKm": 1.67,
+    "credit": "Rīgas pašvaldības aģentūra “Rīgas investīciju un tūrisma aģentūra” · CC BY 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Mezparka-estrade.jpg",
+    "direct": true
+  },
+  "riga-zoo": {
+    "article": "Rīgas Zooloģiskais dārzs",
+    "lat": 57.008127,
+    "lng": 24.161573,
+    "verified": true,
+    "movedKm": 0.07,
+    "direct": false,
+    "osm": "Rīgas Nacionālais Zooloģiskais dārzs, Siguldas prospekts, Mežaparks, Centra apkaime, Rīga, LV-1014, Latvija"
+  },
+  "daugavgriva-fortress": {
+    "article": "Daugavgrīvas cietoksnis",
+    "lat": 57.045,
+    "lng": 24.03972222,
+    "verified": true,
+    "movedKm": 0.65,
+    "credit": "Matthias Richter · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Newmunde_(Daugavgriva).jpg",
+    "direct": true
+  },
+  "mangalsala-pier": {
+    "article": "Rīgas osta",
+    "lat": 57.061,
+    "lng": 24.0551,
+    "verified": true,
+    "movedKm": null,
+    "direct": false,
+    "osm": "OSM bus stop Mangaļsala"
+  },
+  "vecaki-beach": {
+    "article": "Vecāķi (stacija)",
+    "lat": 57.0750369,
+    "lng": 24.1037129,
+    "verified": true,
+    "movedKm": 0.88,
+    "direct": false,
+    "osm": "Vecāķi, Vecmīlgrāvja apkaime, Rīga, LV-1030, Latvija"
+  },
+  "dzintari-concert-hall": {
+    "article": "Dzintaru koncertzāle",
+    "lat": 56.9778908,
+    "lng": 23.8120075,
+    "verified": true,
+    "movedKm": 0.06,
+    "direct": false,
+    "osm": "Dzintaru koncertzāle, 1, Turaidas iela, Majori, Jūrmala, LV-2015, Latvija"
+  },
+  "dzintari-forest-park": {
+    "article": "Dzintari",
+    "lat": 56.9757654,
+    "lng": 23.8191032,
+    "verified": true,
+    "movedKm": 1,
+    "direct": false,
+    "osm": "Dzintaru mežaparks, Dzintari, Jūrmala, Latvija"
+  },
+  "jomas-street": {
+    "article": "Jomas iela",
+    "lat": 56.9736618,
+    "lng": 23.8049204,
+    "verified": true,
+    "movedKm": 2.19,
+    "direct": false,
+    "osm": "Jomas iela, Majori, Jūrmala, LV-2015, Latvija"
+  },
+  "ragakapa": {
+    "article": "Ragakāpa (dabas parks)",
+    "lat": 56.99722222,
+    "lng": 23.91388889,
+    "verified": true,
+    "movedKm": 2.97,
+    "credit": "Егор Журавлёв from Smarde, Latvia · CC BY-SA 2.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Jurmala_Ragakapa_01_(33132087320).jpg",
+    "direct": true
+  },
+  "sigulda-cable-car": {
+    "article": "Sigulda",
+    "lat": 57.1646,
+    "lng": 24.8456,
+    "verified": true,
+    "movedKm": null,
+    "direct": false,
+    "osm": "OSM Siguldas Vagoniņš station"
+  },
+  "sigulda-bobsleigh-track": {
+    "article": "Siguldas bobsleja un kamaniņu trase",
+    "lat": 57.1531267,
+    "lng": 24.8418032,
+    "verified": true,
+    "movedKm": 0.52,
+    "direct": false,
+    "osm": "Bobsleja un kamaniņu trase, Šveices iela, Sigulda, Siguldas novads, LV-2150, Latvija"
+  },
+  "krimulda-castle": {
+    "article": "Krimuldas muiža",
+    "lat": 57.1709,
+    "lng": 24.8323,
+    "verified": true,
+    "movedKm": 0.72,
+    "credit": "PROP1001 · CC0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Krimuldas_mui%C5%BEas_nams.jpg",
+    "direct": true,
+    "osm": "OSM Krimuldas pilsdrupas"
+  },
+  "paradise-hill": {
+    "article": "Kraukļupīte (Vējupītes pieteka)",
+    "lat": 57.1704863,
+    "lng": 24.8619469,
+    "verified": true,
+    "movedKm": 0.72,
+    "direct": false,
+    "osm": "Paradīzes kalns, Miera iela, Pilskalni, Sigulda, Siguldas novads, LV-2150, Latvija"
+  },
+  "velnala": {
+    "article": "Krimuldas Velnala",
+    "lat": 57.1503304,
+    "lng": 24.8114161,
+    "verified": true,
+    "movedKm": 2.48,
+    "direct": false,
+    "osm": "Velnala, Kājnieku tilts, Sigulda, Siguldas novads, LV-2150, Latvija"
+  },
+  "ligatne-nature-trails": {
+    "article": "Līgatne",
+    "lat": 57.2480295,
+    "lng": 25.0157752,
+    "verified": true,
+    "movedKm": 0.59,
+    "direct": false,
+    "osm": "Līgatnes dabas takas, Līgatnes dabas taka, Līgatnes pagasts, Cēsu novads, LV-4108, Latvija"
+  },
+  "ligatne-bunker": {
+    "article": "Līgatnes Padomju slepenais bunkurs",
+    "lat": 57.2556498,
+    "lng": 25.0687692,
+    "verified": true,
+    "movedKm": 1.96,
+    "direct": false,
+    "osm": "Līgatnes bunkurs, V283, Līgatnes pagasts, Cēsu novads, LV-4110, Latvija"
+  },
+  "ligatne-village": {
+    "article": "Līgatne",
+    "lat": 57.23222222,
+    "lng": 25.04583333,
+    "verified": true,
+    "movedKm": 0.4,
+    "credit": "mikroskops · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:L%C4%ABgatnes_pap%C4%ABrfabrika.jpg",
+    "direct": true
+  },
+  "ligatne-ferry": {
+    "article": "Līgatne",
+    "lat": 57.2549543,
+    "lng": 25.0443883,
+    "verified": true,
+    "movedKm": 3.93,
+    "direct": false,
+    "osm": "Līgatnes pārceltuve, Gaujas iela, Gaujas, Līgatne, Cēsu novads, LV-4110, Latvija"
+  },
+  "cirulisi-trails": {
+    "article": "Cīrulīšu bezdibenis",
+    "lat": 57.3019081,
+    "lng": 25.2322205,
+    "verified": true,
+    "movedKm": 1.25,
+    "direct": false,
+    "osm": "Cīrulīši, Cēsis, Cēsu novads, LV-4101, Latvija"
+  },
+  "araisi-lake-fortress": {
+    "article": "Āraišu ezerpils",
+    "lat": 57.25138889,
+    "lng": 25.28277778,
+    "verified": true,
+    "movedKm": 0.19,
+    "credit": "Edgars Šulcs · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:%C4%80rai%C5%A1u_ezerpils_(1).jpg",
+    "direct": true
+  },
+  "ungurmuiza": {
+    "article": "Ungurmuiža",
+    "lat": 57.3625,
+    "lng": 25.08861111,
+    "verified": true,
+    "movedKm": 7.29,
+    "credit": "Richlv · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Ungurmuizha_2013.09.29.JPG",
+    "direct": true
+  },
+  "straupe-castle": {
+    "article": "Straupes luterāņu baznīca",
+    "lat": 57.3474,
+    "lng": 24.9478,
+    "verified": true,
+    "movedKm": 0.17,
+    "direct": false,
+    "osm": "OSM Lielstraupes pils"
+  },
+  "valmiera-st-simons": {
+    "article": "Valmieras Svētā Sīmaņa baznīca",
+    "lat": 57.53833333,
+    "lng": 25.42638889,
+    "verified": true,
+    "movedKm": 0.11,
+    "credit": "Juriskraulis · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Valmieras_Sv%C4%93t%C4%81_S%C4%ABma%C5%86a_bazn%C4%ABca.jpg",
+    "direct": true
+  },
+  "sietiniezis": {
+    "article": "Sietiņiezis",
+    "lat": 57.42652778,
+    "lng": 25.38647222,
+    "verified": true,
+    "movedKm": 4.35,
+    "direct": true
+  },
+  "ergli-cliffs": {
+    "article": "Ērgļu klintis",
+    "lat": 57.36055556,
+    "lng": 25.26166667,
+    "verified": true,
+    "movedKm": 10.29,
+    "credit": "Juris Kraulis · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Erglu_Cliffs.jpg",
+    "direct": true
+  },
+  "skanaiskalns": {
+    "article": "Skaņaiskalns",
+    "lat": 57.8736,
+    "lng": 24.9962,
+    "verified": true,
+    "movedKm": 3.12,
+    "credit": "Gunita Kolle · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Ska%C5%86aiskalns_29.07.2019.jpg",
+    "direct": true
+  },
+  "gaizinkalns": {
+    "article": "Gaiziņš",
+    "lat": 56.87004056,
+    "lng": 25.95935694,
+    "verified": true,
+    "movedKm": 0.64,
+    "credit": "The original uploader was Laurijs at Latvian Wikipedia. · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Skats_no_Gaizi%C5%86kalna_uz_Pu%C4%BCpu_kalnu_un_Vie%C5%A1%C5%ABru.JPG",
+    "direct": true
+  },
+  "cesvaine-palace": {
+    "article": "Cesvaines pils",
+    "lat": 56.96916667,
+    "lng": 26.3125,
+    "verified": true,
+    "movedKm": 0.46,
+    "credit": "Vaido Otsar · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Cesvaine_loss_5015_06.jpg",
+    "direct": true
+  },
+  "stameriena-palace": {
+    "article": "Stāmerienas pils",
+    "lat": 57.21593683,
+    "lng": 26.89941498,
+    "verified": true,
+    "movedKm": 1.58,
+    "credit": "Tim Sin · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:St%C4%81merienas_mui%C5%BEas_pils_2021.jpg",
+    "direct": true
+  },
+  "aluksne-new-castle": {
+    "article": "Alūksnes Jaunā pils",
+    "lat": 57.42282,
+    "lng": 27.054262,
+    "verified": true,
+    "movedKm": 0.21,
+    "direct": true
+  },
+  "gulbene-aluksne-railway": {
+    "article": "Pūriņi",
+    "lat": 57.1831,
+    "lng": 26.7659,
+    "verified": true,
+    "movedKm": 14.42,
+    "direct": false,
+    "osm": "OSM Gulbene station"
+  },
+  "ainazi-naval-school": {
+    "article": "Ainažu jūrskola",
+    "lat": 57.8650832,
+    "lng": 24.3604135,
+    "verified": true,
+    "movedKm": 0.12,
+    "credit": "Ivo Kruusamägi · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Heinaste_merekooli_hoone.JPG",
+    "direct": true
+  },
+  "veczemju-cliffs": {
+    "article": "Veczemju klintis",
+    "lat": 57.58527778,
+    "lng": 24.36916667,
+    "verified": true,
+    "movedKm": 7.09,
+    "credit": "J. Sedols · CC BY 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Veczemju_klintis_Vidzemes_j%C5%ABrmal%C4%81_2002-05-01.jpg",
+    "direct": true
+  },
+  "saulkrasti-white-dune": {
+    "article": "Baltā kāpa",
+    "lat": 57.234343,
+    "lng": 24.3920095,
+    "verified": true,
+    "movedKm": 5.98,
+    "direct": false,
+    "osm": "Baltā kāpa, Kāpu iela, Pabaži, Saulkrasti, Saulkrastu novads, LV-2160, Latvija"
+  },
+  "burtnieks-lake": {
+    "article": "Burtnieks",
+    "lat": 57.73333333,
+    "lng": 25.23333333,
+    "verified": true,
+    "movedKm": 4.3,
+    "credit": "Jānis Sedols · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Burtnieku_ezers_pie_Burtniekiem.jpg",
+    "direct": true
+  },
+  "birini-palace": {
+    "article": "Bīriņu muiža",
+    "lat": 57.24388889,
+    "lng": 24.65972222,
+    "verified": true,
+    "movedKm": 0.7,
+    "credit": "Vesma · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Birini.jpg",
+    "direct": true
+  },
+  "malpils-manor": {
+    "article": "Mālpils muiža",
+    "lat": 57.00638889,
+    "lng": 24.94944444,
+    "verified": true,
+    "movedKm": 0.52,
+    "direct": true
+  },
+  "ogre-blue-hills": {
+    "article": "Ogres Zilie kalni (dabas parks)",
+    "lat": 56.83305556,
+    "lng": 24.57638889,
+    "verified": true,
+    "movedKm": 1.85,
+    "credit": "Evita wiki · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Ogres_Zilo_kalnu_dabas_parks_04.jpg",
+    "direct": true
+  },
+  "kuldiga-brick-bridge": {
+    "article": "Kuldīga",
+    "lat": 56.9693,
+    "lng": 21.9805,
+    "verified": true,
+    "movedKm": null,
+    "credit": "Inārs Švarcs · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Kuld%C4%ABga,_Kurzeme,_Latvija,_Vecpils%C4%93ta.jpg",
+    "direct": false,
+    "osm": "next to OSM Ventas rumba"
+  },
+  "aleksupite-waterfall": {
+    "article": "Alekšupīte",
+    "lat": 56.9698788,
+    "lng": 21.9752225,
+    "verified": true,
+    "movedKm": 0.56,
+    "credit": "Jānis Sedols (first uploaded by lv:User:Kikos) · CC BY 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Alek%C5%A1up%C4%ABte_Kuld%C4%ABg%C4%81.jpg",
+    "direct": false,
+    "osm": "Alekšupītes ūdenskritums, Kuldīga, Kuldīgas novads, LV-3301, Latvija"
+  },
+  "riezupe-caves": {
+    "article": "Riežupe",
+    "lat": 57.0065882,
+    "lng": 21.9861549,
+    "verified": true,
+    "movedKm": 2.15,
+    "direct": false,
+    "osm": "Riežupes Smilšu Alas, Vetklīnika - Palejas, Rumbas pagasts, Kuldīgas novads, LV-3301, Latvija"
+  },
+  "pedvale": {
+    "article": "Briņķi",
+    "lat": 57.0402315,
+    "lng": 22.56225,
+    "verified": true,
+    "movedKm": 0.76,
+    "direct": false,
+    "osm": "Pedvāles Brīvdabas mākslas muzejs, Raiņa iela, Pārabava, Sabile, Talsi novads, LV-3294, Latvija"
+  },
+  "sabile-wine-hill": {
+    "article": "Sabiles Vīna kalns",
+    "lat": 57.04472222,
+    "lng": 22.57833333,
+    "verified": true,
+    "movedKm": 0.11,
+    "credit": "No machine-readable author provided. Mghamburg assumed (based on copyright claims). · CC BY 2.5 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Sabile_weinberg.jpg",
+    "direct": true
+  },
+  "abava-rumba": {
+    "article": "Abavas rumba",
+    "lat": 57.07083333,
+    "lng": 22.52694444,
+    "verified": true,
+    "movedKm": 4.38,
+    "credit": "Sergej Smirnov · CC BY 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Abavas_Rumba_2013.jpg",
+    "direct": true
+  },
+  "jurkalne-cliffs": {
+    "article": "Jūrkalne",
+    "lat": 57.0061,
+    "lng": 21.3869,
+    "verified": true,
+    "movedKm": null,
+    "direct": false,
+    "osm": "OSM Jūrkalne"
+  },
+  "pavilosta": {
+    "article": "Pāvilosta",
+    "lat": 56.88916667,
+    "lng": 21.17694444,
+    "verified": true,
+    "movedKm": 0.57,
+    "credit": "Kārlis Volkovskis · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:P%C4%81vilosta,_Dienvidkurzeme_(125).jpg",
+    "direct": true
+  },
+  "pape-lighthouse": {
+    "article": "Papes bāka",
+    "lat": 56.15491389,
+    "lng": 21.02341111,
+    "verified": true,
+    "movedKm": 0.52,
+    "credit": "Alvals · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Pape_lighthouse.jpg",
+    "direct": true
+  },
+  "pape-wild-horses": {
+    "article": "Pape (dabas parks)",
+    "lat": 56.16666667,
+    "lng": 20.91805556,
+    "verified": true,
+    "movedKm": 8.18,
+    "credit": "mikroskops · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Papes_ezers_-_mikroskops_-_Panoramio_(1).jpg",
+    "direct": true
+  },
+  "karosta-prison": {
+    "article": "Karosta",
+    "lat": 56.54633,
+    "lng": 21.0209635,
+    "verified": true,
+    "movedKm": 0.69,
+    "direct": false,
+    "osm": "Karostas cietums, 4, Invalīdu iela, Karosta, Liepāja, LV-3414, Latvija"
+  },
+  "karosta-cathedral": {
+    "article": "Liepājas Svētā Nikolaja pareizticīgo Jūras katedrāle",
+    "lat": 56.5528983,
+    "lng": 21.0123363,
+    "verified": true,
+    "movedKm": 0.84,
+    "direct": false,
+    "osm": "Svētā Nikolaja pareizticīgo Jūras katedrāle, 7, Studentu rotas iela, Karosta, Liepāja, LV-3414, Latvija"
+  },
+  "liepaja-holy-trinity": {
+    "article": "Liepājas Svētās Trīsvienības katedrāle",
+    "lat": 56.509838,
+    "lng": 21.0133454,
+    "verified": true,
+    "movedKm": 0.06,
+    "direct": false,
+    "osm": "Svētās Trīsvienības Baznīca, 9, Lielā iela, Vecliepāja, Liepāja, LV-3401, Latvija"
+  },
+  "great-amber-liepaja": {
+    "article": "Lielais dzintars",
+    "lat": 56.5114187,
+    "lng": 21.0105683,
+    "verified": true,
+    "movedKm": 0.45,
+    "direct": false,
+    "osm": "Lielais Dzintars, 8, Radio iela, Vecliepāja, Liepāja, LV-3401, Latvija"
+  },
+  "northern-forts": {
+    "article": "Karosta",
+    "lat": 56.5919,
+    "lng": 21.0161,
+    "verified": true,
+    "movedKm": null,
+    "direct": false,
+    "osm": "OSM Ziemeļu forti"
+  },
+  "ventspils-open-air-museum": {
+    "article": "Ventspils muzejs",
+    "lat": 57.3859,
+    "lng": 21.535,
+    "verified": true,
+    "movedKm": null,
+    "direct": false,
+    "osm": "OSM Piejūras brīvdabas muzejs"
+  },
+  "irbene-radio-telescope": {
+    "article": "RT-32 Irbenes radioteleskops",
+    "lat": 57.5539,
+    "lng": 21.8536,
+    "verified": true,
+    "movedKm": 0.08,
+    "credit": "Tiia Monto · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:RT-32_telescope.jpg",
+    "direct": true
+  },
+  "ovisi-lighthouse": {
+    "article": "Ovišu bāka",
+    "lat": 57.56865556,
+    "lng": 21.71580833,
+    "verified": true,
+    "movedKm": 0.11,
+    "credit": "Edgars Šulcs · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Ovisu_baka_3.jpg",
+    "direct": true
+  },
+  "mikeltornis-lighthouse": {
+    "article": null,
+    "lat": 57.5997415,
+    "lng": 21.9744341,
+    "verified": true,
+    "movedKm": 0.16,
+    "direct": false,
+    "osm": "Miķeļbāka, Pievedceļš Miķeļbākai, Miķeļtornis, Tārgales pagasts, Ventspils novads, LV-3601, Latvija"
+  },
+  "dundaga-castle": {
+    "article": "Dundagas pils",
+    "lat": 57.51055556,
+    "lng": 22.35611111,
+    "verified": true,
+    "movedKm": 0.31,
+    "direct": true
+  },
+  "edole-castle": {
+    "article": "Ēdoles pils",
+    "lat": 57.0175,
+    "lng": 21.69694444,
+    "verified": true,
+    "movedKm": 3.45,
+    "credit": "Daarznieks · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:5_Edoles-pils4-14jun08.jpg",
+    "direct": true
+  },
+  "kazdanga-palace": {
+    "article": "Kazdangas pils",
+    "lat": 56.73388889,
+    "lng": 21.73277778,
+    "verified": true,
+    "movedKm": 0.59,
+    "credit": "Semigall · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Kazdangas_pils.JPG",
+    "direct": true
+  },
+  "durbe-manor": {
+    "article": "Durbes muiža",
+    "lat": 56.9667891,
+    "lng": 23.1929497,
+    "verified": true,
+    "movedKm": 2.83,
+    "direct": false,
+    "osm": "Durbes pils, 7 k-1, M. Parka iela, Durbe, Tukums, Tukuma novads, LV-3101, Latvija"
+  },
+  "jaunmoku-palace": {
+    "article": "Jaunmoku pils",
+    "lat": 56.9816,
+    "lng": 23.054,
+    "verified": true,
+    "movedKm": 8.95,
+    "credit": "J. Sedols (Jānis Sedols) · CC BY 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Jaunmoku_pils_1999-11-06_(2).jpg",
+    "direct": true
+  },
+  "engure-lake": {
+    "article": "Engures ezers",
+    "lat": 57.26666667,
+    "lng": 23.1,
+    "verified": true,
+    "movedKm": 3.21,
+    "credit": "J. Sedols · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Engures_ezers_pie_Dzedriem.jpg",
+    "direct": true
+  },
+  "kanieris-lake": {
+    "article": "Kaņieris",
+    "lat": 57.00305556,
+    "lng": 23.46916667,
+    "verified": true,
+    "movedKm": 0.66,
+    "credit": "Gunita Kolle · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Ka%C5%86ieris_9.jpg",
+    "direct": true
+  },
+  "dobele-castle": {
+    "article": "Dobeles pils",
+    "lat": 56.623,
+    "lng": 23.273,
+    "verified": true,
+    "movedKm": 0.54,
+    "credit": "Unknown lithographist from 1660 · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Dobeles_pils_1660.jpg",
+    "direct": true
+  },
+  "tervete-nature-park": {
+    "article": "Tērvete (dabas parks)",
+    "lat": 56.48388889,
+    "lng": 23.37694444,
+    "verified": true,
+    "movedKm": 0.8,
+    "credit": "PROP1001 · CC0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:T%C4%93rvetes_dabas_parks.jpg",
+    "direct": true
+  },
+  "jaunpils-castle": {
+    "article": "Jaunpils pils",
+    "lat": 56.73055556,
+    "lng": 23.02138889,
+    "verified": true,
+    "movedKm": 0.1,
+    "credit": "Daarznieks · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:6_Jaunpils-pils3-5apr08.jpg",
+    "direct": true
+  },
+  "jelgava-trinity-tower": {
+    "article": "Jelgavas Svētās Trīsvienības baznīca",
+    "lat": 56.6524277,
+    "lng": 23.7288895,
+    "verified": true,
+    "movedKm": 0.4,
+    "credit": "Ken Eckert · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Holy_Trinity_Tower_%26_Statue,_Jelgava,_Latvia.jpg",
+    "direct": false,
+    "osm": "Jelgavas Svētās Trīsvienības baznīcas tornis, 1, Akadēmijas iela, Centrs, Jelgava, LV-3001, Latvija"
+  },
+  "cena-bog": {
+    "article": "Cenas tīrelis (dabas liegums)",
+    "lat": 56.8512771,
+    "lng": 23.8787005,
+    "verified": true,
+    "movedKm": 2.92,
+    "credit": "Alinco_fan · CC BY 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Cenas_t%C4%ABrelis.jpg",
+    "direct": false,
+    "osm": "Cenas tīrelis, Mārupes pagasts, Mārupes novads, Latvija"
+  },
+  "daugavpils-rothko": {
+    "article": "Rotko muzejs",
+    "lat": 55.88277778,
+    "lng": 26.50194444,
+    "verified": true,
+    "movedKm": 2.2,
+    "credit": "Ivo Kruusamägi · CC BY-SA 4.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Artillery_arsenal,_Daugavpils_fortress,_2014.jpg",
+    "direct": true
+  },
+  "daugavpils-church-hill": {
+    "article": "Kirkas kalns",
+    "lat": 55.8708862,
+    "lng": 26.5403772,
+    "verified": true,
+    "movedKm": 1.67,
+    "direct": false,
+    "osm": "Baznīcu kalns, 18. novembra iela, Jaunbūve, Daugavpils, LV-5404, Latvija"
+  },
+  "daugava-bends": {
+    "article": "Daugavas loki",
+    "lat": 55.88861111,
+    "lng": 26.92277778,
+    "verified": true,
+    "movedKm": 2.49,
+    "direct": true
+  },
+  "kraslava-palace": {
+    "article": "Krāslavas pils",
+    "lat": 55.89944444,
+    "lng": 27.15972222,
+    "verified": true,
+    "movedKm": 0.69,
+    "credit": "Semigall · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Kreslau.jpg",
+    "direct": true
+  },
+  "ludza-castle": {
+    "article": "Ludzas pils",
+    "lat": 56.54888889,
+    "lng": 27.72861111,
+    "verified": true,
+    "movedKm": 0.57,
+    "credit": "Semigall · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Ludza.JPG",
+    "direct": true
+  },
+  "rezekne-gors": {
+    "article": "Latgales vēstniecība \"Gors\"",
+    "lat": 56.5027938,
+    "lng": 27.3261332,
+    "verified": true,
+    "movedKm": 0.66,
+    "direct": false,
+    "osm": "Latgales vēstniecība \"GORS\", 4, Pils iela, Centrs, Centra rajons, Rēzekne, LV-4601, Latvija"
+  },
+  "latgales-mara": {
+    "article": "Piemineklis \"Vienoti Latvijai\"",
+    "lat": 56.5065413,
+    "lng": 27.3308,
+    "verified": true,
+    "movedKm": 0.3,
+    "direct": false,
+    "osm": "Vienoti Latvijai, Atbrīvošanas aleja, Centrs, Centra rajons, Rēzekne, LV-4601, Latvija"
+  },
+  "rezekne-castle-hill": {
+    "article": "Rēzeknes pilskalns",
+    "lat": 56.50259,
+    "lng": 27.33476,
+    "verified": true,
+    "movedKm": 0.28,
+    "credit": "Semigall · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Rezekne_castle.JPG",
+    "direct": true
+  },
+  "razna-lake": {
+    "article": "Rāznas nacionālais parks",
+    "lat": 56.2950513,
+    "lng": 27.5028937,
+    "verified": true,
+    "movedKm": 4.13,
+    "direct": false,
+    "osm": "Rāzna, Malta — Kaunata, Rāzna, Lipuški, Kaunatas pagasts, Rēzeknes novads, LV-4622, Latvija"
+  },
+  "makonkalns": {
+    "article": "Mākoņkalns",
+    "lat": 56.27805556,
+    "lng": 27.41361111,
+    "verified": true,
+    "movedKm": 13.51,
+    "credit": "J. Sedols · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:M%C4%81ko%C5%86kalns_1999-08-17.jpg",
+    "direct": true
+  },
+  "lubans-lake": {
+    "article": "Lubāns",
+    "lat": 56.76666667,
+    "lng": 26.86666667,
+    "verified": true,
+    "movedKm": 0.89,
+    "credit": "user:biafra · Public domain · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Lubans_R_piekr.jpg",
+    "direct": true
+  },
+  "teici-bog": {
+    "article": "Teiču dabas rezervāts",
+    "lat": 56.6025,
+    "lng": 26.498611,
+    "verified": true,
+    "movedKm": 6.24,
+    "credit": "Silraks · CC BY-SA 3.0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Tei%C4%8Du_purvs_no_skatu_tor%C5%86a.jpg",
+    "direct": true
+  },
+  "preili-manor-park": {
+    "article": "Preiļu muiža",
+    "lat": 56.2858,
+    "lng": 26.7262,
+    "verified": true,
+    "movedKm": null,
+    "credit": "Sneader · CC0 · Wikimedia Commons",
+    "photoSource": "https://commons.wikimedia.org/wiki/File:Prei%C4%BCi_Palace.jpg",
+    "direct": false,
+    "osm": "OSM Preiļu pils parks"
+  }
+}

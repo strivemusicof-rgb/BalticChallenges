@@ -82,6 +82,48 @@ interface AdminEvent {
   live: boolean;
   challenges: number;
   finishers: number;
+  communityGoal: number;
+  communityXp: number;
+  communityProgress: number;
+  communityReachedAt: string | null;
+}
+
+/** Shared goal of one event: target and reward XP, with the current progress. 0 switches it off. */
+function GoalEditor({ event }: { event: AdminEvent }) {
+  const t = useT();
+  const queryClient = useQueryClient();
+  const [goal, setGoal] = useState(String(event.communityGoal));
+  const [xp, setXp] = useState(String(event.communityXp));
+  const save = useMutation({
+    mutationFn: () =>
+      api(`/v1/admin/events/${event.slug}/goal`, { method: 'POST', body: { goal: Number(goal) || 0, xp: Number(xp) || 0 } }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'events'] });
+      void queryClient.invalidateQueries({ queryKey: ['community'] });
+    },
+    onError: (error) => showAlert(t('common.somethingWrong'), error.message),
+  });
+  const changed = goal !== String(event.communityGoal) || xp !== String(event.communityXp);
+  return (
+    <View style={styles.goalRow}>
+      <View style={styles.goalField}>
+        <ThemedText style={styles.meta}>{t('admin.goal')}</ThemedText>
+        <TextInput value={goal} onChangeText={setGoal} keyboardType="number-pad" style={[styles.input, styles.goalInput]} />
+      </View>
+      <View style={styles.goalField}>
+        <ThemedText style={styles.meta}>{t('admin.goalXp')}</ThemedText>
+        <TextInput value={xp} onChangeText={setXp} keyboardType="number-pad" style={[styles.input, styles.goalInput]} />
+      </View>
+      <View style={styles.goalField}>
+        <ThemedText style={styles.meta}>{t('admin.goalProgress')}</ThemedText>
+        <ThemedText type="smallBold">
+          {event.communityGoal > 0 ? `${formatNumber(event.communityProgress)} / ${formatNumber(event.communityGoal)}` : '—'}
+          {event.communityReachedAt ? ' ✓' : ''}
+        </ThemedText>
+      </View>
+      <Button label={t('common.save')} size="small" variant={changed ? 'primary' : 'secondary'} disabled={!changed} loading={save.isPending} onPress={() => save.mutate()} />
+    </View>
+  );
 }
 
 function Events() {
@@ -113,7 +155,8 @@ function Events() {
         const [from, to] = eventColors(event.slug);
         const on = event.status === 'published';
         return (
-          <View key={event.slug} style={[styles.item, styles.contentRow]}>
+          <View key={event.slug} style={[styles.item, styles.eventItem]}>
+          <View style={styles.contentRow}>
             <View style={[styles.eventIcon, { backgroundColor: on ? from : '#C9D2CD' }]}>
               <Glyph name={collectionGlyph(event.slug)} size={22} color={on ? '#FFFFFF' : '#6B7A72'} />
             </View>
@@ -141,6 +184,8 @@ function Events() {
               accessibilityLabel={event.title}
               onValueChange={(active) => toggle.mutate({ slug: event.slug, active })}
             />
+          </View>
+          <GoalEditor event={event} />
           </View>
         );
       })}
@@ -443,6 +488,25 @@ export default function AdminScreen() {
 }
 
 const styles = StyleSheet.create({
+  eventItem: {
+    gap: Spacing.two,
+  },
+  goalRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: Spacing.two,
+  },
+  goalField: {
+    flex: 1,
+    gap: 2,
+  },
+  goalInput: {
+    flex: 0,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: Radius.medium,
+    backgroundColor: '#F1F4F2',
+  },
   section: {
     gap: Spacing.three,
   },

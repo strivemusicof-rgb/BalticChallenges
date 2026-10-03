@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { XpLabel } from '@/components/challenge-card';
+import { CommunityGoalCard } from '@/components/community-goal';
 import { HeroScroll } from '@/components/hero-scroll';
 import { Photo } from '@/components/photo';
 import { Reveal } from '@/components/reveal';
@@ -60,6 +61,12 @@ export default function CollectionScreen() {
           </ThemedText>
         )}
       </Reveal>
+
+      {data.kind === 'seasonal' && (
+        <Reveal index={2}>
+          <CommunityGoalCard slug={data.slug} />
+        </Reveal>
+      )}
 
       <View style={styles.grid}>
         {data.challenges.map((challenge, index) => {

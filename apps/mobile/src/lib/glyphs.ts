@@ -54,6 +54,8 @@ export function categoryGlyph(categoryId: string | null | undefined): GlyphName 
 }
 
 const ACHIEVEMENT: Record<string, GlyphName> = {
+  'together-1': 'account-group',
+  'together-3': 'hand-heart',
   'first-step': 'shoe-print',
   'challenges-5': 'flag-outline',
   'challenges-10': 'flag-checkered',
@@ -108,6 +110,11 @@ const COLLECTION: Record<string, GlyphName> = {
   'wild-nature': 'pine-tree',
   'baltic-trails': 'hiking',
   'autumn-latvia-2026': 'leaf-maple',
+  'latvia-riga': 'city-variant-outline',
+  'latvia-vidzeme': 'image-filter-hdr',
+  'latvia-kurzeme': 'lighthouse-on',
+  'latvia-zemgale': 'barley',
+  'latvia-latgale': 'water',
 };
 
 /** Seasonal events are keyed by slug prefix (e.g. "christmas-2026"), so new years need no code change. */

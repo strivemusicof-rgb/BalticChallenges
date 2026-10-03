@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
+import { CommunityGoalLine } from '@/components/community-goal';
 import { ThemedText } from '@/components/themed-text';
 import { Glyph } from '@/components/ui/glyph';
 import { PressableScale } from '@/components/ui/pressable-scale';
@@ -49,6 +50,7 @@ export function SeasonBanner() {
           {event.completed}/{event.total}
         </ThemedText>
       </View>
+      <CommunityGoalLine slug={event.slug} />
       <View style={styles.footer}>
         <ThemedText style={styles.meta}>
           {done ? t('common.completed') : `${t('common.xp', { xp: event.xpReward })} · ${timeLeft(event.endsAt!)}`}

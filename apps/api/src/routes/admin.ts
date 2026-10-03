@@ -470,7 +470,10 @@ export const adminRoutes: RoutePlugin = (app, { db, auth }) => {
               (c.status = 'published' AND (c.starts_at IS NULL OR c.starts_at <= now())
                  AND (c.ends_at IS NULL OR c.ends_at > now())) AS live,
               (SELECT count(*)::int FROM collection_items ci WHERE ci.collection_id = c.id) AS challenges,
-              (SELECT count(*)::int FROM user_collections uc WHERE uc.collection_id = c.id) AS finishers
+              (SELECT count(*)::int FROM user_collections uc WHERE uc.collection_id = c.id) AS finishers,
+              c.community_goal AS "communityGoal", c.community_xp AS "communityXp", c.community_reached_at AS "communityReachedAt",
+              (SELECT count(*)::int FROM challenge_attempts a
+                WHERE a.status = 'completed' AND a.completed_at >= c.starts_at AND a.completed_at < c.ends_at) AS "communityProgress"
        FROM collections c WHERE c.kind = 'seasonal' ORDER BY c.starts_at NULLS LAST`,
     );
     return { events: rows };
@@ -501,6 +504,22 @@ export const adminRoutes: RoutePlugin = (app, { db, auth }) => {
       );
       await audit(client, userId(request), active ? 'event_on' : 'event_off', 'collection', event.id);
     });
+    return { ok: true };
+  });
+
+  // Shared goal for an event: 0 switches it off. Lowering it below the current progress is allowed;
+  // the goal is then reached with the next completion.
+  app.post('/v1/admin/events/:slug/goal', adminOnly, async (request) => {
+    const { slug } = parse(z.object({ slug: z.string().min(1).max(80) }), request.params);
+    const body = parse(z.object({ goal: z.number().int().min(0).max(1_000_000), xp: z.number().int().min(0).max(5000) }), request.body);
+    const { rows } = await db.query<{ id: string }>(
+      `UPDATE collections SET community_goal = $2, community_xp = $3,
+         community_reached_at = CASE WHEN $2 > community_goal THEN NULL ELSE community_reached_at END
+       WHERE slug = $1 AND kind = 'seasonal' RETURNING id`,
+      [slug, body.goal, body.xp],
+    );
+    if (!rows[0]) throw notFound('Event');
+    await audit(db, userId(request), 'event_goal', 'collection', rows[0].id, body);
     return { ok: true };
   });
 

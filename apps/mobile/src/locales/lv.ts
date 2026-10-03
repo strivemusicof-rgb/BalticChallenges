@@ -576,6 +576,9 @@ export const lv = {
     chooseLibrary: 'Izvēlēties no galerijas',
   },
   admin: {
+    goal: 'Kopīgais mērķis',
+    goalXp: 'Balva XP',
+    goalProgress: 'Progress',
     events: 'Notikumi',
     eventsHint: 'Sezonas notikumi darbojas automātiski savos datumos. Izslēdz, lai paslēptu, vai ieslēdz, lai sāktu uzreiz.',
     live: 'Aktīvs',
@@ -681,5 +684,18 @@ export const lv = {
     waiting_zero: '{{count}} atzīmes gaida sinhronizāciju',
     waiting_one: '{{count}} atzīme gaida sinhronizāciju',
     waiting_other: '{{count}} atzīmes gaida sinhronizāciju',
+  },
+  communityGoal: {
+    title: 'Visas Latvijas mērķis',
+    together: 'Kopā: {{progress}} / {{goal}} izaicinājumi',
+    reachedShort: 'Mērķis sasniegts kopā!',
+    participants_zero: 'Piedalās {{count}} pētnieki',
+    participants_one: 'Piedalās {{count}} pētnieks',
+    participants_other: 'Piedalās {{count}} pētnieki',
+    reward: 'Skaitās katrs izaicinājums, ko kāds izpilda notikuma laikā. Kad sasniegsim mērķi, visi, kas palīdzēja, saņems +{{xp}} XP.',
+    reached: 'Mēs to paveicām! Visi, kas palīdzēja, saņēma +{{xp}} XP, un to saņems arī tie, kas pievienosies līdz beigām.',
+    mine_zero: 'Tu pievienoji {{count}} izaicinājumus',
+    mine_one: 'Tu pievienoji {{count}} izaicinājumu',
+    mine_other: 'Tu pievienoji {{count}} izaicinājumus',
   },
 };

@@ -8,6 +8,7 @@ import { tr, type I18n } from '../i18n.js';
 import { pushTexts } from '../services/push-texts.js';
 import { Coordinates, CountrySchema, parse, UuidSchema, type RoutePlugin } from '../http.js';
 import { findChallengeDetail, findChallenges } from '../services/challenges.js';
+import { communityParticipants } from '../services/community.js';
 import { finalizeCompletion, todaysChallengeId } from '../services/completion.js';
 
 const ListQuery = z.object({
@@ -74,6 +75,19 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
       push.notify([row.friend_id], 'social', (lang) => ({
         ...pushTexts(lang).friendCompleted(row.actor_name, (lang === 'lv' || lang === 'ru' ? row.i18n?.[lang]?.title : null) ?? row.title),
         url: `/challenge/${challengeId}`,
+      }));
+    }
+  }
+
+  /** Tells everyone who helped that the shared goal of an event was reached. */
+  async function notifyCommunity(reached: { slug: string; xp: number }[]) {
+    for (const event of reached) {
+      const { rows } = await db.query<{ title: string; i18n: I18n }>('SELECT title, i18n FROM collections WHERE slug = $1', [event.slug]);
+      const row = rows[0];
+      if (!row) continue;
+      push.notify(await communityParticipants(db, event.slug), 'progress', (lang) => ({
+        ...pushTexts(lang).communityReached((lang === 'lv' || lang === 'ru' ? row.i18n?.[lang]?.title : null) ?? row.title, event.xp),
+        url: `/collection/${event.slug}`,
       }));
     }
   }
@@ -295,6 +309,7 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
       });
       if (result.status === 'completed') {
         notifyFriends(uid, id).catch((error: unknown) => request.log.warn({ err: error }, 'friend activity push failed'));
+        notifyCommunity(result.communityReached).catch((error: unknown) => request.log.warn({ err: error }, 'community push failed'));
       }
       return result;
     },
@@ -372,6 +387,7 @@ export const challengeRoutes: RoutePlugin = (app, { db, auth, push }) => {
       });
       if (result.status === 'completed') {
         notifyFriends(uid, id).catch((error: unknown) => request.log.warn({ err: error }, 'friend activity push failed'));
+        notifyCommunity(result.communityReached).catch((error: unknown) => request.log.warn({ err: error }, 'community push failed'));
       }
       return result;
     },

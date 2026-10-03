@@ -1,5 +1,6 @@
 import type { DbClient } from '../db.js';
 import { findChallenges } from './challenges.js';
+import { settleCommunityGoals } from './community.js';
 import { touchStreak } from './goals.js';
 import { awardXp, evaluateUnlocks, getLevelInfo, type UnlockedReward } from './progression.js';
 
@@ -48,6 +49,8 @@ export async function finalizeCompletion(
   }
 
   const streak = await touchStreak(db, userId);
+  // Before unlocks, so a reached community goal can unlock its badge right away.
+  const communityReached = await settleCommunityGoals(db, userId);
   const unlocked = [...bonuses, ...(await evaluateUnlocks(db, userId))];
 
   const after = await db.query<{ xp: number }>('SELECT xp FROM users WHERE id = $1', [userId]);
@@ -59,5 +62,6 @@ export async function finalizeCompletion(
     level,
     streak,
     unlocked,
+    communityReached,
   };
 }

@@ -12,6 +12,7 @@ import { adminRoutes } from './routes/admin.js';
 import { authRoutes } from './routes/auth.js';
 import { challengeRoutes } from './routes/challenges.js';
 import { collectionRoutes } from './routes/collections.js';
+import { communityRoutes } from './routes/community.js';
 import { duelRoutes } from './routes/duels.js';
 import { homeRoutes } from './routes/home.js';
 import { legalRoutes } from './routes/legal.js';
@@ -78,6 +79,7 @@ export async function buildApp(config: Config, db: Db) {
     challengeRoutes,
     collectionRoutes,
     duelRoutes,
+    communityRoutes,
     socialRoutes,
     postRoutes,
     adminRoutes,

@@ -16,6 +16,8 @@ export const AchievementRuleSchema = z.discriminatedUnion('type', [
     count: z.number().int().positive(),
   }),
   z.object({ type: z.literal('goals_completed'), period: z.enum(['weekly', 'monthly']), count: z.number().int().positive() }),
+  // Community goals of seasonal events the player helped reach.
+  z.object({ type: z.literal('community_goals'), count: z.number().int().positive() }),
 ]);
 
 export type AchievementRule = z.infer<typeof AchievementRuleSchema>;
@@ -35,6 +37,7 @@ export interface PlayerProgress {
   unlockedAchievementIds: Set<string>;
   longestStreak: number;
   goalsCompleted: { weekly: number; monthly: number };
+  communityGoals: number;
 }
 
 export interface RuleProgress {
@@ -80,6 +83,8 @@ export function ruleProgress(rule: AchievementRule, progress: PlayerProgress): R
       };
     case 'goals_completed':
       return { current: progress.goalsCompleted[rule.period], target: rule.count };
+    case 'community_goals':
+      return { current: progress.communityGoals, target: rule.count };
   }
 }
 

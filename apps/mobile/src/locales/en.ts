@@ -573,6 +573,9 @@ export const en = {
     chooseLibrary: 'Choose from library',
   },
   admin: {
+    goal: 'Shared goal',
+    goalXp: 'Reward XP',
+    goalProgress: 'Progress',
     events: 'Events',
     eventsHint: 'Seasonal events run automatically between their dates. Switch one off to hide it, or on to start it right away.',
     live: 'Live',
@@ -676,5 +679,16 @@ export const en = {
     savedBody: 'No connection right now. Your check-in is saved and will be sent automatically when you are back online.',
     waiting_one: '{{count}} check-in waiting to sync',
     waiting_other: '{{count}} check-ins waiting to sync',
+  },
+  communityGoal: {
+    title: 'Latvia-wide goal',
+    together: 'Together: {{progress}} / {{goal}} challenges',
+    reachedShort: 'Goal reached together!',
+    participants_one: '{{count}} explorer is taking part',
+    participants_other: '{{count}} explorers are taking part',
+    reward: 'Every challenge anyone completes during the event counts. When we reach it, everyone who helped gets +{{xp}} XP.',
+    reached: 'We did it! Everyone who helped got +{{xp}} XP, and anyone who joins before the end gets it too.',
+    mine_one: 'You added {{count}} challenge',
+    mine_other: 'You added {{count}} challenges',
   },
 } as const;

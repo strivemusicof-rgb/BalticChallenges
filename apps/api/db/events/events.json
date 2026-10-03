@@ -1,65 +1,405 @@
 [
   {
-    "slug": "halloween-2026", "starts": "2026-10-24", "ends": "2026-11-03", "xp": 600, "badgeXp": 250, "sort": 2,
-    "en": { "short": "Halloween", "title": "Halloween: Haunted Latvia", "description": "Castle ruins, fortresses and ghost legends. Limited edition until 2 November.", "badge": "Ghost Hunter 2026", "badgeDescription": "Complete the Halloween event in 2026.", "hint": "Visit this spooky spot during Halloween week." },
-    "lv": { "short": "Helovīni", "title": "Helovīni: spoku Latvija", "description": "Pilsdrupas, cietokšņi un spoku leģendas. Ierobežots laiks: līdz 2. novembrim.", "badge": "Spoku mednieks 2026", "badgeDescription": "Pabeidz Helovīnu notikumu 2026. gadā.", "hint": "Apmeklē šo baiso vietu Helovīnu nedēļā." },
-    "ru": { "short": "Хэллоуин", "title": "Хэллоуин: Латвия с привидениями", "description": "Руины замков, крепости и легенды о призраках. Только до 2 ноября.", "badge": "Охотник за привидениями 2026", "badgeDescription": "Завершите событие Хэллоуина в 2026 году.", "hint": "Посетите это жуткое место во время недели Хэллоуина." },
-    "places": ["koknese-castle", "daugavpils-fortress", "karosta-north-pier", "bauska-castle", "sigulda-castle"]
+    "slug": "halloween-2026",
+    "starts": "2026-10-24",
+    "ends": "2026-11-03",
+    "xp": 600,
+    "badgeXp": 250,
+    "sort": 2,
+    "en": {
+      "short": "Halloween",
+      "title": "Halloween: Haunted Latvia",
+      "description": "Castle ruins, fortresses and ghost legends. Limited edition until 2 November.",
+      "badge": "Ghost Hunter 2026",
+      "badgeDescription": "Complete the Halloween event in 2026.",
+      "hint": "Visit this spooky spot during Halloween week."
+    },
+    "lv": {
+      "short": "Helovīni",
+      "title": "Helovīni: spoku Latvija",
+      "description": "Pilsdrupas, cietokšņi un spoku leģendas. Ierobežots laiks: līdz 2. novembrim.",
+      "badge": "Spoku mednieks 2026",
+      "badgeDescription": "Pabeidz Helovīnu notikumu 2026. gadā.",
+      "hint": "Apmeklē šo baiso vietu Helovīnu nedēļā."
+    },
+    "ru": {
+      "short": "Хэллоуин",
+      "title": "Хэллоуин: Латвия с привидениями",
+      "description": "Руины замков, крепости и легенды о призраках. Только до 2 ноября.",
+      "badge": "Охотник за привидениями 2026",
+      "badgeDescription": "Завершите событие Хэллоуина в 2026 году.",
+      "hint": "Посетите это жуткое место во время недели Хэллоуина."
+    },
+    "places": [
+      "koknese-castle",
+      "daugavpils-fortress",
+      "karosta-north-pier",
+      "bauska-castle",
+      "sigulda-castle",
+      "karosta-prison",
+      "northern-forts",
+      "velnala",
+      "daugavgriva-fortress",
+      "ludza-castle"
+    ],
+    "communityGoal": 200,
+    "communityXp": 150
   },
   {
-    "slug": "latvia-november-2026", "starts": "2026-11-09", "ends": "2026-11-23", "xp": 750, "badgeXp": 300, "sort": 3,
-    "en": { "short": "Latvia's November", "title": "Latvia's November", "description": "Lāčplēsis Day on 11 November and the 108th birthday of Latvia on 18 November. Visit the places of freedom.", "badge": "Latvia 108", "badgeDescription": "Complete the Latvia's November event in 2026.", "hint": "Visit during the November national holidays." },
-    "lv": { "short": "Latvijas novembris", "title": "Latvijas novembris", "description": "Lāčplēša diena 11. novembrī un Latvijas 108. dzimšanas diena 18. novembrī. Apmeklē brīvības vietas.", "badge": "Latvijai 108", "badgeDescription": "Pabeidz notikumu “Latvijas novembris” 2026. gadā.", "hint": "Apmeklē novembra valsts svētkos." },
-    "ru": { "short": "Ноябрь Латвии", "title": "Ноябрь Латвии", "description": "День Лачплесиса 11 ноября и 108-й день рождения Латвии 18 ноября. Посетите места свободы.", "badge": "Латвии 108", "badgeDescription": "Завершите событие «Ноябрь Латвии» в 2026 году.", "hint": "Посетите во время ноябрьских государственных праздников." },
-    "places": ["freedom-monument", "national-library-lv", "cesis-old-town", "riga-cathedral"]
+    "slug": "latvia-november-2026",
+    "starts": "2026-11-09",
+    "ends": "2026-11-23",
+    "xp": 750,
+    "badgeXp": 300,
+    "sort": 3,
+    "en": {
+      "short": "Latvia's November",
+      "title": "Latvia's November",
+      "description": "Lāčplēsis Day on 11 November and the 108th birthday of Latvia on 18 November. Visit the places of freedom.",
+      "badge": "Latvia 108",
+      "badgeDescription": "Complete the Latvia's November event in 2026.",
+      "hint": "Visit during the November national holidays."
+    },
+    "lv": {
+      "short": "Latvijas novembris",
+      "title": "Latvijas novembris",
+      "description": "Lāčplēša diena 11. novembrī un Latvijas 108. dzimšanas diena 18. novembrī. Apmeklē brīvības vietas.",
+      "badge": "Latvijai 108",
+      "badgeDescription": "Pabeidz notikumu “Latvijas novembris” 2026. gadā.",
+      "hint": "Apmeklē novembra valsts svētkos."
+    },
+    "ru": {
+      "short": "Ноябрь Латвии",
+      "title": "Ноябрь Латвии",
+      "description": "День Лачплесиса 11 ноября и 108-й день рождения Латвии 18 ноября. Посетите места свободы.",
+      "badge": "Латвии 108",
+      "badgeDescription": "Завершите событие «Ноябрь Латвии» в 2026 году.",
+      "hint": "Посетите во время ноябрьских государственных праздников."
+    },
+    "places": [
+      "freedom-monument",
+      "national-library-lv",
+      "cesis-old-town",
+      "riga-cathedral",
+      "brothers-cemetery",
+      "latgales-mara",
+      "riga-castle",
+      "mezaparks-bandstand"
+    ],
+    "communityGoal": 181,
+    "communityXp": 200
   },
   {
-    "slug": "christmas-2026", "starts": "2026-12-01", "ends": "2027-01-07", "xp": 750, "badgeXp": 300, "sort": 4,
-    "en": { "short": "Christmas", "title": "Christmas in Latvia", "description": "Christmas markets, lights and the city where the first decorated Christmas tree was set up in 1510.", "badge": "Christmas Explorer 2026", "badgeDescription": "Complete the Christmas event in 2026.", "hint": "Visit during the Christmas season." },
-    "lv": { "short": "Ziemassvētki", "title": "Ziemassvētki Latvijā", "description": "Ziemassvētku tirdziņi, gaismas un pilsēta, kur 1510. gadā rotāja pirmo Ziemassvētku egli.", "badge": "Ziemassvētku pētnieks 2026", "badgeDescription": "Pabeidz Ziemassvētku notikumu 2026. gadā.", "hint": "Apmeklē Ziemassvētku laikā." },
-    "ru": { "short": "Рождество", "title": "Рождество в Латвии", "description": "Рождественские ярмарки, огни и город, где в 1510 году нарядили первую рождественскую ёлку.", "badge": "Рождественский исследователь 2026", "badgeDescription": "Завершите рождественское событие 2026 года.", "hint": "Посетите в рождественский сезон." },
-    "places": ["riga-old-town", "house-of-blackheads", "riga-cathedral", "cesis-old-town", "kuldiga-old-town"]
+    "slug": "christmas-2026",
+    "starts": "2026-12-01",
+    "ends": "2027-01-07",
+    "xp": 750,
+    "badgeXp": 300,
+    "sort": 4,
+    "en": {
+      "short": "Christmas",
+      "title": "Christmas in Latvia",
+      "description": "Christmas markets, lights and the city where the first decorated Christmas tree was set up in 1510.",
+      "badge": "Christmas Explorer 2026",
+      "badgeDescription": "Complete the Christmas event in 2026.",
+      "hint": "Visit during the Christmas season."
+    },
+    "lv": {
+      "short": "Ziemassvētki",
+      "title": "Ziemassvētki Latvijā",
+      "description": "Ziemassvētku tirdziņi, gaismas un pilsēta, kur 1510. gadā rotāja pirmo Ziemassvētku egli.",
+      "badge": "Ziemassvētku pētnieks 2026",
+      "badgeDescription": "Pabeidz Ziemassvētku notikumu 2026. gadā.",
+      "hint": "Apmeklē Ziemassvētku laikā."
+    },
+    "ru": {
+      "short": "Рождество",
+      "title": "Рождество в Латвии",
+      "description": "Рождественские ярмарки, огни и город, где в 1510 году нарядили первую рождественскую ёлку.",
+      "badge": "Рождественский исследователь 2026",
+      "badgeDescription": "Завершите рождественское событие 2026 года.",
+      "hint": "Посетите в рождественский сезон."
+    },
+    "places": [
+      "riga-old-town",
+      "house-of-blackheads",
+      "riga-cathedral",
+      "cesis-old-town",
+      "kuldiga-old-town",
+      "nativity-cathedral-riga",
+      "st-johns-riga",
+      "three-brothers",
+      "liepaja-holy-trinity",
+      "jelgava-trinity-tower"
+    ],
+    "communityGoal": 241,
+    "communityXp": 200
   },
   {
-    "slug": "winter-2027", "starts": "2027-01-08", "ends": "2027-03-01", "xp": 600, "badgeXp": 250, "sort": 5,
-    "en": { "short": "White Winter", "title": "White Winter", "description": "Frozen waterfalls, snowy bogs and the winter sea.", "badge": "Winter Explorer 2027", "badgeDescription": "Complete the White Winter event in 2027.", "hint": "Visit in winter." },
-    "lv": { "short": "Baltā ziema", "title": "Baltā ziema", "description": "Aizsaluši ūdenskritumi, sniegoti purvi un ziemas jūra.", "badge": "Ziemas pētnieks 2027", "badgeDescription": "Pabeidz notikumu “Baltā ziema” 2027. gadā.", "hint": "Apmeklē ziemā." },
-    "ru": { "short": "Белая зима", "title": "Белая зима", "description": "Замёрзшие водопады, заснеженные болота и зимнее море.", "badge": "Зимний исследователь 2027", "badgeDescription": "Завершите событие «Белая зима» в 2027 году.", "hint": "Посетите зимой." },
-    "places": ["sigulda-castle", "kemeri-bog", "cape-kolka", "venta-rapid"]
+    "slug": "winter-2027",
+    "starts": "2027-01-08",
+    "ends": "2027-03-01",
+    "xp": 600,
+    "badgeXp": 250,
+    "sort": 5,
+    "en": {
+      "short": "White Winter",
+      "title": "White Winter",
+      "description": "Frozen waterfalls, snowy bogs and the winter sea.",
+      "badge": "Winter Explorer 2027",
+      "badgeDescription": "Complete the White Winter event in 2027.",
+      "hint": "Visit in winter."
+    },
+    "lv": {
+      "short": "Baltā ziema",
+      "title": "Baltā ziema",
+      "description": "Aizsaluši ūdenskritumi, sniegoti purvi un ziemas jūra.",
+      "badge": "Ziemas pētnieks 2027",
+      "badgeDescription": "Pabeidz notikumu “Baltā ziema” 2027. gadā.",
+      "hint": "Apmeklē ziemā."
+    },
+    "ru": {
+      "short": "Белая зима",
+      "title": "Белая зима",
+      "description": "Замёрзшие водопады, заснеженные болота и зимнее море.",
+      "badge": "Зимний исследователь 2027",
+      "badgeDescription": "Завершите событие «Белая зима» в 2027 году.",
+      "hint": "Посетите зимой."
+    },
+    "places": [
+      "sigulda-castle",
+      "kemeri-bog",
+      "cape-kolka",
+      "venta-rapid",
+      "sigulda-bobsleigh-track",
+      "gaizinkalns",
+      "sigulda-cable-car",
+      "cena-bog"
+    ],
+    "communityGoal": 300,
+    "communityXp": 150
   },
   {
-    "slug": "easter-2027", "starts": "2027-03-22", "ends": "2027-04-06", "xp": 500, "badgeXp": 200, "sort": 6,
-    "en": { "short": "Easter", "title": "Easter in Latvia", "description": "Churches, bells and the first spring sun. Easter Sunday is 28 March 2027.", "badge": "Easter Explorer 2027", "badgeDescription": "Complete the Easter event in 2027.", "hint": "Visit during the Easter holidays." },
-    "lv": { "short": "Lieldienas", "title": "Lieldienas Latvijā", "description": "Baznīcas, zvani un pirmā pavasara saule. Lieldienas ir 2027. gada 28. martā.", "badge": "Lieldienu pētnieks 2027", "badgeDescription": "Pabeidz Lieldienu notikumu 2027. gadā.", "hint": "Apmeklē Lieldienu brīvdienās." },
-    "ru": { "short": "Пасха", "title": "Пасха в Латвии", "description": "Храмы, колокола и первое весеннее солнце. Пасха — 28 марта 2027 года.", "badge": "Пасхальный исследователь 2027", "badgeDescription": "Завершите пасхальное событие 2027 года.", "hint": "Посетите во время пасхальных праздников." },
-    "places": ["aglona-basilica", "riga-cathedral", "st-peters-riga", "rundale-palace"]
+    "slug": "easter-2027",
+    "starts": "2027-03-22",
+    "ends": "2027-04-06",
+    "xp": 500,
+    "badgeXp": 200,
+    "sort": 6,
+    "en": {
+      "short": "Easter",
+      "title": "Easter in Latvia",
+      "description": "Churches, bells and the first spring sun. Easter Sunday is 28 March 2027.",
+      "badge": "Easter Explorer 2027",
+      "badgeDescription": "Complete the Easter event in 2027.",
+      "hint": "Visit during the Easter holidays."
+    },
+    "lv": {
+      "short": "Lieldienas",
+      "title": "Lieldienas Latvijā",
+      "description": "Baznīcas, zvani un pirmā pavasara saule. Lieldienas ir 2027. gada 28. martā.",
+      "badge": "Lieldienu pētnieks 2027",
+      "badgeDescription": "Pabeidz Lieldienu notikumu 2027. gadā.",
+      "hint": "Apmeklē Lieldienu brīvdienās."
+    },
+    "ru": {
+      "short": "Пасха",
+      "title": "Пасха в Латвии",
+      "description": "Храмы, колокола и первое весеннее солнце. Пасха — 28 марта 2027 года.",
+      "badge": "Пасхальный исследователь 2027",
+      "badgeDescription": "Завершите пасхальное событие 2027 года.",
+      "hint": "Посетите во время пасхальных праздников."
+    },
+    "places": [
+      "aglona-basilica",
+      "riga-cathedral",
+      "st-peters-riga",
+      "rundale-palace",
+      "daugavpils-church-hill",
+      "karosta-cathedral",
+      "st-james-riga"
+    ],
+    "communityGoal": 200,
+    "communityXp": 150
   },
   {
-    "slug": "may-4-2027", "starts": "2027-04-30", "ends": "2027-05-06", "xp": 500, "badgeXp": 200, "sort": 7,
-    "en": { "short": "4 May", "title": "Restoration of Independence", "description": "On 4 May 1990 Latvia declared its independence restored. Visit the symbols of freedom.", "badge": "4 May 2027", "badgeDescription": "Complete the Restoration of Independence event in 2027.", "hint": "Visit around 4 May." },
-    "lv": { "short": "4. maijs", "title": "Neatkarības atjaunošanas diena", "description": "1990. gada 4. maijā Latvija atjaunoja neatkarību. Apmeklē brīvības simbolus.", "badge": "4. maijs 2027", "badgeDescription": "Pabeidz Neatkarības atjaunošanas dienas notikumu 2027. gadā.", "hint": "Apmeklē ap 4. maiju." },
-    "ru": { "short": "4 мая", "title": "День восстановления независимости", "description": "4 мая 1990 года Латвия восстановила независимость. Посетите символы свободы.", "badge": "4 мая 2027", "badgeDescription": "Завершите событие Дня восстановления независимости 2027 года.", "hint": "Посетите в дни около 4 мая." },
-    "places": ["freedom-monument", "national-library-lv", "riga-old-town"]
+    "slug": "may-4-2027",
+    "starts": "2027-04-30",
+    "ends": "2027-05-06",
+    "xp": 500,
+    "badgeXp": 200,
+    "sort": 7,
+    "en": {
+      "short": "4 May",
+      "title": "Restoration of Independence",
+      "description": "On 4 May 1990 Latvia declared its independence restored. Visit the symbols of freedom.",
+      "badge": "4 May 2027",
+      "badgeDescription": "Complete the Restoration of Independence event in 2027.",
+      "hint": "Visit around 4 May."
+    },
+    "lv": {
+      "short": "4. maijs",
+      "title": "Neatkarības atjaunošanas diena",
+      "description": "1990. gada 4. maijā Latvija atjaunoja neatkarību. Apmeklē brīvības simbolus.",
+      "badge": "4. maijs 2027",
+      "badgeDescription": "Pabeidz Neatkarības atjaunošanas dienas notikumu 2027. gadā.",
+      "hint": "Apmeklē ap 4. maiju."
+    },
+    "ru": {
+      "short": "4 мая",
+      "title": "День восстановления независимости",
+      "description": "4 мая 1990 года Латвия восстановила независимость. Посетите символы свободы.",
+      "badge": "4 мая 2027",
+      "badgeDescription": "Завершите событие Дня восстановления независимости 2027 года.",
+      "hint": "Посетите в дни около 4 мая."
+    },
+    "places": [
+      "freedom-monument",
+      "national-library-lv",
+      "riga-old-town",
+      "brothers-cemetery",
+      "latgales-mara",
+      "riga-castle"
+    ],
+    "communityGoal": 405,
+    "communityXp": 200
   },
   {
-    "slug": "spring-2027", "starts": "2027-04-07", "ends": "2027-06-01", "xp": 600, "badgeXp": 250, "sort": 8,
-    "en": { "short": "Spring", "title": "Spring Awakening", "description": "Flying fish at Ventas Rumba, blossoming gardens and birdsong on the bogs.", "badge": "Spring Explorer 2027", "badgeDescription": "Complete the Spring event in 2027.", "hint": "Visit in spring." },
-    "lv": { "short": "Pavasaris", "title": "Pavasara mošanās", "description": "Lidojošās zivis pie Ventas rumbas, ziedoši dārzi un putnu dziesmas purvos.", "badge": "Pavasara pētnieks 2027", "badgeDescription": "Pabeidz pavasara notikumu 2027. gadā.", "hint": "Apmeklē pavasarī." },
-    "ru": { "short": "Весна", "title": "Весеннее пробуждение", "description": "Летающие рыбы у Вентас румбы, цветущие сады и пение птиц на болотах.", "badge": "Весенний исследователь 2027", "badgeDescription": "Завершите весеннее событие 2027 года.", "hint": "Посетите весной." },
-    "places": ["venta-rapid", "gutmanis-cave", "rundale-palace", "kemeri-bog", "zvartes-iezis"]
+    "slug": "spring-2027",
+    "starts": "2027-04-07",
+    "ends": "2027-06-01",
+    "xp": 600,
+    "badgeXp": 250,
+    "sort": 8,
+    "en": {
+      "short": "Spring",
+      "title": "Spring Awakening",
+      "description": "Flying fish at Ventas Rumba, blossoming gardens and birdsong on the bogs.",
+      "badge": "Spring Explorer 2027",
+      "badgeDescription": "Complete the Spring event in 2027.",
+      "hint": "Visit in spring."
+    },
+    "lv": {
+      "short": "Pavasaris",
+      "title": "Pavasara mošanās",
+      "description": "Lidojošās zivis pie Ventas rumbas, ziedoši dārzi un putnu dziesmas purvos.",
+      "badge": "Pavasara pētnieks 2027",
+      "badgeDescription": "Pabeidz pavasara notikumu 2027. gadā.",
+      "hint": "Apmeklē pavasarī."
+    },
+    "ru": {
+      "short": "Весна",
+      "title": "Весеннее пробуждение",
+      "description": "Летающие рыбы у Вентас румбы, цветущие сады и пение птиц на болотах.",
+      "badge": "Весенний исследователь 2027",
+      "badgeDescription": "Завершите весеннее событие 2027 года.",
+      "hint": "Посетите весной."
+    },
+    "places": [
+      "venta-rapid",
+      "gutmanis-cave",
+      "rundale-palace",
+      "kemeri-bog",
+      "zvartes-iezis",
+      "ligatne-nature-trails",
+      "pape-wild-horses",
+      "kanieris-lake",
+      "tervete-nature-park"
+    ],
+    "communityGoal": 500,
+    "communityXp": 200
   },
   {
-    "slug": "ligo-2027", "starts": "2027-06-15", "ends": "2027-06-27", "xp": 750, "badgeXp": 300, "sort": 9,
-    "en": { "short": "Jāņi", "title": "Jāņi: Midsummer", "description": "Līgo! Folk song hills, wreaths and the shortest night of the year on 23–24 June.", "badge": "Jāņi 2027", "badgeDescription": "Complete the Midsummer event in 2027.", "hint": "Visit during the Midsummer celebrations." },
-    "lv": { "short": "Jāņi", "title": "Jāņi un Līgo", "description": "Līgo! Dainu kalni, vainagi un gada īsākā nakts 23.–24. jūnijā.", "badge": "Jāņi 2027", "badgeDescription": "Pabeidz Jāņu notikumu 2027. gadā.", "hint": "Apmeklē Jāņu laikā." },
-    "ru": { "short": "Лиго", "title": "Лиго: Янов день", "description": "Лиго! Холмы народных песен, венки и самая короткая ночь года 23–24 июня.", "badge": "Лиго 2027", "badgeDescription": "Завершите событие Лиго в 2027 году.", "hint": "Посетите во время праздника Лиго." },
-    "places": ["turaida-castle", "zvartes-iezis", "cape-kolka", "jurmala-beach", "kuldiga-old-town"]
+    "slug": "ligo-2027",
+    "starts": "2027-06-15",
+    "ends": "2027-06-27",
+    "xp": 750,
+    "badgeXp": 300,
+    "sort": 9,
+    "en": {
+      "short": "Jāņi",
+      "title": "Jāņi: Midsummer",
+      "description": "Līgo! Folk song hills, wreaths and the shortest night of the year on 23–24 June.",
+      "badge": "Jāņi 2027",
+      "badgeDescription": "Complete the Midsummer event in 2027.",
+      "hint": "Visit during the Midsummer celebrations."
+    },
+    "lv": {
+      "short": "Jāņi",
+      "title": "Jāņi un Līgo",
+      "description": "Līgo! Dainu kalni, vainagi un gada īsākā nakts 23.–24. jūnijā.",
+      "badge": "Jāņi 2027",
+      "badgeDescription": "Pabeidz Jāņu notikumu 2027. gadā.",
+      "hint": "Apmeklē Jāņu laikā."
+    },
+    "ru": {
+      "short": "Лиго",
+      "title": "Лиго: Янов день",
+      "description": "Лиго! Холмы народных песен, венки и самая короткая ночь года 23–24 июня.",
+      "badge": "Лиго 2027",
+      "badgeDescription": "Завершите событие Лиго в 2027 году.",
+      "hint": "Посетите во время праздника Лиго."
+    },
+    "places": [
+      "turaida-castle",
+      "zvartes-iezis",
+      "cape-kolka",
+      "jurmala-beach",
+      "kuldiga-old-town",
+      "ethnographic-open-air-museum",
+      "araisi-lake-fortress",
+      "lubans-lake",
+      "razna-lake",
+      "mezaparks-bandstand"
+    ],
+    "communityGoal": 234,
+    "communityXp": 250
   },
   {
-    "slug": "summer-2027", "starts": "2027-06-28", "ends": "2027-09-01", "xp": 700, "badgeXp": 250, "sort": 10,
-    "en": { "short": "Summer", "title": "Summer by the Sea", "description": "Latvia's 500 km of coast: beaches, lighthouses and the cape where two seas meet.", "badge": "Summer Explorer 2027", "badgeDescription": "Complete the Summer event in 2027.", "hint": "Visit in summer." },
-    "lv": { "short": "Vasara", "title": "Vasara pie jūras", "description": "Latvijas 500 km piekraste: pludmales, bākas un rags, kur satiekas divas jūras.", "badge": "Vasaras pētnieks 2027", "badgeDescription": "Pabeidz vasaras notikumu 2027. gadā.", "hint": "Apmeklē vasarā." },
-    "ru": { "short": "Лето", "title": "Лето у моря", "description": "500 км побережья Латвии: пляжи, маяки и мыс, где встречаются два моря.", "badge": "Летний исследователь 2027", "badgeDescription": "Завершите летнее событие 2027 года.", "hint": "Посетите летом." },
-    "places": ["jurmala-beach", "liepaja-beach", "ventspils-beach", "slitere-lighthouse", "cape-kolka"]
+    "slug": "summer-2027",
+    "starts": "2027-06-28",
+    "ends": "2027-09-01",
+    "xp": 700,
+    "badgeXp": 250,
+    "sort": 10,
+    "en": {
+      "short": "Summer",
+      "title": "Summer by the Sea",
+      "description": "Latvia's 500 km of coast: beaches, lighthouses and the cape where two seas meet.",
+      "badge": "Summer Explorer 2027",
+      "badgeDescription": "Complete the Summer event in 2027.",
+      "hint": "Visit in summer."
+    },
+    "lv": {
+      "short": "Vasara",
+      "title": "Vasara pie jūras",
+      "description": "Latvijas 500 km piekraste: pludmales, bākas un rags, kur satiekas divas jūras.",
+      "badge": "Vasaras pētnieks 2027",
+      "badgeDescription": "Pabeidz vasaras notikumu 2027. gadā.",
+      "hint": "Apmeklē vasarā."
+    },
+    "ru": {
+      "short": "Лето",
+      "title": "Лето у моря",
+      "description": "500 км побережья Латвии: пляжи, маяки и мыс, где встречаются два моря.",
+      "badge": "Летний исследователь 2027",
+      "badgeDescription": "Завершите летнее событие 2027 года.",
+      "hint": "Посетите летом."
+    },
+    "places": [
+      "jurmala-beach",
+      "liepaja-beach",
+      "ventspils-beach",
+      "slitere-lighthouse",
+      "cape-kolka",
+      "pavilosta",
+      "jurkalne-cliffs",
+      "veczemju-cliffs",
+      "saulkrasti-white-dune",
+      "vecaki-beach",
+      "mikeltornis-lighthouse"
+    ],
+    "communityGoal": 1000,
+    "communityXp": 250
   }
 ]

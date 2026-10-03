@@ -91,6 +91,7 @@ describe('achievement rules', () => {
     unlockedAchievementIds: new Set(['latvia-explorer']),
     longestStreak: 7,
     goalsCompleted: { weekly: 3, monthly: 0 },
+    communityGoals: 0,
   };
 
   it('handles hour windows that wrap past midnight', () => {

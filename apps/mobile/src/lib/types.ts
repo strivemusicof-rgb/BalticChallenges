@@ -273,6 +273,19 @@ export interface Collection {
   imageUrl: string | null;
 }
 
+export interface CommunityGoal {
+  slug: string;
+  title: string;
+  description: string;
+  goal: number;
+  progress: number;
+  participants: number;
+  mine: number;
+  rewardXp: number;
+  reachedAt: string | null;
+  endsAt: string;
+}
+
 export interface Achievement {
   id: string;
   title: string;
